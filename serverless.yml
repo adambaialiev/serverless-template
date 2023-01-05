@@ -1,0 +1,64 @@
+org: shopwallet
+app: shop-wallet-serverless
+service: shop-wallet-serverless
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  profile: aidar-bakytbekov
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - cognito-idp:AdminInitiateAuth
+        - cognito-idp:AdminCreateUser
+        - cognito-idp:AdminSetUserPassword
+        - sns:*
+      Resource: '*'
+
+functions:
+  createAuthChallenge:
+    handler: build/index.createAuthChallenge
+    events:
+      - cognitoUserPool:
+          pool: MyUserPool
+          trigger: CreateAuthChallenge
+  verifyAuthChallenge:
+    handler: build/index.verifyAuthChallenge
+    events:
+      - cognitoUserPool:
+          pool: MyUserPool
+          trigger: VerifyAuthChallengeResponse
+  defineAuthChallenge:
+    handler: build/index.defineAuthChallenge
+    events:
+      - cognitoUserPool:
+          pool: MyUserPool
+          trigger: DefineAuthChallenge
+  preSignUp:
+    handler: build/index.preSignUp
+    events:
+      - cognitoUserPool:
+          pool: MyUserPool
+          trigger: PreSignUp
+
+resources:
+  Resources:
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: shop-wallet-users-pool
+        UsernameAttributes:
+          - phone_number
+    UserClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: shop-wallet-app-client
+        GenerateSecret: false
+        UserPoolId:
+          Ref: CognitoUserPool
+        ExplicitAuthFlows:
+          - 'ALLOW_USER_SRP_AUTH'
+          - 'ALLOW_REFRESH_TOKEN_AUTH'
