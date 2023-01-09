@@ -9,36 +9,62 @@ provider:
   runtime: nodejs12.x
   region: us-east-1
   profile: aidar-bakytbekov
+  environment:
+    user_pool_id:
+      Ref: UserPool
+    client_id:
+      Ref: UserClient
+    dynamo_table:
+      Ref: UsersTable
   iamRoleStatements:
     - Effect: Allow
       Action:
         - cognito-idp:AdminInitiateAuth
+        - cognito-idp:AdminRespondToAuthChallenge
         - cognito-idp:AdminCreateUser
         - cognito-idp:AdminSetUserPassword
+        - dynamodb:Query
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
         - sns:*
       Resource: '*'
 
 functions:
+  signUp:
+    handler: build/src/endpoints/sign-up/sign-up.signUp
+    events:
+      - http:
+          path: /api/shop-wallet/auth/sign-up
+          method: post
+          cors: true
+  signIn:
+    handler: build/src/endpoints/sign-in/sign-in.signIn
+    events:
+      - http:
+          path: /api/shop-wallet/auth/sign-in
+          method: post
+          cors: true
   createAuthChallenge:
-    handler: build/index.createAuthChallenge
+    handler: build/src/triggers/create-auth-challenge.createAuthChallenge
     events:
       - cognitoUserPool:
           pool: MyUserPool
           trigger: CreateAuthChallenge
   verifyAuthChallenge:
-    handler: build/index.verifyAuthChallenge
+    handler: build/src/triggers/verify-auth-challenge.verifyAuthChallenge
     events:
       - cognitoUserPool:
           pool: MyUserPool
           trigger: VerifyAuthChallengeResponse
   defineAuthChallenge:
-    handler: build/index.defineAuthChallenge
+    handler: build/src/triggers/define-auth-challenge.defineAuthChallenge
     events:
       - cognitoUserPool:
           pool: MyUserPool
           trigger: DefineAuthChallenge
   preSignUp:
-    handler: build/index.preSignUp
+    handler: build/src/triggers/pre-sign-up.preSignUp
     events:
       - cognitoUserPool:
           pool: MyUserPool
@@ -46,7 +72,7 @@ functions:
 
 resources:
   Resources:
-    CognitoUserPool:
+    UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
         UserPoolName: shop-wallet-users-pool
@@ -58,7 +84,23 @@ resources:
         ClientName: shop-wallet-app-client
         GenerateSecret: false
         UserPoolId:
-          Ref: CognitoUserPool
+          Ref: UserPool
         ExplicitAuthFlows:
-          - 'ALLOW_USER_SRP_AUTH'
+          - 'ALLOW_CUSTOM_AUTH'
           - 'ALLOW_REFRESH_TOKEN_AUTH'
+
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UsersTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
