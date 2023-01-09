@@ -1,14 +1,14 @@
-org: shopwallet
-app: shop-wallet-serverless
-service: shop-wallet-serverless
+#org: shopwallet
+#app: shop-wallet-serverless
+service: shop-wallet-serverlesss-bakyt
 
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-1
-  profile: aidar-bakytbekov
+  profile: ${opt:stage, "dev"}
   environment:
     user_pool_id:
       Ref: UserPool
@@ -28,7 +28,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - sns:*
-      Resource: '*'
+      Resource: "*"
 
 functions:
   signUp:
@@ -75,24 +75,24 @@ resources:
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
-        UserPoolName: shop-wallet-users-pool
+        UserPoolName: shop-wallet-users-pool-${self:provider.profile}
         UsernameAttributes:
           - phone_number
     UserClient:
       Type: AWS::Cognito::UserPoolClient
       Properties:
-        ClientName: shop-wallet-app-client
+        ClientName: shop-wallet-app-client-${self:provider.profile}
         GenerateSecret: false
         UserPoolId:
           Ref: UserPool
         ExplicitAuthFlows:
-          - 'ALLOW_CUSTOM_AUTH'
-          - 'ALLOW_REFRESH_TOKEN_AUTH'
+          - "ALLOW_CUSTOM_AUTH"
+          - "ALLOW_REFRESH_TOKEN_AUTH"
 
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UsersTable
+        TableName: UsersTable-${self:provider.profile}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
