@@ -51,7 +51,7 @@ export default class BalanceService {
                 [TransactionAttributes.TYPE]: "out",
               },
               TableName: tableName,
-              ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
+              ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
             },
           },
           {
@@ -68,7 +68,7 @@ export default class BalanceService {
                 [TransactionAttributes.TYPE]: "in",
               },
               TableName: tableName,
-              ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
+              ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
             },
           },
           {
