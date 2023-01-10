@@ -2,7 +2,7 @@ org: shopwallet
 app: shop-wallet-serverless
 service: shop-wallet-serverless
 
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -28,7 +28,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - sns:*
-      Resource: '*'
+      Resource: "*"
 
 plugins:
   - serverless-offline
@@ -96,20 +96,23 @@ resources:
         UserPoolId:
           Ref: UserPool
         ExplicitAuthFlows:
-          - 'ALLOW_CUSTOM_AUTH'
-          - 'ALLOW_REFRESH_TOKEN_AUTH'
+          - "ALLOW_CUSTOM_AUTH"
+          - "ALLOW_REFRESH_TOKEN_AUTH"
 
     UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: UsersTable-${self:provider.profile}
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: PK
             AttributeType: S
-
+          - AttributeName: SK
+            AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: PK
             KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
 
         ProvisionedThroughput:
           ReadCapacityUnits: 1
