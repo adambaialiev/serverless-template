@@ -1,14 +1,28 @@
+import { verify } from "crypto";
 import { v4 } from "uuid";
+import { buildUserKey } from "../common/dynamo/buildKey";
 import { DynamoDB } from "../common/dynamo/Dynamo";
+import { TableKeys, UserAttributes } from "../common/dynamo/schema";
 
 const dynamoDB = new DynamoDB();
 
 export const preSignUp = async (event: any) => {
   console.log("Received EVENT", JSON.stringify(event, null, 2));
 
+  const phoneNumber = event.request.userAttributes.phone_number;
+
+  const userKey = buildUserKey(phoneNumber);
+
   const params = {
-    phone_number: event.request.userAttributes.phone_number,
-    balance: 0,
+    [TableKeys.PK]: userKey,
+    [TableKeys.SK]: userKey,
+    [UserAttributes.FIRST_NAME]: "",
+    [UserAttributes.LAST_NAME]: "",
+    [UserAttributes.BALANCE]: 100,
+    [UserAttributes.PHONE_NUMBER]: phoneNumber,
+    [UserAttributes.CREATED_AT]: Date.now().toString(),
+    [UserAttributes.UPDATED_AT]: "",
+    [UserAttributes.EMAIL]: "",
   };
   await dynamoDB.putItem(process.env.dynamo_table, params);
 

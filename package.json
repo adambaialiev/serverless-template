@@ -5,7 +5,6 @@
   "main": "handler.js",
   "scripts": {
     "build": "tsc",
-    "dev": "yarn build && sls deploy",
     "start": "sls offline",
     "stage": "yarn build && sls deploy --stage staging",
     "deploy": "yarn build && sls deploy --stage prod"

@@ -15,7 +15,7 @@ provider:
     client_id:
       Ref: UserClient
     dynamo_table:
-      Ref: UsersTable
+      Ref: MainTable
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -106,10 +106,10 @@ resources:
           - "ALLOW_CUSTOM_AUTH"
           - "ALLOW_REFRESH_TOKEN_AUTH"
 
-    UsersTable:
+    MainTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: UsersTable-${self:provider.profile}
+        TableName: MainTable-${self:provider.profile}
         AttributeDefinitions:
           - AttributeName: PK
             AttributeType: S

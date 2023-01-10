@@ -23,5 +23,6 @@ export default class UserService {
     if (userOutput.Item) {
       return unmarshallUserSlug(userOutput.Item as UserItem);
     }
+    return undefined;
   }
 }
