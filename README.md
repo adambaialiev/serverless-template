@@ -24,5 +24,5 @@ serverless deploy
 - deploy to prod stage
 
 ```
-serverless deploy prod
+yarn deploy
 ```
