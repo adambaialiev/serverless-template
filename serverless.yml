@@ -34,6 +34,13 @@ plugins:
   - serverless-offline
 
 functions:
+  makeTransaction:
+    handler: build/src/endpoints/makeTransaction/makeTransaction.makeTransaction
+    events:
+      - http:
+          path: /api/shop-wallet/balance/makeTransaction
+          method: post
+          cors: true
   signUp:
     handler: build/src/endpoints/sign-up/sign-up.signUp
     events:

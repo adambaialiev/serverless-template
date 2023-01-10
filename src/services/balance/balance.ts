@@ -6,19 +6,13 @@ import {
   TransactionAttributes,
 } from "../../common/dynamo/schema";
 import { v4 } from "uuid";
+import { UserSlug } from "../user/types";
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 
 export interface MakeTransactionProps {
   sourceId: string;
   targetId: string;
-}
-
-export interface UserSlug {
-  id: string;
-  phoneNumber: string;
-  firstName: string;
-  lastName: string;
 }
 
 export default class BalanceService {
