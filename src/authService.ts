@@ -1,14 +1,12 @@
 import AWS from 'aws-sdk';
-import { CognitoUserPool } from 'amazon-cognito-identity-js';
 import { SessionType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
 import { makePassword } from './utils/makePassword';
 
 export const poolData = {
-  UserPoolId: 'us-east-1_Uy7RQSyPg',
-  ClientId: '7vf1d03uaqiec4294emjujm18g',
+  UserPoolId: process.env.user_pool_id,
+  ClientId: process.env.client_id,
 };
 
-const UserPool = new CognitoUserPool(poolData);
 const cognito = new AWS.CognitoIdentityServiceProvider();
 
 export class AuthService {
@@ -35,24 +33,15 @@ export class AuthService {
         USERNAME: phone_number,
       },
     };
-    await this.preSignUpUser(phone_number);
 
+    await cognito
+      .signUp({
+        ClientId: poolData.ClientId,
+        Username: phone_number,
+        Password: makePassword(),
+      })
+      .promise();
     const response = await cognito.adminInitiateAuth(params).promise();
     return response;
-  }
-  async preSignUpUser(username: string) {
-    return new Promise((resolve, reject) => {
-      UserPool.signUp(username, makePassword(), [], [], (err: any, data) => {
-        if (err) {
-          console.error(err);
-          reject(err);
-        }
-        resolve({
-          status: 201,
-          message: 'Success sign up',
-          data,
-        });
-      });
-    });
   }
 }

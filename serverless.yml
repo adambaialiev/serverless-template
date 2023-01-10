@@ -1,8 +1,8 @@
-#org: shopwallet
-#app: shop-wallet-serverless
-service: shop-wallet-serverlesss-bakyt
+org: shopwallet
+app: shop-wallet-serverless
+service: shop-wallet-serverless
 
-frameworkVersion: "3"
+frameworkVersion: '3'
 
 provider:
   name: aws
@@ -28,7 +28,10 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - sns:*
-      Resource: "*"
+      Resource: '*'
+
+plugins:
+  - serverless-offline
 
 functions:
   signUp:
@@ -49,25 +52,25 @@ functions:
     handler: build/src/triggers/create-auth-challenge.createAuthChallenge
     events:
       - cognitoUserPool:
-          pool: MyUserPool
+          pool: UserPool
           trigger: CreateAuthChallenge
   verifyAuthChallenge:
     handler: build/src/triggers/verify-auth-challenge.verifyAuthChallenge
     events:
       - cognitoUserPool:
-          pool: MyUserPool
+          pool: UserPool
           trigger: VerifyAuthChallengeResponse
   defineAuthChallenge:
     handler: build/src/triggers/define-auth-challenge.defineAuthChallenge
     events:
       - cognitoUserPool:
-          pool: MyUserPool
+          pool: UserPool
           trigger: DefineAuthChallenge
   preSignUp:
     handler: build/src/triggers/pre-sign-up.preSignUp
     events:
       - cognitoUserPool:
-          pool: MyUserPool
+          pool: UserPool
           trigger: PreSignUp
 
 resources:
@@ -78,6 +81,13 @@ resources:
         UserPoolName: shop-wallet-users-pool-${self:provider.profile}
         UsernameAttributes:
           - phone_number
+        Policies:
+          PasswordPolicy:
+            RequireLowercase: false
+            RequireSymbols: false
+            RequireNumbers: false
+            MinimumLength: 6
+            RequireUppercase: false
     UserClient:
       Type: AWS::Cognito::UserPoolClient
       Properties:
@@ -86,8 +96,8 @@ resources:
         UserPoolId:
           Ref: UserPool
         ExplicitAuthFlows:
-          - "ALLOW_CUSTOM_AUTH"
-          - "ALLOW_REFRESH_TOKEN_AUTH"
+          - 'ALLOW_CUSTOM_AUTH'
+          - 'ALLOW_REFRESH_TOKEN_AUTH'
 
     UsersTable:
       Type: AWS::DynamoDB::Table
