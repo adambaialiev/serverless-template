@@ -1,28 +1,16 @@
 # Setup
 
-## configure aws users prod, dev
+## Setup ~/.aws/credentials file
 
 ```
-
-[dev]
-aws_access_key_id =
-aws_secret_access_key =
-
-[prod]
+[wallet-dev-${your name}]
 aws_access_key_id =
 aws_secret_access_key =
 ```
 
-## serverless deploy
-
-- by default stage dev
+## deploy your own dev environment
 
 ```
-serverless deploy
-```
+serverless deploy --stage <wallet-dev-${your name}>
 
-- deploy to prod stage
-
-```
-serverless deploy prod
 ```
