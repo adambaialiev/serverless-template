@@ -12,4 +12,5 @@ export interface UserSlug {
   firstName: string;
   lastName: string;
   id: string;
+  balance: string;
 }

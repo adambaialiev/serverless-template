@@ -4,6 +4,7 @@ import {
   APIGatewayProxyCallback,
   APIGatewayProxyResult,
 } from "aws-lambda";
+import { callbackify } from "util";
 import BalanceService from "../../services/balance/balance";
 import UserService from "../../services/user/user";
 
@@ -21,13 +22,24 @@ export const makeTransaction = async (
 
     const source = await userService.getSlug(from);
 
+    if (Number(source.balance) < amount) {
+      callback(null, {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "you dont have enought money",
+        }),
+      });
+    }
+
     const target = await userService.getSlug(to);
 
     await balanceService.makeTransaction(source, target, Number(amount));
 
     callback(null, {
       statusCode: 201,
-      body: "true",
+      body: JSON.stringify({
+        message: "transaction was success",
+      }),
     });
   } catch (error: unknown) {
     if (error instanceof Error) {
