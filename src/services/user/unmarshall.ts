@@ -6,4 +6,5 @@ export const unmarshallUserSlug = (userItem: UserItem): UserSlug => ({
   firstName: userItem.firstName,
   lastName: userItem.lastName,
   id: userItem.id,
+  balance: userItem.balance,
 });
