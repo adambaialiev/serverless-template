@@ -11,6 +11,5 @@ aws_secret_access_key =
 ## deploy your own dev environment
 
 ```
-serverless deploy --stage <wallet-dev-${your name}>
-
+yarn dev --stage <wallet-dev-${your name}>
 ```
