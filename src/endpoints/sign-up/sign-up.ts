@@ -3,7 +3,6 @@ import {
   APIGatewayEvent,
   APIGatewayProxyCallback,
   Context,
-  APIGatewayProxyResult,
 } from 'aws-lambda';
 
 const authService = new AuthService();

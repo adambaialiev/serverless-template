@@ -28,7 +28,7 @@ export const defineAuthChallenge: DefineAuthChallengeTriggerHandler = async (
     event.request.session &&
     event.request.session.length &&
     event.request.session.slice(-1)[0].challengeName === 'CUSTOM_CHALLENGE' &&
-    event.request.session.slice(-1)[0].challengeResult === true
+    event.request.session.slice(-1)[0].challengeResult
   ) {
     console.log('The user provided the right answer to the challenge');
     event.response.issueTokens = true;
@@ -36,7 +36,7 @@ export const defineAuthChallenge: DefineAuthChallengeTriggerHandler = async (
   } else if (
     event.request.session &&
     event.request.session.length >= 3 &&
-    event.request.session.slice(-1)[0].challengeResult === false
+    !event.request.session.slice(-1)[0].challengeResult
   ) {
     console.log(
       'FAILED Authentication: The user provided a wrong answer 3 times'
