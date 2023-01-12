@@ -2,14 +2,16 @@ org: shopwallet
 app: shop-wallet-serverless
 service: shop-wallet-serverless
 
-frameworkVersion: "3"
+frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs16.x
   region: us-east-1
   profile: ${opt:stage, "dev"}
   environment:
+    accessKeyId: ${param:accessKeyId}
+    secretAccessKey: ${param:secretAccessKey}
     user_pool_id:
       Ref: UserPool
     client_id:
@@ -27,8 +29,9 @@ provider:
         - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:UpdateItem
+        - dynamodb:RemoveItem
         - sns:*
-      Resource: "*"
+      Resource: '*'
 
 plugins:
   - serverless-offline
@@ -46,6 +49,7 @@ functions:
           cors: true
 
   signUp:
+    timeout: 10
     handler: build/src/endpoints/sign-up/sign-up.signUp
     events:
       - http:
@@ -54,13 +58,21 @@ functions:
           cors: true
 
   signIn:
+    timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
     events:
       - http:
           path: /api/shop-wallet/auth/sign-in
           method: post
           cors: true
-
+  signInVerify:
+    timeout: 10
+    handler: build/src/endpoints/sign-in-verify/sign-in-verify.signInVerify
+    events:
+      - http:
+          path: /api/shop-wallet/auth/sign-in/verify
+          method: post
+          cors: true
   createAuthChallenge:
     handler: build/src/triggers/create-auth-challenge.createAuthChallenge
     events:
@@ -121,8 +133,8 @@ resources:
         UserPoolId:
           Ref: UserPool
         ExplicitAuthFlows:
-          - "ALLOW_CUSTOM_AUTH"
-          - "ALLOW_REFRESH_TOKEN_AUTH"
+          - 'ALLOW_CUSTOM_AUTH'
+          - 'ALLOW_REFRESH_TOKEN_AUTH'
 
     MainTable:
       Type: AWS::DynamoDB::Table

@@ -1,16 +1,22 @@
-export const verifyAuthChallenge = async (event: any) => {
-  console.log('RECEIVED Event: ', JSON.stringify(event, null, 2));
+import {
+  VerifyAuthChallengeResponseTriggerEvent,
+  VerifyAuthChallengeResponseTriggerHandler,
+} from 'aws-lambda';
 
-  const expectedAnswer =
-    event.request.privateChallengeParameters.challenge || null;
+export const verifyAuthChallenge: VerifyAuthChallengeResponseTriggerHandler =
+  async (event: VerifyAuthChallengeResponseTriggerEvent) => {
+    console.log('RECEIVED Event: ', JSON.stringify(event, null, 2));
 
-  if (event.request.challengeAnswer === expectedAnswer) {
-    event.response.answerCorrect = true;
-  } else {
-    event.response.answerCorrect = false;
-  }
+    const expectedAnswer =
+      event.request.privateChallengeParameters.challenge || null;
 
-  console.log('RETURNED Event: ', JSON.stringify(event, null, 2));
+    if (event.request.challengeAnswer === expectedAnswer) {
+      event.response.answerCorrect = true;
+    } else {
+      event.response.answerCorrect = false;
+    }
 
-  return event;
-};
+    console.log('RETURNED Event: ', JSON.stringify(event, null, 2));
+
+    return event;
+  };

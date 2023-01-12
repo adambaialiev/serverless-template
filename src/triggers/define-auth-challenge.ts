@@ -1,9 +1,16 @@
-export const defineAuthChallenge = async (event: any) => {
+import {
+  DefineAuthChallengeTriggerEvent,
+  DefineAuthChallengeTriggerHandler,
+} from 'aws-lambda';
+
+export const defineAuthChallenge: DefineAuthChallengeTriggerHandler = async (
+  event: DefineAuthChallengeTriggerEvent
+) => {
   console.log('RECEIVED event: ', JSON.stringify(event, null, 2));
 
   if (event.request.userNotFound) {
     console.log('User does not exist');
-    event.response.issueToken = false;
+    event.response.issueTokens = false;
     event.response.failAuthentication = true;
     throw new Error('User does not exist');
   }

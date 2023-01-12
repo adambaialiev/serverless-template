@@ -2,11 +2,14 @@
   "name": "shop-wallet-serverless",
   "version": "1.0.0",
   "description": "",
-  "main": "handler.js",
+  "main": "./build/index.js",
+  "_moduleAliases": {
+    "@/": "build/src"
+  },
   "scripts": {
-    "build": "tsc",
-    "start": "sls offline",
+    "build": "rm -rf build && tsc -p tsconfig.json",
     "dev": "yarn build && sls deploy",
+    "start": "sls offline",
     "stage": "yarn build && sls deploy --stage staging",
     "deploy": "yarn build && sls deploy --stage prod"
   },
@@ -14,10 +17,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.245.0",
     "amazon-cognito-identity-js": "^6.1.2",
     "aws-lambda": "^1.0.7",
     "aws-sdk": "^2.1287.0",
     "crypto-secure-random-digit": "^1.0.10",
+    "module-alias": "^2.2.2",
     "serverless-offline": "^12.0.4",
     "uuid": "^9.0.0"
   },

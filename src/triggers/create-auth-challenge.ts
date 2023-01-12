@@ -1,5 +1,9 @@
 import { randomDigits } from 'crypto-secure-random-digit';
 import AWS from 'aws-sdk';
+import {
+  CreateAuthChallengeTriggerEvent,
+  CreateAuthChallengeTriggerHandler,
+} from 'aws-lambda';
 
 const sendSMS = (phoneNumber: string, passCode: string) => {
   const params = {
@@ -10,7 +14,9 @@ const sendSMS = (phoneNumber: string, passCode: string) => {
   return new AWS.SNS({ apiVersion: '2010-03-31' }).publish(params).promise();
 };
 
-export const createAuthChallenge = async (event: any) => {
+export const createAuthChallenge: CreateAuthChallengeTriggerHandler = async (
+  event: CreateAuthChallengeTriggerEvent
+) => {
   console.log('RECEIVED event: ', JSON.stringify(event, null, 2));
 
   let passCode;

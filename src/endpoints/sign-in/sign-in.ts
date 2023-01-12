@@ -12,11 +12,11 @@ export const signIn = async (
   event: APIGatewayEvent,
   context: Context,
   callback: APIGatewayProxyCallback
-): Promise<APIGatewayProxyResult> => {
+) => {
   try {
-    const { phone_number, session, passCode } = JSON.parse(event.body);
+    const { phoneNumber } = JSON.parse(event.body as string);
 
-    const res = await authService.signIn(phone_number, passCode, session);
+    const res = await authService.signIn(phoneNumber);
 
     callback(null, {
       statusCode: 201,

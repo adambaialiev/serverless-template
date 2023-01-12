@@ -2,12 +2,17 @@
   "compilerOptions": {
     "module": "CommonJS",
     "rootDir": "./",
-    "target": "ES2020",
+    "target": "ES2015",
+    "lib": ["es2018"],
     "noImplicitAny": true,
     "moduleResolution": "node",
     "outDir": "./build",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "exclude": ["node_modules"],
-  "include": ["src/**/*.ts"]
+  "include": ["**/*.ts"]
 }
