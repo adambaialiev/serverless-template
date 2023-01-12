@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "sls offline",
+    "dev": "yarn build && sls deploy",
     "stage": "yarn build && sls deploy --stage staging",
     "deploy": "yarn build && sls deploy --stage prod"
   },
