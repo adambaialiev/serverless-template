@@ -33,6 +33,9 @@ provider:
 plugins:
   - serverless-offline
 
+custom:
+  userPoolName: shop-wallet-users-pool-${self:provider.profile}
+
 functions:
   makeTransaction:
     handler: build/src/endpoints/makeTransaction/makeTransaction.makeTransaction
@@ -41,6 +44,7 @@ functions:
           path: /api/shop-wallet/balance/makeTransaction
           method: post
           cors: true
+
   signUp:
     handler: build/src/endpoints/sign-up/sign-up.signUp
     events:
@@ -48,6 +52,7 @@ functions:
           path: /api/shop-wallet/auth/sign-up
           method: post
           cors: true
+
   signIn:
     handler: build/src/endpoints/sign-in/sign-in.signIn
     events:
@@ -55,37 +60,49 @@ functions:
           path: /api/shop-wallet/auth/sign-in
           method: post
           cors: true
+
   createAuthChallenge:
     handler: build/src/triggers/create-auth-challenge.createAuthChallenge
     events:
       - cognitoUserPool:
-          pool: UserPool
+          pool: ${self:custom.userPoolName}
           trigger: CreateAuthChallenge
+          existing: true
+          forceDeploy: true
+
   verifyAuthChallenge:
     handler: build/src/triggers/verify-auth-challenge.verifyAuthChallenge
     events:
       - cognitoUserPool:
-          pool: UserPool
+          pool: ${self:custom.userPoolName}
           trigger: VerifyAuthChallengeResponse
+          existing: true
+          forceDeploy: true
+
   defineAuthChallenge:
     handler: build/src/triggers/define-auth-challenge.defineAuthChallenge
     events:
       - cognitoUserPool:
-          pool: UserPool
+          pool: ${self:custom.userPoolName}
           trigger: DefineAuthChallenge
+          existing: true
+          forceDeploy: true
+
   preSignUp:
     handler: build/src/triggers/pre-sign-up.preSignUp
     events:
       - cognitoUserPool:
-          pool: UserPool
+          pool: ${self:custom.userPoolName}
           trigger: PreSignUp
+          existing: true
+          forceDeploy: true
 
 resources:
   Resources:
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
-        UserPoolName: shop-wallet-users-pool-${self:provider.profile}
+        UserPoolName: ${self:custom.userPoolName}
         UsernameAttributes:
           - phone_number
         Policies:
@@ -95,6 +112,7 @@ resources:
             RequireNumbers: false
             MinimumLength: 6
             RequireUppercase: false
+
     UserClient:
       Type: AWS::Cognito::UserPoolClient
       Properties:
