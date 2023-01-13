@@ -73,6 +73,14 @@ functions:
           path: /api/shop-wallet/auth/sign-in/verify
           method: post
           cors: true
+  refreshToken:
+    timeout: 10
+    handler: build/src/endpoints/refreshToken/refreshToken.refreshTokenHandler
+    events:
+      - http:
+          path: /api/shop-wallet/auth/refreshToken
+          method: post
+          cors: true
   createAuthChallenge:
     handler: build/src/triggers/create-auth-challenge.createAuthChallenge
     events:
