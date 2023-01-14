@@ -1,18 +1,17 @@
 import { AuthService } from '../../authService';
-import { APIGatewayEvent, APIGatewayProxyCallback, Context } from 'aws-lambda';
+import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
 
 const authService = new AuthService();
 
-export const signUp = async (
+export const signInVerify = async (
 	event: APIGatewayEvent,
 	context: Context,
 	callback: APIGatewayProxyCallback
 ) => {
 	try {
-		console.log('Received event:', JSON.stringify(event, null, 2));
-		const { phoneNumber } = JSON.parse(event.body as string);
+		const { phoneNumber, passCode, session } = JSON.parse(event.body as string);
 
-		const res = await authService.signUp(phoneNumber);
+		const res = await authService.verifySignIn(passCode, phoneNumber, session);
 
 		callback(null, {
 			statusCode: 201,

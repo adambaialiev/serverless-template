@@ -1,25 +1,24 @@
-import { AuthService } from '../../authService';
 import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
-
+import { AuthService } from '../../authService';
 const authService = new AuthService();
 
-export const signIn = async (
+export const refreshTokenHandler = async (
 	event: APIGatewayEvent,
 	context: Context,
 	callback: APIGatewayProxyCallback
 ) => {
 	try {
-		const { phoneNumber } = JSON.parse(event.body as string);
+		const { refreshToken } = JSON.parse(event.body as string);
 
-		const res = await authService.signIn(phoneNumber);
+		const refreshTokenResponse = await authService.refreshToken(refreshToken);
 
 		callback(null, {
-			statusCode: 201,
-			body: JSON.stringify(res),
+			statusCode: 200,
+			body: JSON.stringify(refreshTokenResponse),
 		});
 	} catch (error: unknown) {
 		if (error instanceof Error) {
-			console.log({ error });
+			console.log(error);
 			return {
 				statusCode: 500,
 				body: error.message,
