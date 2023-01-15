@@ -16,9 +16,9 @@ export const makeTransaction = async (
 
 		const source = await userService.getSlug(from);
 
-		if (Number(source?.balance) < amount) {
+		if (source && Number(source.balance) < amount) {
 			callback(null, {
-				statusCode: 200,
+				statusCode: 400,
 				body: JSON.stringify({
 					message: 'you dont have enought money',
 				}),

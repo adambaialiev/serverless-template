@@ -10,8 +10,6 @@ provider:
   region: us-east-1
   profile: ${opt:stage, "dev"}
   environment:
-    accessKeyId: ${param:accessKeyId}
-    secretAccessKey: ${param:secretAccessKey}
     user_pool_id:
       Ref: UserPool
     client_id:
@@ -47,7 +45,15 @@ functions:
           path: /api/shop-wallet/balance/makeTransaction
           method: post
           cors: true
-
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
   signUp:
     timeout: 10
     handler: build/src/endpoints/sign-up/sign-up.signUp
@@ -114,6 +120,15 @@ functions:
       - cognitoUserPool:
           pool: ${self:custom.userPoolName}
           trigger: PreSignUp
+          existing: true
+          forceDeploy: true
+
+  postSignUp:
+    handler: build/src/triggers/post-sign-up.postSignUp
+    events:
+      - cognitoUserPool:
+          pool: ${self:custom.userPoolName}
+          trigger: PostConfirmation
           existing: true
           forceDeploy: true
 
