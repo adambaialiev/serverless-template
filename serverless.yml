@@ -123,6 +123,15 @@ functions:
           existing: true
           forceDeploy: true
 
+  postSignUp:
+    handler: build/src/triggers/post-sign-up.postSignUp
+    events:
+      - cognitoUserPool:
+          pool: ${self:custom.userPoolName}
+          trigger: PostConfirmation
+          existing: true
+          forceDeploy: true
+
 resources:
   Resources:
     UserPool:
