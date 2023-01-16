@@ -1,0 +1,26 @@
+name: CI-CD
+on:
+  push:
+    branches: [staging]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm i -g yarn
+      - run: npm i -g serverless
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - run: pip install awscli --upgrade
+
+      - uses: actions/checkout@v3
+      - run: |
+          yarn
+          serverless config credentials --provider aws --profile staging --key ${{ secrets.STAGING_ACCESS_KEY_ID }}  --secret ${{ secrets.STAGING_SECRET_ACCESS_KEY }} -o
+          yarn deploy --stage STAGING
