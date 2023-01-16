@@ -1,6 +1,6 @@
-org: shopwallet
-app: shop-wallet-serverless
-service: shop-wallet-serverless
+#org: shopwallet
+#app: shop-wallet-serverless
+service: shop-wallet-serverless-test
 
 frameworkVersion: '3'
 
