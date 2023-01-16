@@ -23,4 +23,4 @@ jobs:
       - run: |
           yarn
           serverless config credentials --provider aws --profile prod --key ${{ secrets.AWS_ACCESS_KEY_ID }}  --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }} -o
-          yarn deploy
+          yarn deploy --stage
