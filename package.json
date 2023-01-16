@@ -9,10 +9,11 @@
 	"scripts": {
 		"lint": "eslint --fix --ext .ts .",
 		"build": "rm -rf build && tsc -p tsconfig.json && yarn lint",
-		"dev": "yarn build && sls deploy",
+		"deploy:dev": "yarn build && sls deploy",
 		"start": "sls offline",
 		"stage": "yarn build && sls deploy --stage staging",
-		"deploy": "yarn build && sls deploy --stage prod"
+		"deploy:prod": "yarn build && sls deploy --stage prod",
+		"deploy:staging": "yarn build && sls deploy --stage staging"
 	},
 	"keywords": [],
 	"author": "",
