@@ -33,9 +33,15 @@ provider:
 
 plugins:
   - serverless-offline
+  - serverless-domain-manager
 
 custom:
   userPoolName: shop-wallet-users-pool-${self:provider.profile}
+  customDomain:
+    domainName: ${opt:stage}-api.shopwalletapp.com
+    basePath: 'v1'
+    stage: ${opt:stage}
+    createRoute53Record: true
 
 functions:
   makeTransaction:
