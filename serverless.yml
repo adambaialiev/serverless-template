@@ -39,7 +39,7 @@ custom:
   userPoolName: shop-wallet-users-pool-${self:provider.profile}
   customDomain:
     domainName: ${opt:stage}-api.shopwalletapp.com
-    basePath: 'v1'
+    basePath: 'api'
     stage: ${opt:stage}
     createRoute53Record: true
 
@@ -48,7 +48,7 @@ functions:
     handler: build/src/endpoints/makeTransaction/makeTransaction.makeTransaction
     events:
       - http:
-          path: /api/shop-wallet/balance/makeTransaction
+          path: /v1/balance/makeTransaction
           method: post
           cors: true
           authorizer:
@@ -65,7 +65,7 @@ functions:
     handler: build/src/endpoints/sign-up/sign-up.signUp
     events:
       - http:
-          path: /api/shop-wallet/auth/sign-up
+          path: /v1/auth/sign-up
           method: post
           cors: true
 
@@ -74,7 +74,7 @@ functions:
     handler: build/src/endpoints/sign-in/sign-in.signIn
     events:
       - http:
-          path: /api/shop-wallet/auth/sign-in
+          path: /v1/auth/sign-in
           method: post
           cors: true
   signInVerify:
@@ -82,7 +82,7 @@ functions:
     handler: build/src/endpoints/sign-in-verify/sign-in-verify.signInVerify
     events:
       - http:
-          path: /api/shop-wallet/auth/sign-in/verify
+          path: /v1/auth/sign-in/verify
           method: post
           cors: true
   refreshToken:
@@ -90,9 +90,10 @@ functions:
     handler: build/src/endpoints/refreshToken/refreshToken.refreshTokenHandler
     events:
       - http:
-          path: /api/shop-wallet/auth/refreshToken
+          path: /v1/auth/refreshToken
           method: post
           cors: true
+
   createAuthChallenge:
     handler: build/src/triggers/create-auth-challenge.createAuthChallenge
     events:
