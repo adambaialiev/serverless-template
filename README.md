@@ -8,10 +8,18 @@ aws_access_key_id =
 aws_secret_access_key =
 ```
 
-## deploy your own dev environment
+## Create your own dev domain
+
+```
+sls create_domain --stage <wallet-dev-${your name}>
+```
+
+## Deploy your own dev environment
 
 ```
 yarn dev --stage <wallet-dev-${your name}>
+
+Example enpoint: https://wallet-adam-dev-api.shopwalletapp.com/v1/api/shop-wallet/auth/sign-up
 ```
 
 ## Authentication Reference
