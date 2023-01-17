@@ -24,16 +24,6 @@ Example enpoint: https://wallet-adam-dev-api.shopwalletapp.com/v1/api/shop-walle
 
 ## Authentication Reference
 
-#### Sign up
-
-```http
-  POST <your dev URL>/auth/sign-up
-```
-
-| Parameter     | Type     | Description                     |
-| :------------ | :------- | :------------------------------ |
-| `phoneNumber` | `string` | **Required**. Your phone number |
-
 #### Login
 
 ```http
