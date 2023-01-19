@@ -16,6 +16,12 @@ export interface MakeTransactionProps {
 
 export default class BalanceService {
 	async makeTransaction(source: UserSlug, target: UserSlug, amount: number) {
+		if (Number(source.balance) < Number(amount)) {
+			return {
+				statusCode: 400,
+				body: 'you don`t have enough money',
+			};
+		}
 		const tableName = process.env.dynamo_table as string;
 
 		const sourceUserKey = buildUserKey(source.phoneNumber);
@@ -113,5 +119,6 @@ export default class BalanceService {
 				],
 			})
 			.promise();
+		return true;
 	}
 }
