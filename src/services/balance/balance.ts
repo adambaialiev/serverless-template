@@ -8,6 +8,7 @@ import { v4 } from 'uuid';
 import { UserSlug } from '../user/types';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
+const tableName = process.env.dynamo_table as string;
 
 export interface MakeTransactionProps {
 	sourceId: string;
@@ -15,6 +16,25 @@ export interface MakeTransactionProps {
 }
 
 export default class BalanceService {
+	async getTransactions(phoneNumber: string) {
+		const userKey = buildUserKey(phoneNumber);
+
+		const params = {
+			TableName: tableName,
+			KeyConditionExpression: '#pk = :pk',
+			FilterExpression: 'phoneNumber <> :phoneNumber',
+			ExpressionAttributeNames: {
+				'#pk': TableKeys.PK,
+			},
+			ExpressionAttributeValues: {
+				':pk': userKey,
+				':phoneNumber': phoneNumber,
+			},
+			ScanIndexForward: false,
+		};
+
+		return dynamoDB.query(params).promise();
+	}
 	async makeTransaction(source: UserSlug, target: UserSlug, amount: number) {
 		if (Number(source.balance) < Number(amount)) {
 			return {
@@ -22,7 +42,6 @@ export default class BalanceService {
 				body: 'you don`t have enough money',
 			};
 		}
-		const tableName = process.env.dynamo_table as string;
 
 		const sourceUserKey = buildUserKey(source.phoneNumber);
 		const targetUserKey = buildUserKey(target.phoneNumber);

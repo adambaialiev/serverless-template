@@ -48,8 +48,24 @@ functions:
     handler: build/src/endpoints/makeTransaction/makeTransaction.makeTransaction
     events:
       - http:
-          path: /v1/balance/makeTransaction
+          path: /v1/balance/makeTransaction/
           method: post
+          cors: true
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
+  getTransactions:
+    handler: build/src/endpoints/getTransactions/getTransactions.getTransactions
+    events:
+      - http:
+          path: /v1/balance/getTransactions/{phoneNumber}
+          method: get
           cors: true
           authorizer:
             name: PrivateAuthorizer
