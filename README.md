@@ -40,11 +40,12 @@ Example enpoint: https://wallet-adam-dev-api.shopwalletapp.com/v1/api/shop-walle
   POST <your dev URL>/auth/sign-in/verify
 ```
 
-| Parameter     | Type     | Description                                                                 |
-| :------------ | :------- | :-------------------------------------------------------------------------- |
-| `phoneNumber` | `string` | **Required**. Your phone number                                             |
-| `passCode`    | `string` | **Required**. Your passcode that you got by SMS notification to your number |
-| `session`     | `string` | **Required**. Session you retrieved after Login                             |
+| Parameter     | Type       | Description                                     |
+| :------------ | :--------- | :---------------------------------------------- | --------------------------------------------------------------------------- | --- |
+| `phoneNumber` | `string`   | **Required**. Your phone number                 |
+| `passCode`    | `string`   | **Required**. 555666                            |
+| <!--          | `passCode` | `string`                                        | **Required**. Your passcode that you got by SMS notification to your number | --> |
+| `session`     | `string`   | **Required**. Session you retrieved after Login |
 
 #### Refresh token
 
