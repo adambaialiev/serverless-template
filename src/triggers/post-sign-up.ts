@@ -1,11 +1,10 @@
+import { buildUserKey } from '@/common/dynamo/buildKey';
+import { DynamoDB } from '@/common/dynamo/Dynamo';
+import { TableKeys, UserAttributes } from '@/common/dynamo/schema';
 import {
 	PostConfirmationTriggerEvent,
 	PostConfirmationTriggerHandler,
 } from 'aws-lambda';
-
-import { DynamoDB } from '../common/dynamo/Dynamo';
-import { TableKeys, UserAttributes } from '../common/dynamo/schema';
-import { buildUserKey } from '../common/dynamo/buildKey';
 
 const dynamoDB = new DynamoDB();
 

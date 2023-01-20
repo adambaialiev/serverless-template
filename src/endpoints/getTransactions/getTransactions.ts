@@ -1,5 +1,5 @@
+import BalanceService from '@/services/balance/balance';
 import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
-import BalanceService from '../../services/balance/balance';
 
 const balanceService = new BalanceService();
 

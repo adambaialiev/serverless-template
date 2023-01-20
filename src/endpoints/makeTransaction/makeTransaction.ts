@@ -1,6 +1,6 @@
+import BalanceService from '@/services/balance/balance';
+import UserService from '@/services/user/user';
 import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
-import BalanceService from '../../services/balance/balance';
-import UserService from '../../services/user/user';
 
 export const makeTransaction = async (
 	event: APIGatewayEvent,
