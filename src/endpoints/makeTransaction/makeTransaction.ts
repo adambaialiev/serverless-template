@@ -15,27 +15,23 @@ export const makeTransaction = async (
 		const userService = new UserService();
 
 		const source = await userService.getSlug(from);
-
-		if (source && Number(source.balance) < amount) {
-			callback(null, {
-				statusCode: 400,
-				body: JSON.stringify({
-					message: 'you dont have enought money',
-				}),
-			});
-		}
+		console.log('sourceUser', source);
+		console.log('sourceUserBalance', source.balance);
+		console.log('event', JSON.stringify(event, null, 2));
 
 		const target = await userService.getSlug(to);
-
+		let balanceServiceOutput;
 		if (source && target) {
-			await balanceService.makeTransaction(source, target, Number(amount));
+			balanceServiceOutput = await balanceService.makeTransaction(
+				source,
+				target,
+				Number(amount)
+			);
 		}
 
 		callback(null, {
 			statusCode: 201,
-			body: JSON.stringify({
-				message: 'transaction was success',
-			}),
+			body: JSON.stringify(balanceServiceOutput),
 		});
 	} catch (error: unknown) {
 		if (error instanceof Error) {
