@@ -26,7 +26,7 @@ export const signInVerify = async (
 		callback(null, {
 			statusCode: 201,
 			body: JSON.stringify({
-				...res.AuthenticationResult,
+				...res,
 				user: userOutput.Item,
 			}),
 		});

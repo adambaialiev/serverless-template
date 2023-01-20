@@ -48,7 +48,7 @@ functions:
     handler: build/src/endpoints/makeTransaction/makeTransaction.makeTransaction
     events:
       - http:
-          path: /v1/balance/makeTransaction
+          path: /v1/transaction
           method: post
           cors: true
           authorizer:
@@ -64,7 +64,7 @@ functions:
     handler: build/src/endpoints/getTransactions/getTransactions.getTransactions
     events:
       - http:
-          path: /v1/balance/getTransactions/{phoneNumber}
+          path: /v1/transactions/{phoneNumber}
           method: get
           cors: true
           authorizer:
