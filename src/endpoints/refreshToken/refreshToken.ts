@@ -1,5 +1,6 @@
+import { AuthService } from '@/services/auth/auth';
 import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
-import { AuthService } from '../../authService';
+
 const authService = new AuthService();
 
 export const refreshTokenHandler = async (

@@ -1,8 +1,8 @@
-import { AuthService } from '../../authService';
 import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
-import { DynamoDB } from '../../common/dynamo/Dynamo';
-import { buildUserKey } from '../../common/dynamo/buildKey';
-import { TableKeys } from '../../common/dynamo/schema';
+import { AuthService } from '@/services/auth/auth';
+import { DynamoDB } from '@/common/dynamo/Dynamo';
+import { buildUserKey } from '@/common/dynamo/buildKey';
+import { TableKeys } from '@/common/dynamo/schema';
 
 const authService = new AuthService();
 const dynamoDB = new DynamoDB();

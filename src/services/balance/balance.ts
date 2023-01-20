@@ -1,11 +1,8 @@
+import { buildTransactionKey, buildUserKey } from '@/common/dynamo/buildKey';
+import { TableKeys, TransactionAttributes } from '@/common/dynamo/schema';
+import { UserSlug } from '@/services/user/types';
 import AWS from 'aws-sdk';
-import {
-	buildTransactionKey,
-	buildUserKey,
-} from '../../common/dynamo/buildKey';
-import { TableKeys, TransactionAttributes } from '../../common/dynamo/schema';
 import { v4 } from 'uuid';
-import { UserSlug } from '../user/types';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.dynamo_table as string;

@@ -1,8 +1,8 @@
+import { buildUserKey } from '@/common/dynamo/buildKey';
+import { TableKeys, UserItem } from '@/common/dynamo/schema';
+import { UserSlug } from '@/services/user/types';
+import { unmarshallUserSlug } from '@/services/user/unmarshall';
 import AWS from 'aws-sdk';
-import { buildUserKey } from '../../common/dynamo/buildKey';
-import { TableKeys, UserItem } from '../../common/dynamo/schema';
-import { UserSlug } from './types';
-import { unmarshallUserSlug } from './unmarshall';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 

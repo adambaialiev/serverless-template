@@ -1,6 +1,6 @@
+import { makePassword } from '@/utils/makePassword';
 import AWS from 'aws-sdk';
 import { SessionType } from 'aws-sdk/clients/cognitoidentityserviceprovider';
-import { makePassword } from './utils/makePassword';
 
 export const poolData = {
 	UserPoolId: process.env.user_pool_id as string,
