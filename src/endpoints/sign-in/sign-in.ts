@@ -1,17 +1,14 @@
-import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
+import { APIGatewayEvent } from 'aws-lambda';
 import { AuthService } from '@/services/auth/auth';
 import { DynamoDB } from '@/common/dynamo/Dynamo';
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { TableKeys } from '@/common/dynamo/schema';
+import { sendResponse } from '@/utils/makeResponse';
 
 const authService = new AuthService();
 const dynamoDB = new DynamoDB();
 
-export const signIn = async (
-	event: APIGatewayEvent,
-	context: Context,
-	callback: APIGatewayProxyCallback
-) => {
+export const signIn = async (event: APIGatewayEvent) => {
 	try {
 		const { phoneNumber } = JSON.parse(event.body as string);
 		const tableName = process.env.dynamo_table as string;
@@ -27,18 +24,11 @@ export const signIn = async (
 		}
 
 		const res = await authService.signIn(phoneNumber);
-
-		callback(null, {
-			statusCode: 201,
-			body: JSON.stringify(res),
-		});
+		return sendResponse(201, res);
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			console.log({ error });
-			return {
-				statusCode: 500,
-				body: error.message,
-			};
+			return sendResponse(500, { message: error.message });
 		}
 	}
 };
