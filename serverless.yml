@@ -25,6 +25,8 @@ provider:
         - cognito-idp:AdminSetUserPassword
         - dynamodb:Query
         - dynamodb:GetItem
+        - dynamodb:Scan
+        - dynamodb:BatchGetItem
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:RemoveItem
@@ -34,8 +36,12 @@ provider:
 plugins:
   - serverless-offline
   - serverless-domain-manager
+  - serverless-prune-plugin
 
 custom:
+  prune:
+    automatic: true
+    number: 5
   userPoolName: shop-wallet-users-pool-${self:provider.profile}
   customDomain:
     domainName: ${opt:stage}-api.shopwalletapp.com
@@ -92,6 +98,22 @@ functions:
                 - Arn
             claims:
               - email
+  getUsers:
+    handler: build/src/endpoints/user/getUsers.getUsers
+    events:
+      - http:
+          path: /v1/users
+          method: post
+          cors: true
+          # authorizer:
+          #   name: PrivateAuthorizer
+          #   type: COGNITO_USER_POOLS
+          #   arn:
+          #     Fn::GetAtt:
+          #       - UserPool
+          #       - Arn
+          #   claims:
+          #     - email
   signIn:
     timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
