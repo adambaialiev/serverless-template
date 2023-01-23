@@ -11,7 +11,6 @@ export const makeTransaction = async (
 		const { from, to, amount } = JSON.parse(event.body as string);
 
 		const balanceService = new BalanceService();
-
 		const userService = new UserService();
 
 		const source = await userService.getSlug(from);
