@@ -14,8 +14,6 @@ export const makeTransaction = async (
 		const userService = new UserService();
 
 		const source = await userService.getSlug(from);
-		console.log('sourceUser', source);
-		console.log('sourceUserBalance', source.balance);
 		console.log('event', JSON.stringify(event, null, 2));
 
 		const target = await userService.getSlug(to);

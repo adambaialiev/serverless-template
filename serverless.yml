@@ -86,7 +86,22 @@ functions:
                 - Arn
             claims:
               - email
-
+  getUser:
+    handler: build/src/endpoints/user/getUser.getUser
+    events:
+      - http:
+          path: /v1/users/{phoneNumber}
+          method: get
+          cors: true
+          authorizer:
+            name: PrivateAuthorizer
+            type: COGNITO_USER_POOLS
+            arn:
+              Fn::GetAtt:
+                - UserPool
+                - Arn
+            claims:
+              - email
   signIn:
     timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
