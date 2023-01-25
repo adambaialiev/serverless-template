@@ -16,7 +16,7 @@ export const getTransactions = async () => {
 		};
 
 		const transactions = await dynamoDB.scan(params).promise();
-		return sendResponse(200, { transactions });
+		return sendResponse(200, { transactions: transactions.Items });
 	} catch (error) {
 		const message = error.message ? error.message : 'Internal server error';
 		return sendResponse(500, { message });
