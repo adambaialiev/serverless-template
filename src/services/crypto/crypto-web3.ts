@@ -34,33 +34,18 @@ class CryptoWeb3Service {
 
 	async sendERC20Transaction() {
 		const fromAddress = '0xC7E966B2b80738458ddF304D586058E900a4C25b';
-		const toAddress = '0xb5A59D7AbAD4f5aa0c95FD799C17985ed8b3bb5e';
+		const toAddress = '0xaa7735b6d0b9c08d9ac7a349dc3af49d9797d6c5';
 		const privateKey = '0x997ac31ca6c895d405287e2a2eed95de7e1093e373ba93844f6c95744f821333';
-		const contractAddress = '0x56705DB9F87c8a930Ec87Da0D458E00A657Fccb0';
-		const USDT = new web3.eth.Contract(contractAbi, contractAddress, { from: fromAddress });
-		const amount = web3.utils.toHex(2710);
-
-		const nonce = await web3.eth.getTransactionCount(fromAddress, 'latest');
-
-		const transaction = {
-			'from': fromAddress,
-			'gasPrice': web3.utils.toHex(2000000),
-			'gasLimit': web3.utils.toHex(6000000),
-			'gas': web3.utils.toHex(100000),
-			'to': contractAddress,
-			'value': web3.utils.toWei('.00001', 'ether'),
-			'data': USDT.methods.transfer(toAddress, amount).encodeABI(),
-			'nonce': nonce,
-		};
-		const signedTx = await web3.eth.accounts.signTransaction(transaction, privateKey);
-		web3.eth.sendSignedTransaction(signedTx.rawTransaction, (error, hash) => {
-			if (!error) {
-				console.log('success', hash);
-			} else {
-				console.log('error', error);
-			}
+		const contractAddress = '0x56705db9f87c8a930ec87da0d458e00a657fccb0';
+		web3.eth.accounts.wallet.add(privateKey);
+		const tokenContract = new web3.eth.Contract(contractAbi, contractAddress);
+		const amount = '0';
+		const transaction = await tokenContract.methods.transfer(toAddress, amount).send({
+			from: fromAddress,
+			gasLimit: 21560,
+			gas: 128028,
 		});
-
+		console.log(transaction);
 	}
 }
 
