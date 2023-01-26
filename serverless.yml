@@ -110,6 +110,7 @@ functions:
           path: /v1/auth/sign-in
           method: post
           cors: true
+
   signInVerify:
     timeout: 10
     handler: build/src/endpoints/sign-in-verify/sign-in-verify.signInVerify
@@ -118,6 +119,7 @@ functions:
           path: /v1/auth/sign-in/verify
           method: post
           cors: true
+
   refreshToken:
     timeout: 10
     handler: build/src/endpoints/refreshToken/refreshToken.refreshTokenHandler
