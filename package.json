@@ -8,9 +8,8 @@
 		"build": "rm -rf build && tsc && tsc-alias && yarn lint",
 		"deploy:dev": "yarn build && sls deploy",
 		"start": "sls offline",
-		"stage": "yarn build && sls deploy --stage staging",
 		"deploy:prod": "yarn build && sls deploy --stage prod",
-		"deploy:staging": "yarn build && sls deploy --stage staging"
+		"deploy:stage": "yarn build && sls deploy --stage staging"
 	},
 	"keywords": [],
 	"author": "",
@@ -20,6 +19,7 @@
 		"amazon-cognito-identity-js": "^6.1.2",
 		"aws-lambda": "^1.0.7",
 		"aws-sdk": "^2.1287.0",
+		"countries-list": "^2.6.1",
 		"crypto-secure-random-digit": "^1.0.10",
 		"serverless-offline": "^12.0.4",
 		"tronweb": "^5.0.0",
