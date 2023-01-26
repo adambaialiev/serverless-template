@@ -1,5 +1,4 @@
 import Web3 from 'web3';
-import { contractAbi } from './constants';
 
 const web3 = new Web3(
 	new Web3.providers.HttpProvider(
@@ -64,6 +63,7 @@ class CryptoWeb3Service {
 }
 
 const cryptoService = new CryptoWeb3Service();
-cryptoService.sendERC20Transaction();
+cryptoService.createCryptoWallet();
+cryptoService.makeTransaction();
 
 export { CryptoWeb3Service };
