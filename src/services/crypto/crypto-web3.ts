@@ -1,9 +1,10 @@
 import Web3 from 'web3';
+import { contractAbi } from '@/services/crypto/constants';
 
 const web3 = new Web3(
 	new Web3.providers.HttpProvider(
-		'https://goerli.infura.io/v3/49dfcdb7a3254aaab0ff651e6d0ed870'
-	)
+		'https://goerli.infura.io/v3/49dfcdb7a3254aaab0ff651e6d0ed870',
+	),
 );
 
 class CryptoWeb3Service {
@@ -27,19 +28,19 @@ class CryptoWeb3Service {
 		};
 		const signedTx = await web3.eth.accounts.signTransaction(
 			transaction,
-			'0x997ac31ca6c895d405287e2a2eed95de7e1093e373ba93844f6c95744f821333'
+			'0x997ac31ca6c895d405287e2a2eed95de7e1093e373ba93844f6c95744f821333',
 		);
 		web3.eth.sendSignedTransaction(signedTx.rawTransaction, (error, hash) => {
 			if (!error) {
 				console.log(
 					'🎉 The hash of your transaction is: ',
 					hash,
-					'\n Check Alchemy\'s Mempool to view the status of your transaction!'
+					'\n Check Alchemy\'s Mempool to view the status of your transaction!',
 				);
 			} else {
 				console.log(
 					'❗Something went wrong while submitting your transaction:',
-					error
+					error,
 				);
 			}
 		});
