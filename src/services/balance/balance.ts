@@ -32,6 +32,29 @@ export default class BalanceService {
 
 		return dynamoDB.query(params).promise();
 	}
+	async getTransactionsBetweenUsers(source: string, target: string) {
+		const userKey = buildUserKey(source);
+
+		const params = {
+			TableName: tableName,
+			KeyConditionExpression: '#pk = :pk',
+			FilterExpression:
+				'(phoneNumber <> :source) AND ((#source = :source AND #target = :target) OR (#source = :target AND #target = :source))',
+			ExpressionAttributeNames: {
+				'#pk': TableKeys.PK,
+				'#source': 'source',
+				'#target': 'target',
+			},
+			ExpressionAttributeValues: {
+				':pk': userKey,
+				':source': source,
+				':target': target,
+			},
+			ScanIndexForward: false,
+		};
+
+		return dynamoDB.query(params).promise();
+	}
 	async makeTransaction(source: UserSlug, target: UserSlug, amount: number) {
 		if (Number(source.balance) < Number(amount)) {
 			return {
