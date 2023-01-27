@@ -32,7 +32,7 @@ export default class BalanceService {
 
 		return dynamoDB.query(params).promise();
 	}
-	async getTransactionsBetweenUsers(source: string, target: string) {
+	async getTransactionsRoom(source: string, target: string) {
 		const userKey = buildUserKey(source);
 
 		const params = {

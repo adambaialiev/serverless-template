@@ -3,7 +3,7 @@ import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
 
 const balanceService = new BalanceService();
 
-export const getTransactionsBetweenUsers = async (
+export const getTransactionsRoom = async (
 	event: APIGatewayEvent,
 	context: Context,
 	callback: APIGatewayProxyCallback
@@ -12,10 +12,7 @@ export const getTransactionsBetweenUsers = async (
 		const { source, target } = JSON.parse(event.body);
 		console.log('event', JSON.stringify(event, null, 2));
 
-		const response = await balanceService.getTransactionsBetweenUsers(
-			source,
-			target
-		);
+		const response = await balanceService.getTransactionsRoom(source, target);
 
 		console.log('UsersTransactionsResponse', response);
 

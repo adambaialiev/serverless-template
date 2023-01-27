@@ -52,7 +52,7 @@ custom:
 
 functions:
   makeTransaction:
-    handler: build/src/endpoints/makeTransaction/makeTransaction.makeTransaction
+    handler: build/src/endpoints/transactions/makeTransaction.makeTransaction
     events:
       - http:
           path: /v1/transaction
@@ -69,7 +69,7 @@ functions:
               - email
 
   getTransactionByAdmin:
-    handler: build/src/endpoints/getTransactionByAdmin/getTransactionByAdmin.getTransactions
+    handler: build/src/endpoints/transactions/getTransactionByAdmin.getTransactions
     events:
       - http:
           path: /v1/transactions
@@ -93,7 +93,7 @@ functions:
             claims:
               - email
   getTransactionsRoom:
-    handler: build/src/endpoints/transactions/getTransactionsBetweenUsers.getTransactionsBetweenUsers
+    handler: build/src/endpoints/transactions/getTransactionsRoom.getTransactionsRoom
     events:
       - http:
           path: /v1/transactions/room
