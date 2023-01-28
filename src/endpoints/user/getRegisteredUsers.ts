@@ -37,7 +37,9 @@ export const getRegisteredUsers = async (event: APIGatewayEvent) => {
 			await dynamoDB.batchGet(params).promise()
 		).Responses[tableName].map((item) => item.phoneNumber);
 
-		const registeredUsers = phoneNumbers.map((number: string) => {
+		const numbersDictionary: Record<string, any> = {};
+
+		for (const number of phoneNumbers) {
 			const number1 = number.replace(/\(|\)|-/g, '').replace(/\s/g, '');
 			const number2 = (
 				number1.startsWith('+')
@@ -48,20 +50,19 @@ export const getRegisteredUsers = async (event: APIGatewayEvent) => {
 			).replace(/[- ]/g, '');
 
 			if (usersPhoneNumbersOutput.includes(number2)) {
-				return {
-					number,
+				numbersDictionary[number] = {
 					registered: true,
 					internationalNumber: number2,
 				};
+			} else {
+				numbersDictionary[number] = {
+					registered: false,
+					internationalNumber: number2,
+				};
 			}
-			return {
-				number,
-				registered: false,
-				internationalNumber: number2,
-			};
-		});
+		}
 
-		return sendResponse(200, registeredUsers);
+		return sendResponse(200, numbersDictionary);
 	} catch (error) {
 		console.log(error);
 		const message = error.message ? error.message : 'Internal server error';
