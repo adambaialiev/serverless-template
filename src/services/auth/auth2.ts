@@ -4,7 +4,7 @@ import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
 import jwt from 'jsonwebtoken';
 
-const SECRET_KEY = "PK3q@Zek4Jb!nzS3]LY4a/bwmD7'!fy.";
+export const JWT_SECRET_KEY = "PK3q@Zek4Jb!nzS3]LY4a/bwmD7'!fy.";
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -96,10 +96,10 @@ export class AuthService {
 				userItem.sessionId === sessionId && userItem.otpCode === otpCode;
 
 			if (verified) {
-				const accessToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
+				const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
 					expiresIn: '1h',
 				});
-				const refreshToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
+				const refreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
 					expiresIn: '14d',
 				});
 
@@ -115,11 +115,11 @@ export class AuthService {
 		phoneNumber: string,
 		refreshToken: string
 	): Promise<AuthTokens | undefined> {
-		jwt.verify(refreshToken, SECRET_KEY);
-		const accessToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
+		jwt.verify(refreshToken, JWT_SECRET_KEY);
+		const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
 			expiresIn: '1h',
 		});
-		const newRefreshToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
+		const newRefreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
 			expiresIn: '14d',
 		});
 

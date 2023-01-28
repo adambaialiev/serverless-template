@@ -24,6 +24,7 @@
 		"countries-list": "^2.6.1",
 		"crypto-secure-random-digit": "^1.0.10",
 		"jsonwebtoken": "^9.0.0",
+		"serverless-middleware": "^3.1.0",
 		"serverless-offline": "^12.0.4",
 		"tronweb": "^5.0.0",
 		"uuid": "^9.0.0",

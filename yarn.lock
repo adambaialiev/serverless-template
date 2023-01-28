@@ -5985,6 +5985,11 @@ serverless-domain-manager@^6.2.1:
   dependencies:
     aws-sdk "^2.1261.0"
 
+serverless-middleware@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/serverless-middleware/-/serverless-middleware-3.1.0.tgz#59fa4ce7e44144b82cd4084caac8c162c962b945"
+  integrity sha512-1eqopM831D9ucjDjKThATtfk+tNGlhophUMLEQpC6bZu6u2uTz48oQ7/j5oYuXUIG/tFnyOhycuKn8OXQ9r6Bg==
+
 serverless-offline@^12.0.4:
   version "12.0.4"
   resolved "https://registry.npmjs.org/serverless-offline/-/serverless-offline-12.0.4.tgz"

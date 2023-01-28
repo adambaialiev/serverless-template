@@ -38,6 +38,7 @@ plugins:
   - serverless-offline
   - serverless-domain-manager
   - serverless-prune-plugin
+  - serverless-middleware
 
 custom:
   prune:
@@ -53,23 +54,20 @@ custom:
 functions:
   makeTransaction:
     handler: build/src/endpoints/transactions/makeTransaction.makeTransaction
+    middleware:
+      pre:
+        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/transaction
           method: post
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
 
   getTransactionByAdmin:
     handler: build/src/endpoints/transactions/getTransactionByAdmin.getTransactions
+    middleware:
+      pre:
+        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/transactions
@@ -78,68 +76,47 @@ functions:
 
   getTransactions:
     handler: build/src/endpoints/transactions/getTransactions.getTransactions
+    middleware:
+      pre:
+        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/transactions/{phoneNumber}
           method: get
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
+
   getTransactionsRoom:
     handler: build/src/endpoints/transactions/getTransactionsRoom.getTransactionsRoom
+    middleware:
+      pre:
+        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/transactions/room
           method: post
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
+
   getUser:
     handler: build/src/endpoints/user/getUser.getUser
+    middleware:
+      pre:
+        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/users/{phoneNumber}
           method: get
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
+
   getRegisteredUsers:
     handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
+    middleware:
+      pre:
+        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/users/registered
           method: post
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
   signIn:
     timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
