@@ -1,9 +1,10 @@
+import { withAuthorization } from '@/middlewares/withAuthorization';
 import BalanceService from '@/services/balance/balance';
 import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
 
 const balanceService = new BalanceService();
 
-export const getTransactionsRoom = async (
+export const handler = async (
 	event: APIGatewayEvent,
 	context: Context,
 	callback: APIGatewayProxyCallback
@@ -30,3 +31,5 @@ export const getTransactionsRoom = async (
 		}
 	}
 };
+
+export const getTransactionsRoom = withAuthorization(handler);

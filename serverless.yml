@@ -30,7 +30,6 @@ plugins:
   - serverless-offline
   - serverless-domain-manager
   - serverless-prune-plugin
-  - serverless-middleware
 
 custom:
   prune:
@@ -45,9 +44,6 @@ custom:
 functions:
   makeTransaction:
     handler: build/src/endpoints/transactions/makeTransaction.makeTransaction
-    middleware:
-      pre:
-        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/transaction
@@ -56,9 +52,6 @@ functions:
 
   getTransactionByAdmin:
     handler: build/src/endpoints/transactions/getTransactionByAdmin.getTransactions
-    middleware:
-      pre:
-        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/transactions
@@ -67,9 +60,6 @@ functions:
 
   getTransactions:
     handler: build/src/endpoints/transactions/getTransactions.getTransactions
-    middleware:
-      pre:
-        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/transactions/{phoneNumber}
@@ -78,9 +68,6 @@ functions:
 
   getTransactionsRoom:
     handler: build/src/endpoints/transactions/getTransactionsRoom.getTransactionsRoom
-    middleware:
-      pre:
-        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/transactions/room
@@ -89,9 +76,6 @@ functions:
 
   getUser:
     handler: build/src/endpoints/user/getUser.getUser
-    middleware:
-      pre:
-        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/users/{phoneNumber}
@@ -100,9 +84,6 @@ functions:
 
   getRegisteredUsers:
     handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
-    middleware:
-      pre:
-        - build/src/middlewares/authorization.authorization
     events:
       - http:
           path: /v1/users/registered

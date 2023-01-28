@@ -72,6 +72,7 @@ interface AuthTokens {
 | Parameter      | Type     | Description                      |
 | :------------- | :------- | :------------------------------- |
 | `refreshToken` | `string` | **Required**. Your refresh token |
+| `phoneNumber`  | `string` | **Required**. Your phone number  |
 
 Returns:
 

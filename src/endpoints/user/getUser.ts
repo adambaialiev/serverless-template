@@ -2,10 +2,11 @@ import { APIGatewayEvent, APIGatewayProxyCallback, Context } from 'aws-lambda';
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { TableKeys } from '@/common/dynamo/schema';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
+import { withAuthorization } from '@/middlewares/withAuthorization';
 
 const dynamoDB = new DynamoMainTable();
 
-export const getUser = async (
+export const handler = async (
 	event: APIGatewayEvent,
 	context: Context,
 	callback: APIGatewayProxyCallback
@@ -34,3 +35,5 @@ export const getUser = async (
 		}
 	}
 };
+
+export const getUser = withAuthorization(handler);

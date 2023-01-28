@@ -1,11 +1,11 @@
 import AWS from 'aws-sdk';
 import { sendResponse } from '@/utils/makeResponse';
-//import { TableKeys } from '@/common/dynamo/schema';
+import { withAuthorization } from '@/middlewares/withAuthorization';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.dynamo_table as string;
 
-export const getTransactions = async () => {
+export const handler = async () => {
 	try {
 		const params = {
 			TableName: tableName,
@@ -22,3 +22,5 @@ export const getTransactions = async () => {
 		return sendResponse(500, { message });
 	}
 };
+
+export const getTransactions = withAuthorization(handler);

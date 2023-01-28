@@ -2,11 +2,12 @@ import AWS from 'aws-sdk';
 import { sendResponse } from '@/utils/makeResponse';
 import { APIGatewayEvent } from 'aws-lambda';
 import { countries } from 'countries-list';
+import { withAuthorization } from '@/middlewares/withAuthorization';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.dynamo_table as string;
 
-export const getRegisteredUsers = async (event: APIGatewayEvent) => {
+export const handler = async (event: APIGatewayEvent) => {
 	try {
 		const { phoneNumbers, countryCode } = JSON.parse(event.body as string);
 
@@ -69,3 +70,5 @@ export const getRegisteredUsers = async (event: APIGatewayEvent) => {
 		return sendResponse(500, { message });
 	}
 };
+
+export const getRegisteredUsers = withAuthorization(handler);
