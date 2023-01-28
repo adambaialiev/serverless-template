@@ -11,13 +11,13 @@ aws_secret_access_key =
 ## Create your own dev domain
 
 ```
-sls create_domain --stage <wallet-dev-${your name}>
+sls create_domain --stage <wallet-${your name}-dev>
 ```
 
 ## Deploy your own dev environment
 
 ```
-yarn dev --stage <wallet-dev-${your name}>
+yarn dev --stage <wallet-${your name}-dev>
 
 Example enpoint: https://wallet-adam-dev-api.shopwalletapp.com/v1/api/shop-wallet/auth/sign-up
 ```
@@ -34,18 +34,34 @@ Example enpoint: https://wallet-adam-dev-api.shopwalletapp.com/v1/api/shop-walle
 | :------------ | :------- | :------------------------------ |
 | `phoneNumber` | `string` | **Required**. Your phone number |
 
+Returns:
+
+```
+interface SignInResponse {
+	sessionId: string;
+}
+```
+
 #### Login verify
 
 ```http
   POST <your dev URL>/auth/sign-in/verify
 ```
 
-| Parameter     | Type       | Description                                     |
-| :------------ | :--------- | :---------------------------------------------- | --------------------------------------------------------------------------- | --- |
-| `phoneNumber` | `string`   | **Required**. Your phone number                 |
-| `passCode`    | `string`   | **Required**. 555666                            |
-| <!--          | `passCode` | `string`                                        | **Required**. Your passcode that you got by SMS notification to your number | --> |
-| `session`     | `string`   | **Required**. Session you retrieved after Login |
+| Parameter     | Type     | Description                                     |
+| :------------ | :------- | :---------------------------------------------- |
+| `phoneNumber` | `string` | **Required**. Your phone number                 |
+| `otpCode`     | `string` | **Required**. 555666                            |
+| `sessionId`   | `string` | **Required**. Session you retrieved after Login |
+
+Returns:
+
+```
+interface AuthTokens {
+	accessToken: string;
+	refreshToken: string;
+}
+```
 
 #### Refresh token
 
@@ -56,3 +72,13 @@ Example enpoint: https://wallet-adam-dev-api.shopwalletapp.com/v1/api/shop-walle
 | Parameter      | Type     | Description                      |
 | :------------- | :------- | :------------------------------- |
 | `refreshToken` | `string` | **Required**. Your refresh token |
+| `phoneNumber`  | `string` | **Required**. Your phone number  |
+
+Returns:
+
+```
+interface AuthTokens {
+	accessToken: string;
+	refreshToken: string;
+}
+```

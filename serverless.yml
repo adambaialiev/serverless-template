@@ -10,19 +10,11 @@ provider:
   region: us-east-1
   profile: ${opt:stage, "dev"}
   environment:
-    user_pool_id:
-      Ref: UserPool
-    client_id:
-      Ref: UserClient
     dynamo_table:
       Ref: MainTable
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - cognito-idp:AdminInitiateAuth
-        - cognito-idp:AdminRespondToAuthChallenge
-        - cognito-idp:AdminCreateUser
-        - cognito-idp:AdminSetUserPassword
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
@@ -43,7 +35,6 @@ custom:
   prune:
     automatic: true
     number: 5
-  userPoolName: shop-wallet-users-pool-${self:provider.profile}
   customDomain:
     domainName: ${opt:stage}-api.shopwalletapp.com
     basePath: 'api'
@@ -58,15 +49,6 @@ functions:
           path: /v1/transaction
           method: post
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
 
   getTransactionByAdmin:
     handler: build/src/endpoints/transactions/getTransactionByAdmin.getTransactions
@@ -83,15 +65,7 @@ functions:
           path: /v1/transactions/{phoneNumber}
           method: get
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
+
   getTransactionsRoom:
     handler: build/src/endpoints/transactions/getTransactionsRoom.getTransactionsRoom
     events:
@@ -99,15 +73,7 @@ functions:
           path: /v1/transactions/room
           method: post
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
+
   getUser:
     handler: build/src/endpoints/user/getUser.getUser
     events:
@@ -115,15 +81,7 @@ functions:
           path: /v1/users/{phoneNumber}
           method: get
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
+
   getRegisteredUsers:
     handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
     events:
@@ -131,15 +89,6 @@ functions:
           path: /v1/users/registered
           method: post
           cors: true
-          authorizer:
-            name: PrivateAuthorizer
-            type: COGNITO_USER_POOLS
-            arn:
-              Fn::GetAtt:
-                - UserPool
-                - Arn
-            claims:
-              - email
   signIn:
     timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
@@ -167,78 +116,8 @@ functions:
           method: post
           cors: true
 
-  createAuthChallenge:
-    handler: build/src/triggers/create-auth-challenge.createAuthChallenge
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: CreateAuthChallenge
-          existing: true
-          forceDeploy: true
-
-  verifyAuthChallenge:
-    handler: build/src/triggers/verify-auth-challenge.verifyAuthChallenge
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: VerifyAuthChallengeResponse
-          existing: true
-          forceDeploy: true
-
-  defineAuthChallenge:
-    handler: build/src/triggers/define-auth-challenge.defineAuthChallenge
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: DefineAuthChallenge
-          existing: true
-          forceDeploy: true
-
-  preSignUp:
-    handler: build/src/triggers/pre-sign-up.preSignUp
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: PreSignUp
-          existing: true
-          forceDeploy: true
-
-  postSignUp:
-    handler: build/src/triggers/post-sign-up.postSignUp
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: PostConfirmation
-          existing: true
-          forceDeploy: true
-
 resources:
   Resources:
-    UserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UserPoolName: ${self:custom.userPoolName}
-        UsernameAttributes:
-          - phone_number
-        Policies:
-          PasswordPolicy:
-            RequireLowercase: false
-            RequireSymbols: false
-            RequireNumbers: false
-            MinimumLength: 6
-            RequireUppercase: false
-
-    UserClient:
-      Type: AWS::Cognito::UserPoolClient
-      Properties:
-        ClientName: shop-wallet-app-client-${self:provider.profile}
-        GenerateSecret: false
-        UserPoolId:
-          Ref: UserPool
-        ExplicitAuthFlows:
-          - 'ALLOW_CUSTOM_AUTH'
-          - 'ALLOW_REFRESH_TOKEN_AUTH'
-
     MainTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -253,7 +132,4 @@ resources:
             KeyType: HASH
           - AttributeName: SK
             KeyType: RANGE
-
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
