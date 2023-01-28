@@ -63,7 +63,7 @@ export class AuthService {
 			.update({
 				TableName,
 				Key: getUserCompositeKey(phoneNumber),
-				UpdateExpression: `SET #${UserAttributes.SESSION_ID} = :${UserAttributes.SESSION_ID} SET #${UserAttributes.OTP_CODE} = :${UserAttributes.OTP_CODE}`,
+				UpdateExpression: `SET #${UserAttributes.SESSION_ID} = :${UserAttributes.SESSION_ID}, #${UserAttributes.OTP_CODE} = :${UserAttributes.OTP_CODE}`,
 				ExpressionAttributeNames: {
 					[`#${UserAttributes.SESSION_ID}`]: UserAttributes.SESSION_ID,
 					[`#${UserAttributes.OTP_CODE}`]: UserAttributes.OTP_CODE,
