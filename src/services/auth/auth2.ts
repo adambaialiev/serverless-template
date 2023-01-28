@@ -97,24 +97,11 @@ export class AuthService {
 
 			if (verified) {
 				const accessToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
-					expiresIn: '2 days',
+					expiresIn: '1h',
 				});
-				const refreshToken = v4();
-
-				await dynamo
-					.update({
-						TableName,
-						Key: getUserCompositeKey(phoneNumber),
-						UpdateExpression: `SET #${UserAttributes.REFRESH_TOKEN} = :${UserAttributes.REFRESH_TOKEN}`,
-						ExpressionAttributeNames: {
-							[`#${UserAttributes.REFRESH_TOKEN}`]:
-								UserAttributes.REFRESH_TOKEN,
-						},
-						ExpressionAttributeValues: {
-							[`:${UserAttributes.REFRESH_TOKEN}`]: refreshToken,
-						},
-					})
-					.promise();
+				const refreshToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
+					expiresIn: '14d',
+				});
 
 				return {
 					accessToken,
@@ -128,40 +115,17 @@ export class AuthService {
 		phoneNumber: string,
 		refreshToken: string
 	): Promise<AuthTokens | undefined> {
-		const output = await dynamo
-			.get({
-				TableName,
-				Key: getUserCompositeKey(phoneNumber),
-			})
-			.promise();
-		if (output.Item) {
-			const userItem = output.Item as UserItem;
-			if (userItem.refreshToken === refreshToken) {
-				const accessToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
-					expiresIn: '2 days',
-				});
-				const refreshToken = v4();
+		jwt.verify(refreshToken, SECRET_KEY);
+		const accessToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
+			expiresIn: '1h',
+		});
+		const newRefreshToken = jwt.sign({ phoneNumber }, SECRET_KEY, {
+			expiresIn: '14d',
+		});
 
-				await dynamo
-					.update({
-						TableName,
-						Key: getUserCompositeKey(phoneNumber),
-						UpdateExpression: `SET #${UserAttributes.REFRESH_TOKEN} = :${UserAttributes.REFRESH_TOKEN}`,
-						ExpressionAttributeNames: {
-							[`#${UserAttributes.REFRESH_TOKEN}`]:
-								UserAttributes.REFRESH_TOKEN,
-						},
-						ExpressionAttributeValues: {
-							[`:${UserAttributes.REFRESH_TOKEN}`]: refreshToken,
-						},
-					})
-					.promise();
-
-				return {
-					accessToken,
-					refreshToken,
-				};
-			}
-		}
+		return {
+			accessToken,
+			refreshToken: newRefreshToken,
+		};
 	}
 }

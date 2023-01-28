@@ -1,7 +1,7 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys } from '@/common/dynamo/schema';
-import { AuthService } from '@/services/auth/auth';
+import { AuthService } from '@/services/auth/auth2';
 import { sendResponse } from '@/utils/makeResponse';
 import { APIGatewayEvent } from 'aws-lambda';
 
@@ -9,10 +9,16 @@ const authService = new AuthService();
 const dynamoDB = new DynamoMainTable();
 export const signInVerify = async (event: APIGatewayEvent) => {
 	try {
-		const { phoneNumber, passCode, session } = JSON.parse(event.body as string);
+		const { phoneNumber, otpCode, sessionId } = JSON.parse(
+			event.body as string
+		);
 		const userKey = buildUserKey(phoneNumber);
 
-		const res = await authService.verifySignIn(passCode, phoneNumber, session);
+		const res = await authService.verifySignIn({
+			phoneNumber,
+			otpCode,
+			sessionId,
+		});
 
 		const userOutput = await dynamoDB.getItem({
 			[TableKeys.PK]: userKey,

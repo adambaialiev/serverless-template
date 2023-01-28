@@ -1,4 +1,4 @@
-import { AuthService } from '@/services/auth/auth';
+import { AuthService } from '@/services/auth/auth2';
 import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
 
 const authService = new AuthService();
@@ -9,9 +9,12 @@ export const refreshTokenHandler = async (
 	callback: APIGatewayProxyCallback
 ) => {
 	try {
-		const { refreshToken } = JSON.parse(event.body as string);
+		const { refreshToken, phoneNumber } = JSON.parse(event.body as string);
 
-		const refreshTokenResponse = await authService.refreshToken(refreshToken);
+		const refreshTokenResponse = await authService.refreshToken(
+			phoneNumber,
+			refreshToken
+		);
 
 		callback(null, {
 			statusCode: 200,
