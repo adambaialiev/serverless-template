@@ -167,78 +167,8 @@ functions:
           method: post
           cors: true
 
-  createAuthChallenge:
-    handler: build/src/triggers/create-auth-challenge.createAuthChallenge
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: CreateAuthChallenge
-          existing: true
-          forceDeploy: true
-
-  verifyAuthChallenge:
-    handler: build/src/triggers/verify-auth-challenge.verifyAuthChallenge
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: VerifyAuthChallengeResponse
-          existing: true
-          forceDeploy: true
-
-  defineAuthChallenge:
-    handler: build/src/triggers/define-auth-challenge.defineAuthChallenge
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: DefineAuthChallenge
-          existing: true
-          forceDeploy: true
-
-  preSignUp:
-    handler: build/src/triggers/pre-sign-up.preSignUp
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: PreSignUp
-          existing: true
-          forceDeploy: true
-
-  postSignUp:
-    handler: build/src/triggers/post-sign-up.postSignUp
-    events:
-      - cognitoUserPool:
-          pool: ${self:custom.userPoolName}
-          trigger: PostConfirmation
-          existing: true
-          forceDeploy: true
-
 resources:
   Resources:
-    UserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UserPoolName: ${self:custom.userPoolName}
-        UsernameAttributes:
-          - phone_number
-        Policies:
-          PasswordPolicy:
-            RequireLowercase: false
-            RequireSymbols: false
-            RequireNumbers: false
-            MinimumLength: 6
-            RequireUppercase: false
-
-    UserClient:
-      Type: AWS::Cognito::UserPoolClient
-      Properties:
-        ClientName: shop-wallet-app-client-${self:provider.profile}
-        GenerateSecret: false
-        UserPoolId:
-          Ref: UserPool
-        ExplicitAuthFlows:
-          - 'ALLOW_CUSTOM_AUTH'
-          - 'ALLOW_REFRESH_TOKEN_AUTH'
-
     MainTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -253,7 +183,4 @@ resources:
             KeyType: HASH
           - AttributeName: SK
             KeyType: RANGE
-
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
