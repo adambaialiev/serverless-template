@@ -1,12 +1,12 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
-import { DynamoDB } from '@/common/dynamo/Dynamo';
+import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys, UserAttributes } from '@/common/dynamo/schema';
 import {
 	PostConfirmationTriggerEvent,
 	PostConfirmationTriggerHandler,
 } from 'aws-lambda';
 
-const dynamoDB = new DynamoDB();
+const dynamoDB = new DynamoMainTable();
 
 export const postSignUp: PostConfirmationTriggerHandler = async (
 	event: PostConfirmationTriggerEvent
@@ -24,7 +24,7 @@ export const postSignUp: PostConfirmationTriggerHandler = async (
 		[UserAttributes.UPDATED_AT]: '',
 		[UserAttributes.EMAIL]: '',
 	};
-	await dynamoDB.putItem(process.env.dynamo_table as string, params);
+	await dynamoDB.putItem(params);
 
 	return event;
 };

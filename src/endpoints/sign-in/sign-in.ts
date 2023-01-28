@@ -1,20 +1,19 @@
 import { APIGatewayEvent } from 'aws-lambda';
 import { AuthService } from '@/services/auth/auth';
-import { DynamoDB } from '@/common/dynamo/Dynamo';
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { TableKeys } from '@/common/dynamo/schema';
 import { sendResponse } from '@/utils/makeResponse';
+import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 
 const authService = new AuthService();
-const dynamoDB = new DynamoDB();
+const dynamoDB = new DynamoMainTable();
 
 export const signIn = async (event: APIGatewayEvent) => {
 	try {
 		const { phoneNumber } = JSON.parse(event.body as string);
-		const tableName = process.env.dynamo_table as string;
 		const userKey = buildUserKey(phoneNumber);
 
-		const userOutput = await dynamoDB.getItem(tableName, {
+		const userOutput = await dynamoDB.getItem({
 			[TableKeys.PK]: userKey,
 			[TableKeys.SK]: userKey,
 		});
