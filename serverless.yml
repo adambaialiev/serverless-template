@@ -10,19 +10,11 @@ provider:
   region: us-east-1
   profile: ${opt:stage, "dev"}
   environment:
-    user_pool_id:
-      Ref: UserPool
-    client_id:
-      Ref: UserClient
     dynamo_table:
       Ref: MainTable
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - cognito-idp:AdminInitiateAuth
-        - cognito-idp:AdminRespondToAuthChallenge
-        - cognito-idp:AdminCreateUser
-        - cognito-idp:AdminSetUserPassword
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:GetItem
@@ -44,7 +36,6 @@ custom:
   prune:
     automatic: true
     number: 5
-  userPoolName: shop-wallet-users-pool-${self:provider.profile}
   customDomain:
     domainName: ${opt:stage}-api.shopwalletapp.com
     basePath: 'api'
