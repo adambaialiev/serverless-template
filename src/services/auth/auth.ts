@@ -21,6 +21,7 @@ export class AuthService {
 		};
 		return cognito.adminInitiateAuth(input).promise();
 	}
+
 	async verifySignIn(code: string, phoneNumber: string, session: SessionType) {
 		const input = {
 			ClientId: poolData.ClientId,
@@ -33,6 +34,7 @@ export class AuthService {
 		};
 		return await cognito.respondToAuthChallenge(input).promise();
 	}
+
 	async signUp(phone_number: string) {
 		const input = {
 			Password: makePassword(),
@@ -41,6 +43,7 @@ export class AuthService {
 		};
 		return cognito.signUp(input).promise();
 	}
+
 	async refreshToken(refreshToken: string) {
 		const input = {
 			UserPoolId: poolData.UserPoolId,
