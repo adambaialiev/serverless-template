@@ -65,6 +65,13 @@ functions:
           path: /v1/transactions/{phoneNumber}
           method: get
           cors: true
+  createWallet:
+    handler: build/src/endpoints/wallet/createWallet.createWallet
+    events:
+      - http:
+          path: /v1/wallet
+          method: post
+          cors: true
 
   getTransactionsRoom:
     handler: build/src/endpoints/transactions/getTransactionsRoom.getTransactionsRoom

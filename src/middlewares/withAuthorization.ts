@@ -6,22 +6,23 @@ export const withAuthorization =
 	(handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
 	async (event, context, callback) => {
 		const authHeader = event.headers['Authorization'];
-		const token = authHeader.split(' ')[1];
-		console.log({ authHeader, token });
-		if (!token) {
+		if (!authHeader) {
 			return {
 				statusCode: 401,
-				body: 'No token',
+				body: 'Unauthorized',
 			};
 		}
+		const token = authHeader.split(' ')[1];
 		try {
 			jwt.verify(token, JWT_SECRET_KEY);
 			await handler(event, context, callback);
 		} catch (error: unknown) {
 			console.log({ error });
-			return {
-				statusCode: 401,
-				body: 'Not authorized',
-			};
+			if (error instanceof Error) {
+				return {
+					statusCode: 401,
+					body: error.message,
+				};
+			}
 		}
 	};

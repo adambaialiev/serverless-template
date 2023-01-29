@@ -18,6 +18,7 @@ interface VerifySignInProps {
 	phoneNumber: string;
 	otpCode: string;
 	sessionId: string;
+	user: UserItem;
 }
 
 interface AuthTokens {
@@ -25,7 +26,7 @@ interface AuthTokens {
 	refreshToken: string;
 }
 
-const getUserCompositeKey = (phoneNumber: string) => {
+export const getUserCompositeKey = (phoneNumber: string) => {
 	const userKey = buildUserKey(phoneNumber);
 	return {
 		[TableKeys.PK]: userKey,
@@ -84,32 +85,22 @@ export class AuthService {
 		phoneNumber,
 		otpCode,
 		sessionId,
+		user,
 	}: VerifySignInProps): Promise<AuthTokens | undefined> {
-		const output = await dynamo
-			.get({
-				TableName,
-				Key: getUserCompositeKey(phoneNumber),
-			})
-			.promise();
+		const verified = user.sessionId === sessionId && user.otpCode === otpCode;
 
-		if (output.Item) {
-			const userItem = output.Item as UserItem;
-			const verified =
-				userItem.sessionId === sessionId && userItem.otpCode === otpCode;
+		if (verified) {
+			const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
+				expiresIn: '1m',
+			});
+			const refreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
+				expiresIn: '14d',
+			});
 
-			if (verified) {
-				const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-					expiresIn: '1m',
-				});
-				const refreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-					expiresIn: '14d',
-				});
-
-				return {
-					accessToken,
-					refreshToken,
-				};
-			}
+			return {
+				accessToken,
+				refreshToken,
+			};
 		}
 	}
 

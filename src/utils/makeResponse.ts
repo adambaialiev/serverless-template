@@ -1,4 +1,4 @@
-export const sendResponse = (statusCode: number, body: object) => {
+export const sendResponse = (statusCode: number, body: any) => {
 	const response = {
 		statusCode: statusCode,
 		body: JSON.stringify(body),
