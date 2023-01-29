@@ -13,12 +13,12 @@ export const handler = async (
 		const output = await dynamoDb
 			.query({
 				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: 'begins_with(#pk, :pk)',
+				KeyConditionExpression: 'begins_with(#sk, :sk)',
 				ExpressionAttributeNames: {
-					'#pk': TableKeys.PK,
+					'#sk': TableKeys.SK,
 				},
 				ExpressionAttributeValues: {
-					':pk': Entities.USER,
+					':sk': Entities.USER,
 				},
 			})
 			.promise();

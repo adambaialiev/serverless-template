@@ -104,6 +104,15 @@ functions:
           path: /v1/users/registered
           method: post
           cors: true
+
+  incrementUserBalance:
+    handler: build/src/endpoints/user/incrementUserBalance.incrementUserBalance
+    events:
+      - http:
+          path: /v1/users/increment-balance
+          method: post
+          cors: true
+
   signIn:
     timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
