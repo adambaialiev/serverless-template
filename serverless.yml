@@ -89,6 +89,14 @@ functions:
           method: get
           cors: true
 
+  getAllWalletsAddresses:
+    handler: build/src/endpoints/user/getAllWalletsAddresses.getAllWalletsAddresses
+    events:
+      - http:
+          path: /v1/users/get-all-wallets-addresses
+          method: get
+          cors: true
+
   getRegisteredUsers:
     handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
     events:
