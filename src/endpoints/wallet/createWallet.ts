@@ -24,7 +24,7 @@ export const handler: APIGatewayProxyHandler = async (
 		const wallet: IWallet = {
 			privateKey: privateKey,
 			publicKey: address,
-			chain: 'goerli',
+			chain: 'mainnet',
 			network: 'erc20',
 		};
 
