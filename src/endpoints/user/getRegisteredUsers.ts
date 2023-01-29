@@ -1,13 +1,17 @@
 import AWS from 'aws-sdk';
 import { sendResponse } from '@/utils/makeResponse';
-import { APIGatewayEvent } from 'aws-lambda';
+import { APIGatewayProxyHandler } from 'aws-lambda';
 import { countries } from 'countries-list';
 import { withAuthorization } from '@/middlewares/withAuthorization';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.dynamo_table as string;
 
-export const handler = async (event: APIGatewayEvent) => {
+export const handler: APIGatewayProxyHandler = async (
+	event,
+	context,
+	callback
+) => {
 	try {
 		const { phoneNumbers, countryCode } = JSON.parse(event.body as string);
 
@@ -63,7 +67,10 @@ export const handler = async (event: APIGatewayEvent) => {
 			}
 		}
 
-		return sendResponse(200, numbersDictionary);
+		callback(null, {
+			statusCode: 200,
+			body: JSON.stringify(numbersDictionary),
+		});
 	} catch (error) {
 		console.log(error);
 		const message = error.message ? error.message : 'Internal server error';

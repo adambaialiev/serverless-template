@@ -14,17 +14,19 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 		);
 		const userKey = buildUserKey(phoneNumber);
 
-		const res = await authService.verifySignIn({
-			phoneNumber,
-			otpCode,
-			sessionId,
-		});
-
 		const userOutput = await dynamoDB.getItem({
 			[TableKeys.PK]: userKey,
 			[TableKeys.SK]: userKey,
 		});
-		if (userOutput.Item) {
+
+		const res = await authService.verifySignIn({
+			phoneNumber,
+			otpCode,
+			sessionId,
+			user: userOutput.Item as UserItem,
+		});
+
+		if (userOutput.Item && res) {
 			const user = userOutput.Item as UserItem;
 			return sendResponse(201, { ...res, user });
 		}
