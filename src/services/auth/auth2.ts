@@ -48,11 +48,13 @@ export class AuthService {
 			[UserAttributes.EMAIL]: '',
 			[UserAttributes.SESSION_ID]: v4(),
 		};
-		await dynamo.put({
-			Item,
-			TableName,
-			ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
-		});
+		await dynamo
+			.put({
+				Item,
+				TableName,
+				ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
+			})
+			.promise();
 	}
 
 	async signIn(phoneNumber: string): Promise<SignInResponse> {

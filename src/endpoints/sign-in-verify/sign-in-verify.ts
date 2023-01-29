@@ -1,6 +1,6 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
-import { TableKeys } from '@/common/dynamo/schema';
+import { TableKeys, UserItem } from '@/common/dynamo/schema';
 import { AuthService } from '@/services/auth/auth2';
 import { sendResponse } from '@/utils/makeResponse';
 import { APIGatewayEvent } from 'aws-lambda';
@@ -24,7 +24,11 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 			[TableKeys.PK]: userKey,
 			[TableKeys.SK]: userKey,
 		});
-		return sendResponse(201, { ...res, user: userOutput.Item });
+		if (userOutput.Item) {
+			const user = userOutput.Item as UserItem;
+			return sendResponse(201, { ...res, user });
+		}
+		return sendResponse(500, { message: 'user is not found' });
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			console.log({ error });
