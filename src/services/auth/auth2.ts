@@ -119,7 +119,7 @@ export class AuthService {
 	): Promise<AuthTokens | undefined> {
 		jwt.verify(refreshToken, JWT_SECRET_KEY);
 		const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-			expiresIn: '1h',
+			expiresIn: '1m',
 		});
 		const newRefreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
 			expiresIn: '14d',
