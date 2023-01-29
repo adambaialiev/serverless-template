@@ -11,9 +11,9 @@ export const handler = async (
 ) => {
 	try {
 		const output = await dynamoDb
-			.query({
+			.scan({
 				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: 'begins_with(#sk, :sk)',
+				FilterExpression: 'begins_with(#sk, :sk)',
 				ExpressionAttributeNames: {
 					'#sk': TableKeys.SK,
 				},
