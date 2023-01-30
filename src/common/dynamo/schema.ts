@@ -9,6 +9,7 @@ export enum Entities {
 	USER = 'USER#',
 	MERCHANT = 'MERCHANT#',
 	TRANSACTION = 'TRANSACTION#',
+	PRE_TRANSACTION = 'PRE_TRANSACTION#',
 	API = 'API#',
 }
 

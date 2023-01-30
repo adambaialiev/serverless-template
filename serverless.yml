@@ -23,6 +23,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:RemoveItem
+        - dynamodb:DeleteItem
         - sns:*
       Resource: '*'
 
@@ -42,6 +43,22 @@ custom:
     createRoute53Record: true
 
 functions:
+  makeMerchantTransaction:
+    handler: build/src/endpoints/merchant/preTransaction.preTransaction
+    events:
+      - http:
+          path: /v1/merchant/transaction
+          method: post
+          cors: true
+
+  ConfirmPreTransaction:
+    handler: build/src/endpoints/merchant/confirmPreTransaction.ConfirmPreTransaction
+    events:
+      - http:
+          path: /v1/users/confirm-transaction
+          method: post
+          cors: true
+
   createApiKey:
     handler: build/src/endpoints/merchant/createApiKey.createApiKey
     events:

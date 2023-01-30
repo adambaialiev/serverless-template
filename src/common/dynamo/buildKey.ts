@@ -12,3 +12,6 @@ export const buildApiKey = (api: string) => buildKey(Entities.API, api);
 
 export const buildTransactionKey = (id: string) =>
 	buildKey(Entities.TRANSACTION, id);
+
+export const buildPreTransactionKey = (id: string) =>
+	buildKey(Entities.PRE_TRANSACTION, id);

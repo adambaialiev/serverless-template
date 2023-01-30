@@ -7,6 +7,7 @@ import { APIGatewayEvent } from 'aws-lambda';
 
 const authService = new AuthService();
 const dynamoDB = new DynamoMainTable();
+
 export const signInVerify = async (event: APIGatewayEvent) => {
 	try {
 		const { phoneNumber, otpCode, sessionId } = JSON.parse(
