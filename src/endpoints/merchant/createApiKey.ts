@@ -8,7 +8,7 @@ const apiKey = new ApiKey();
 export const createApiKey = async (event: APIGatewayEvent) => {
 	const { phoneNumber } = JSON.parse(event.body as string);
 	const output = await apiKey.GetApiKey(phoneNumber);
-	if (output.Items) {
+	if (output) {
 		return sendResponse(200, { output });
 	}
 	const key = v4();

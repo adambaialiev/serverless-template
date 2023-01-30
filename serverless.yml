@@ -47,7 +47,7 @@ functions:
     handler: build/src/endpoints/merchant/preTransaction.preTransaction
     events:
       - http:
-          path: /v1/merchant/transaction
+          path: /v1/merchant/transaction/{apiKey}
           method: post
           cors: true
 

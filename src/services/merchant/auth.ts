@@ -103,7 +103,21 @@ export class AuthService {
 
 		return { sessionId };
 	}
-
+	async isMerchantKey(apiKey: string) {
+		const params = {
+			TableName,
+			Key: {
+				SK: apiKey,
+			},
+		};
+		try {
+			await dynamo.scan(params).promise();
+			return true;
+		} catch (error) {
+			console.log(error);
+			return false;
+		}
+	}
 	async refreshToken(
 		phoneNumber: string,
 		refreshToken: string
