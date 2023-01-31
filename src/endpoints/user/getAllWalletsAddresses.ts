@@ -19,8 +19,14 @@ export const handler = async (
 		const output = await dynamoDb
 			.query({
 				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: `${TableKeys.GSI1PK} = ${Entities.USER}`,
+				KeyConditionExpression: '#pk = :pk',
 				IndexName: IndexNames.GSI1,
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.GSI1PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.USER,
+				},
 			})
 			.promise();
 		console.log({ output });
@@ -29,11 +35,13 @@ export const handler = async (
 			const addresses: string[] = [];
 			users.forEach((user) => {
 				const wallets = user.wallets as IWallet[];
-				wallets.forEach((wallet) => {
-					if (wallet.network === 'erc20' && wallet.chain === 'mainnet') {
-						addresses.push(wallet.publicKey);
-					}
-				});
+				if (wallets) {
+					wallets.forEach((wallet) => {
+						if (wallet.network === 'erc20' && wallet.chain === 'mainnet') {
+							addresses.push(wallet.publicKey);
+						}
+					});
+				}
 			});
 			callback(null, {
 				statusCode: 201,

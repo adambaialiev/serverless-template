@@ -11,6 +11,9 @@ import jwt from 'jsonwebtoken';
 
 export const JWT_SECRET_KEY = "PK3q@Zek4Jb!nzS3]LY4a/bwmD7'!fy.";
 
+const ACCESS_TOKEN_EXPIRATION = '1d';
+const REFRESH_TOKEN_EXPIRATION = '14d';
+
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
@@ -98,10 +101,10 @@ export class AuthService {
 
 		if (verified) {
 			const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-				expiresIn: '1m',
+				expiresIn: ACCESS_TOKEN_EXPIRATION,
 			});
 			const refreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-				expiresIn: '14d',
+				expiresIn: REFRESH_TOKEN_EXPIRATION,
 			});
 
 			return {
@@ -117,10 +120,10 @@ export class AuthService {
 	): Promise<AuthTokens | undefined> {
 		jwt.verify(refreshToken, JWT_SECRET_KEY);
 		const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-			expiresIn: '1d',
+			expiresIn: ACCESS_TOKEN_EXPIRATION,
 		});
 		const newRefreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-			expiresIn: '14d',
+			expiresIn: REFRESH_TOKEN_EXPIRATION,
 		});
 
 		return {
