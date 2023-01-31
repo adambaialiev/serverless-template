@@ -1,5 +1,11 @@
 import { APIGatewayEvent, APIGatewayProxyCallback, Context } from 'aws-lambda';
-import { Entities, IWallet, TableKeys, UserItem } from '@/common/dynamo/schema';
+import {
+	Entities,
+	IndexNames,
+	IWallet,
+	TableKeys,
+	UserItem,
+} from '@/common/dynamo/schema';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 const dynamoDb = new DocumentClient();
@@ -11,18 +17,13 @@ export const handler = async (
 ) => {
 	try {
 		const output = await dynamoDb
-			.scan({
+			.query({
 				TableName: process.env.dynamo_table as string,
-				FilterExpression: 'begins_with(#sk, :sk)',
-				ExpressionAttributeNames: {
-					'#sk': TableKeys.SK,
-				},
-				ExpressionAttributeValues: {
-					':sk': Entities.USER,
-				},
+				KeyConditionExpression: `${TableKeys.GSI1PK} = ${Entities.USER}`,
+				IndexName: IndexNames.GSI1,
 			})
 			.promise();
-
+		console.log({ output });
 		if (output.Items) {
 			const users = output.Items as UserItem[];
 			const addresses: string[] = [];

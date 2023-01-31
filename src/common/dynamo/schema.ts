@@ -7,6 +7,10 @@ export enum TableKeys {
 	GSI1SK = 'GSI1SK',
 }
 
+export enum IndexNames {
+	GSI1 = 'GSI1',
+}
+
 export enum Entities {
 	USER = 'USER#',
 	TRANSACTION = 'TRANSACTION#',
