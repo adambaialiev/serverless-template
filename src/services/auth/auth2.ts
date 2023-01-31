@@ -1,5 +1,10 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
-import { TableKeys, UserAttributes, UserItem } from '@/common/dynamo/schema';
+import {
+	Entities,
+	TableKeys,
+	UserAttributes,
+	UserItem,
+} from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
 import jwt from 'jsonwebtoken';
@@ -40,6 +45,8 @@ export class AuthService {
 		const Item = {
 			[TableKeys.PK]: userKey,
 			[TableKeys.SK]: userKey,
+			[TableKeys.GSI1PK]: Entities.USER,
+			[TableKeys.GSI1SK]: Entities.USER,
 			[UserAttributes.FIRST_NAME]: '',
 			[UserAttributes.LAST_NAME]: '',
 			[UserAttributes.BALANCE]: 100,
