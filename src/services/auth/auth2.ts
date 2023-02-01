@@ -4,6 +4,7 @@ import {
 	TableKeys,
 	UserAttributes,
 	UserItem,
+	MerchantItem,
 } from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
