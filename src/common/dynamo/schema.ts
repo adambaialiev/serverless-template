@@ -31,6 +31,7 @@ export enum UserAttributes {
 	ACCESS_TOKEN = 'accessToken',
 	REFRESH_TOKEN = 'refreshToken',
 	WALLETS = 'wallets',
+	PUSH_TOKEN = 'pushToken',
 }
 
 export interface UserItem {
@@ -49,6 +50,7 @@ export interface UserItem {
 	[UserAttributes.ACCESS_TOKEN]: DocumentClient.String;
 	[UserAttributes.REFRESH_TOKEN]: DocumentClient.String;
 	[UserAttributes.WALLETS]: DocumentClient.ListAttributeValue;
+	[UserAttributes.PUSH_TOKEN]: DocumentClient.String;
 }
 
 export enum TransactionAttributes {
