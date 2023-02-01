@@ -32,13 +32,16 @@ export const handler = async (
 		console.log({ output });
 		if (output.Items) {
 			const users = output.Items as UserItem[];
-			const addresses: string[] = [];
+			const addresses: { address: string; phoneNumber: string }[] = [];
 			users.forEach((user) => {
 				const wallets = user.wallets as IWallet[];
 				if (wallets) {
 					wallets.forEach((wallet) => {
 						if (wallet.network === 'erc20' && wallet.chain === 'mainnet') {
-							addresses.push(wallet.publicKey);
+							addresses.push({
+								address: wallet.publicKey,
+								phoneNumber: user.phoneNumber,
+							});
 						}
 					});
 				}
