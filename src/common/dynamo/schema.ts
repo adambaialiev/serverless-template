@@ -13,7 +13,10 @@ export enum IndexNames {
 
 export enum Entities {
 	USER = 'USER#',
+	MERCHANT = 'MERCHANT#',
 	TRANSACTION = 'TRANSACTION#',
+	PRE_TRANSACTION = 'PRE_TRANSACTION#',
+	API = 'API#',
 }
 
 export interface IWallet {
@@ -37,6 +40,17 @@ export enum UserAttributes {
 	ACCESS_TOKEN = 'accessToken',
 	REFRESH_TOKEN = 'refreshToken',
 	WALLETS = 'wallets',
+}
+
+export interface MerchantItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[UserAttributes.SESSION_ID]: DocumentClient.String;
+	[UserAttributes.BALANCE]: DocumentClient.NumberAttributeValue;
+	[UserAttributes.OTP_CODE]: DocumentClient.String;
+	[UserAttributes.ACCESS_TOKEN]: DocumentClient.String;
+	[UserAttributes.REFRESH_TOKEN]: DocumentClient.String;
+	[UserAttributes.WALLETS]: DocumentClient.ListAttributeValue;
 }
 
 export interface UserItem {

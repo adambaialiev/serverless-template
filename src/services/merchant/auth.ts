@@ -1,10 +1,8 @@
-import { buildUserKey, buildMerchantKey } from '@/common/dynamo/buildKey';
+import { buildMerchantKey } from '@/common/dynamo/buildKey';
 import {
-	Entities,
+	MerchantItem,
 	TableKeys,
 	UserAttributes,
-	UserItem,
-	MerchantItem,
 } from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
@@ -12,22 +10,12 @@ import jwt from 'jsonwebtoken';
 
 export const JWT_SECRET_KEY = "PK3q@Zek4Jb!nzS3]LY4a/bwmD7'!fy.";
 
-const ACCESS_TOKEN_EXPIRATION = '1d';
-const REFRESH_TOKEN_EXPIRATION = '14d';
-
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
 
-interface SignInResponse {
+interface MerchantSignInResponse {
 	sessionId: string;
-}
-
-interface VerifySignInProps {
-	phoneNumber: string;
-	otpCode: string;
-	sessionId: string;
-	user: UserItem;
 }
 
 interface MerchantVerifySignInProps {
@@ -41,14 +29,6 @@ interface AuthTokens {
 	accessToken: string;
 	refreshToken: string;
 }
-
-export const getUserCompositeKey = (phoneNumber: string) => {
-	const userKey = buildUserKey(phoneNumber);
-	return {
-		[TableKeys.PK]: userKey,
-		[TableKeys.SK]: userKey,
-	};
-};
 
 export const getMerchantCompositeKey = (phoneNumber: string) => {
 	const merchantKey = buildMerchantKey(phoneNumber);
@@ -101,7 +81,7 @@ export class AuthService {
 			.promise();
 	}
 
-	async merchantSignIn(phoneNumber: string): Promise<SignInResponse> {
+	async merchantSignIn(phoneNumber: string): Promise<MerchantSignInResponse> {
 		const sessionId = v4();
 		const otpCode = '555666';
 
@@ -123,88 +103,31 @@ export class AuthService {
 
 		return { sessionId };
 	}
-
-	async signUp(phoneNumber: string) {
-		const userKey = buildUserKey(phoneNumber);
-		const Item = {
-			[TableKeys.PK]: userKey,
-			[TableKeys.SK]: userKey,
-			[TableKeys.GSI1PK]: Entities.USER,
-			[TableKeys.GSI1SK]: Entities.USER,
-			[UserAttributes.FIRST_NAME]: '',
-			[UserAttributes.LAST_NAME]: '',
-			[UserAttributes.BALANCE]: 100,
-			[UserAttributes.PHONE_NUMBER]: phoneNumber,
-			[UserAttributes.CREATED_AT]: Date.now().toString(),
-			[UserAttributes.UPDATED_AT]: '',
-			[UserAttributes.EMAIL]: '',
-			[UserAttributes.SESSION_ID]: v4(),
+	async isMerchantKey(apiKey: string) {
+		const params = {
+			TableName,
+			Key: {
+				SK: apiKey,
+			},
 		};
-		await dynamo
-			.put({
-				Item,
-				TableName,
-				ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
-			})
-			.promise();
-	}
-
-	async signIn(phoneNumber: string): Promise<SignInResponse> {
-		const sessionId = v4();
-		const otpCode = '555666';
-
-		await dynamo
-			.update({
-				TableName,
-				Key: getUserCompositeKey(phoneNumber),
-				UpdateExpression: `SET #${UserAttributes.SESSION_ID} = :${UserAttributes.SESSION_ID}, #${UserAttributes.OTP_CODE} = :${UserAttributes.OTP_CODE}`,
-				ExpressionAttributeNames: {
-					[`#${UserAttributes.SESSION_ID}`]: UserAttributes.SESSION_ID,
-					[`#${UserAttributes.OTP_CODE}`]: UserAttributes.OTP_CODE,
-				},
-				ExpressionAttributeValues: {
-					[`:${UserAttributes.SESSION_ID}`]: sessionId,
-					[`:${UserAttributes.OTP_CODE}`]: otpCode,
-				},
-			})
-			.promise();
-
-		return { sessionId };
-	}
-
-	async verifySignIn({
-		phoneNumber,
-		otpCode,
-		sessionId,
-		user,
-	}: VerifySignInProps): Promise<AuthTokens | undefined> {
-		const verified = user.sessionId === sessionId && user.otpCode === otpCode;
-
-		if (verified) {
-			const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-				expiresIn: ACCESS_TOKEN_EXPIRATION,
-			});
-			const refreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-				expiresIn: REFRESH_TOKEN_EXPIRATION,
-			});
-
-			return {
-				accessToken,
-				refreshToken,
-			};
+		try {
+			await dynamo.scan(params).promise();
+			return true;
+		} catch (error) {
+			console.log(error);
+			return false;
 		}
 	}
-
 	async refreshToken(
 		phoneNumber: string,
 		refreshToken: string
 	): Promise<AuthTokens | undefined> {
 		jwt.verify(refreshToken, JWT_SECRET_KEY);
 		const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-			expiresIn: ACCESS_TOKEN_EXPIRATION,
+			expiresIn: '1m',
 		});
 		const newRefreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-			expiresIn: REFRESH_TOKEN_EXPIRATION,
+			expiresIn: '14d',
 		});
 
 		return {

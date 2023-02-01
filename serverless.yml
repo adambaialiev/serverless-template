@@ -23,6 +23,7 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:RemoveItem
+        - dynamodb:DeleteItem
         - sns:*
       Resource: '*'
 
@@ -42,6 +43,30 @@ custom:
     createRoute53Record: true
 
 functions:
+  makeMerchantTransaction:
+    handler: build/src/endpoints/merchant/preTransaction.preTransaction
+    events:
+      - http:
+          path: /v1/merchant/transaction/{apiKey}
+          method: post
+          cors: true
+
+  ConfirmPreTransaction:
+    handler: build/src/endpoints/merchant/confirmPreTransaction.ConfirmPreTransaction
+    events:
+      - http:
+          path: /v1/users/confirm-transaction
+          method: post
+          cors: true
+
+  createApiKey:
+    handler: build/src/endpoints/merchant/createApiKey.createApiKey
+    events:
+      - http:
+          path: /v1/merchant/apikey
+          method: post
+          cors: true
+
   makeTransaction:
     handler: build/src/endpoints/transactions/makeTransaction.makeTransaction
     events:
@@ -65,6 +90,7 @@ functions:
           path: /v1/transactions/{phoneNumber}
           method: get
           cors: true
+
   createWallet:
     handler: build/src/endpoints/wallet/createWallet.createWallet
     events:
@@ -78,6 +104,22 @@ functions:
     events:
       - http:
           path: /v1/transactions/room
+          method: post
+          cors: true
+
+  merchantSignin:
+    handler: build/src/endpoints/merchant/sign-in.signIn
+    events:
+      - http:
+          path: /v1/merchant/sign-in
+          method: post
+          cors: true
+
+  merchantSigninVerify:
+    handler: build/src/endpoints/merchant/sign-in-verify.signInVerify
+    events:
+      - http:
+          path: /v1/merchant/sign-in-verify
           method: post
           cors: true
 

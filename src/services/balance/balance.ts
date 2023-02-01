@@ -1,4 +1,8 @@
-import { buildTransactionKey, buildUserKey } from '@/common/dynamo/buildKey';
+import {
+	buildTransactionKey,
+	buildUserKey,
+	buildPreTransactionKey,
+} from '@/common/dynamo/buildKey';
 import { TableKeys, TransactionAttributes } from '@/common/dynamo/schema';
 import { UserSlug } from '@/services/user/types';
 import AWS from 'aws-sdk';
@@ -13,6 +17,80 @@ export interface MakeTransactionProps {
 }
 
 export default class BalanceService {
+	async preTransaction(source: UserSlug, target: UserSlug, amount: number) {
+		if (Number(source.balance) < Number(amount)) {
+			return {
+				statusCode: 400,
+				body: 'you don`t have enough money',
+			};
+		}
+
+		const sourceUserKey = buildUserKey(source.phoneNumber);
+		const targetUserKey = buildUserKey(target.phoneNumber);
+
+		const sourceTransactionId = source.phoneNumber;
+		const targetTransactionId = target.phoneNumber;
+
+		console.log({
+			sourceUserKey,
+			targetUserKey,
+			sourceTransactionId,
+			targetTransactionId,
+			amount,
+			source,
+			target,
+			tableName,
+		});
+
+		const sourcePreTransactionKey = buildPreTransactionKey(sourceTransactionId);
+		const targetPreTransactionKey = buildPreTransactionKey(targetTransactionId);
+
+		const date = Date.now().toString();
+		const status = 'pending';
+
+		await dynamoDB
+			.transactWrite({
+				TransactItems: [
+					{
+						Put: {
+							Item: {
+								[TableKeys.PK]: sourceUserKey,
+								[TableKeys.SK]: sourcePreTransactionKey,
+								[TransactionAttributes.ID]: sourceTransactionId,
+								[TransactionAttributes.SOURCE]: source.phoneNumber,
+								[TransactionAttributes.TARGET]: target.phoneNumber,
+								[TransactionAttributes.AMOUNT]: amount,
+								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.STATUS]: status,
+								[TransactionAttributes.TYPE]: 'out',
+							},
+							TableName: tableName,
+							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
+					{
+						Put: {
+							Item: {
+								[TableKeys.PK]: targetUserKey,
+								[TableKeys.SK]: targetPreTransactionKey,
+								[TransactionAttributes.ID]: targetTransactionId,
+								[TransactionAttributes.SOURCE]: source.phoneNumber,
+								[TransactionAttributes.TARGET]: target.phoneNumber,
+								[TransactionAttributes.AMOUNT]: amount,
+								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.STATUS]: status,
+								[TransactionAttributes.TYPE]: 'in',
+							},
+							TableName: tableName,
+							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
+				],
+			})
+			.promise();
+		return true;
+	}
+
 	async incrementBalance(phoneNumber: string, amount: number) {
 		const userKey = buildUserKey(phoneNumber);
 		await dynamoDB
