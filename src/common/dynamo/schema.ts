@@ -3,6 +3,12 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 export enum TableKeys {
 	PK = 'PK',
 	SK = 'SK',
+	GSI1PK = 'GSI1PK',
+	GSI1SK = 'GSI1SK',
+}
+
+export enum IndexNames {
+	GSI1 = 'GSI1',
 }
 
 export enum Entities {
