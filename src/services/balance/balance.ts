@@ -91,6 +91,25 @@ export default class BalanceService {
 		return true;
 	}
 
+	async incrementBalance(phoneNumber: string, amount: number) {
+		const userKey = buildUserKey(phoneNumber);
+		await dynamoDB
+			.update({
+				TableName: tableName,
+				Key: {
+					[TableKeys.PK]: userKey,
+					[TableKeys.SK]: userKey,
+				},
+				UpdateExpression: `SET #balance = #balance + :increase`,
+				ExpressionAttributeNames: {
+					'#balance': 'balance',
+				},
+				ExpressionAttributeValues: {
+					':increase': amount,
+				},
+			})
+			.promise();
+	}
 	async getTransactions(phoneNumber: string) {
 		const userKey = buildUserKey(phoneNumber);
 

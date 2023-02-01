@@ -131,6 +131,14 @@ functions:
           method: get
           cors: true
 
+  getAllWalletsAddresses:
+    handler: build/src/endpoints/user/getAllWalletsAddresses.getAllWalletsAddresses
+    events:
+      - http:
+          path: /v1/users/get-all-wallets-addresses
+          method: get
+          cors: true
+
   getRegisteredUsers:
     handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
     events:
@@ -138,6 +146,15 @@ functions:
           path: /v1/users/registered
           method: post
           cors: true
+
+  incrementUserBalance:
+    handler: build/src/endpoints/user/incrementUserBalance.incrementUserBalance
+    events:
+      - http:
+          path: /v1/users/increment-balance
+          method: post
+          cors: true
+
   signIn:
     timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
@@ -176,9 +193,22 @@ resources:
             AttributeType: S
           - AttributeName: SK
             AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
         KeySchema:
           - AttributeName: PK
             KeyType: HASH
           - AttributeName: SK
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
