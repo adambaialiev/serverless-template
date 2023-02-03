@@ -1,18 +1,22 @@
-import { APIGatewayEvent, APIGatewayProxyCallback, Context } from 'aws-lambda';
+import { APIGatewayProxyHandler } from 'aws-lambda';
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { TableKeys } from '@/common/dynamo/schema';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
-import { withAuthorization } from '@/middlewares/withAuthorization';
+import {
+	CustomAPIGateway,
+	withAuthorization,
+} from '@/middlewares/withAuthorization';
 
 const dynamoDB = new DynamoMainTable();
 
-export const handler = async (
-	event: APIGatewayEvent,
-	context: Context,
-	callback: APIGatewayProxyCallback
+export const handler: APIGatewayProxyHandler = async (
+	event: CustomAPIGateway,
+	context,
+	callback
 ) => {
 	try {
 		const { phoneNumber } = event.pathParameters;
+		console.log('event', JSON.stringify(event, null, 2));
 
 		const userKey = buildUserKey(phoneNumber);
 

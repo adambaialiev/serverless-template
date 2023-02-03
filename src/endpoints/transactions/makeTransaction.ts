@@ -2,7 +2,6 @@ import { withAuthorization } from '@/middlewares/withAuthorization';
 import BalanceService from '@/services/balance/balance';
 import UserService from '@/services/user/user';
 import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
-
 const handler = async (
 	event: APIGatewayEvent,
 	context: Context,
