@@ -13,4 +13,5 @@ export interface UserSlug {
 	lastName: string;
 	id: string;
 	balance: string;
+	pushToken: string;
 }

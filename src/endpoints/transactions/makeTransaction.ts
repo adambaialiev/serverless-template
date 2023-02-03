@@ -1,12 +1,9 @@
 import { withAuthorization } from '@/middlewares/withAuthorization';
 import BalanceService from '@/services/balance/balance';
 import UserService from '@/services/user/user';
-import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
-const handler = async (
-	event: APIGatewayEvent,
-	context: Context,
-	callback: APIGatewayProxyCallback
-) => {
+import { APIGatewayProxyHandler } from 'aws-lambda';
+
+const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	try {
 		const { from, to, amount } = JSON.parse(event.body as string);
 
@@ -17,6 +14,7 @@ const handler = async (
 		console.log('event', JSON.stringify(event, null, 2));
 
 		const target = await userService.getSlug(to);
+
 		let balanceServiceOutput;
 		if (source && target) {
 			balanceServiceOutput = await balanceService.makeTransaction(
