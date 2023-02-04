@@ -50,7 +50,7 @@ export class AuthService {
 
 		if (verified) {
 			const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-				expiresIn: '1m',
+				expiresIn: '1d',
 			});
 			const refreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
 				expiresIn: '14d',
@@ -124,7 +124,7 @@ export class AuthService {
 	): Promise<AuthTokens | undefined> {
 		jwt.verify(refreshToken, JWT_SECRET_KEY);
 		const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
-			expiresIn: '1m',
+			expiresIn: '1d',
 		});
 		const newRefreshToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
 			expiresIn: '14d',

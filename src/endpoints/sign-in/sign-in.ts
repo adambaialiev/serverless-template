@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from 'aws-lambda';
-import { AuthService } from '@/services/auth/auth2';
+import { AuthService } from '@/services/auth/auth';
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { TableKeys } from '@/common/dynamo/schema';
 import { sendResponse } from '@/utils/makeResponse';

@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from '@/services/auth/auth2';
+import { JWT_SECRET_KEY } from '@/services/auth/auth';
 
 export const withAuthorization =
 	(handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
