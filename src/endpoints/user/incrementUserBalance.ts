@@ -17,6 +17,9 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			event.body as string
 		);
 		console.log({ phoneNumber, amount, transactionHash });
+		if (!phoneNumber || !amount || !transactionHash) {
+			throw new Error('not enough parameters');
+		}
 		const balanceService = new BalanceService();
 		const userKey = buildUserKey(phoneNumber);
 
