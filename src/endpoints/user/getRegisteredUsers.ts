@@ -1,8 +1,10 @@
 import AWS from 'aws-sdk';
 import { sendResponse } from '@/utils/makeResponse';
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { countries } from 'countries-list';
 import { withAuthorization } from '@/middlewares/withAuthorization';
+import { removeAllSpaces } from '@/utils/removeAllSpaces';
+import { addCountryCodeToNumber } from '@/utils/addCountryCodeToNumber';
+import { batchRequestedItems } from '@/utils/batchRequestedItems';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.dynamo_table as string;
@@ -16,45 +18,36 @@ export const handler: APIGatewayProxyHandler = async (
 		const { phoneNumbers, countryCode } = JSON.parse(event.body as string);
 
 		const newPhoneNumbers = phoneNumbers
-			.map((number: string) =>
-				number.replace(/\(|\)|-/g, '').replace(/\s/g, '')
-			)
-			.map((el: string) =>
-				(el.startsWith('+')
-					? el
-					: '+' +
-					  countries[countryCode as keyof typeof countries].phone +
-					  el.replace(/^./, '')
-				).replace(/[- ]/g, '')
-			);
+			.map((number: string) => removeAllSpaces(number))
+			.map((el: string) => addCountryCodeToNumber(el, countryCode));
 
-		const params = {
-			RequestItems: {
-				[tableName]: {
-					Keys: newPhoneNumbers.map((item: string) => ({
-						PK: `USER#${item}`,
-						SK: `USER#${item}`,
-					})),
-				},
-			},
-		};
-		const usersPhoneNumbersOutput = (
-			await dynamoDB.batchGet(params).promise()
-		).Responses[tableName].map((item) => item.phoneNumber);
+		const batches = batchRequestedItems(newPhoneNumbers, 100);
+		const results = [];
+
+		for (const keysBatch of batches) {
+			let Keys: any = keysBatch.map((item) => ({
+				PK: `USER#${item}`,
+				SK: `USER#${item}`,
+			}));
+			do {
+				const response = await dynamoDB
+					.batchGet({
+						RequestItems: {
+							[tableName]: { Keys },
+						},
+					})
+					.promise();
+				results.push(...response.Responses[tableName]);
+				Keys = response.UnprocessedKeys[tableName] ?? [];
+			} while (Keys.length > 0);
+		}
 
 		const numbersDictionary: Record<string, any> = {};
 
 		for (const number of phoneNumbers) {
-			const number1 = number.replace(/\(|\)|-/g, '').replace(/\s/g, '');
-			const number2 = (
-				number1.startsWith('+')
-					? number1
-					: '+' +
-					  countries[countryCode as keyof typeof countries].phone +
-					  number1.replace(/^0+/, '')
-			).replace(/[- ]/g, '');
-
-			if (usersPhoneNumbersOutput.includes(number2)) {
+			const number1 = removeAllSpaces(number);
+			const number2 = addCountryCodeToNumber(number1, countryCode);
+			if (results.map((item) => item.phoneNumber).includes(number2)) {
 				numbersDictionary[number] = {
 					registered: true,
 					internationalNumber: number2,
@@ -69,7 +62,9 @@ export const handler: APIGatewayProxyHandler = async (
 
 		callback(null, {
 			statusCode: 200,
-			body: JSON.stringify(numbersDictionary),
+			body: JSON.stringify({
+				items: numbersDictionary,
+			}),
 		});
 	} catch (error) {
 		console.log(error);
