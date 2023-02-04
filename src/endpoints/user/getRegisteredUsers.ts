@@ -16,12 +16,18 @@ export const handler: APIGatewayProxyHandler = async (
 ) => {
 	try {
 		const { phoneNumbers, countryCode } = JSON.parse(event.body as string);
+		console.log('incomingPhoneNumbers>', phoneNumbers);
+		console.log('countryCode>', countryCode);
 
 		const newPhoneNumbers = phoneNumbers
 			.map((number: string) => removeAllSpaces(number))
 			.map((el: string) => addCountryCodeToNumber(el, countryCode));
 
-		const batches = batchRequestedItems(newPhoneNumbers, 100);
+		console.log('newPhoneNumbers>', newPhoneNumbers);
+		const batches = batchRequestedItems(
+			Array.from(new Set([...newPhoneNumbers])),
+			100
+		);
 		const results = [];
 
 		for (const keysBatch of batches) {
@@ -41,8 +47,10 @@ export const handler: APIGatewayProxyHandler = async (
 				Keys = response.UnprocessedKeys[tableName] ?? [];
 			} while (Keys.length > 0);
 		}
+		console.log('results>', results);
 
 		const numbersDictionary: Record<string, any> = {};
+		console.log('results>', results);
 
 		for (const number of phoneNumbers) {
 			const number1 = removeAllSpaces(number);
@@ -59,11 +67,6 @@ export const handler: APIGatewayProxyHandler = async (
 				};
 			}
 		}
-		console.log('incomingPhoneNumbers>', phoneNumbers);
-		console.log('countryCode>', countryCode);
-		console.log('newPhoneNumbers>', newPhoneNumbers);
-		console.log('numbersDictionary>', numbersDictionary);
-		console.log('results>', results);
 
 		callback(null, {
 			statusCode: 200,
