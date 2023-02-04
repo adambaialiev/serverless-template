@@ -17,6 +17,7 @@ export enum Entities {
 	TRANSACTION = 'TRANSACTION#',
 	PRE_TRANSACTION = 'PRE_TRANSACTION#',
 	API = 'API#',
+	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
 }
 
 export interface IWallet {
@@ -81,4 +82,18 @@ export enum TransactionAttributes {
 	DATE = 'date',
 	STATUS = 'status',
 	TYPE = 'type',
+}
+
+export enum IncrementTransactionAttributes {
+	ID = 'id',
+	PHONE_NUMBER = 'phoneNumber',
+	AMOUNT = 'amount',
+}
+
+export interface IncrementTransactionItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[IncrementTransactionAttributes.ID]: DocumentClient.String;
+	[IncrementTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
+	[IncrementTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
 }

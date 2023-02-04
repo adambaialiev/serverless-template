@@ -1,6 +1,9 @@
 import BalanceService from '@/services/balance/balance';
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { buildUserKey } from '@/common/dynamo/buildKey';
+import {
+	buildIncrementTransactionKey,
+	buildUserKey,
+} from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys, UserItem } from '@/common/dynamo/schema';
 import { PushNotifications } from '@/services/pushNotifications/pushNotification';
@@ -10,8 +13,13 @@ const pushNotificationService = new PushNotifications();
 
 const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	try {
-		const { phoneNumber, amount } = JSON.parse(event.body as string);
-		console.log({ phoneNumber, amount });
+		const { phoneNumber, amount, transactionHash } = JSON.parse(
+			event.body as string
+		);
+		console.log({ phoneNumber, amount, transactionHash });
+		if (!phoneNumber || !amount || !transactionHash) {
+			throw new Error('not enough parameters');
+		}
 		const balanceService = new BalanceService();
 		const userKey = buildUserKey(phoneNumber);
 
@@ -20,7 +28,22 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			[TableKeys.SK]: userKey,
 		});
 
-		await balanceService.incrementBalance(phoneNumber, Number(amount));
+		const incrementTransactionOutput = await dynamoDB.getItem({
+			[TableKeys.PK]: buildIncrementTransactionKey(transactionHash),
+			[TableKeys.SK]: buildIncrementTransactionKey(transactionHash),
+		});
+
+		if (incrementTransactionOutput.Item) {
+			throw new Error(
+				`Increment transaction with hash ${transactionHash} already exist`
+			);
+		}
+
+		await balanceService.incrementBalance(
+			phoneNumber,
+			Number(amount),
+			transactionHash
+		);
 		if (userOutput.Item) {
 			const user = userOutput.Item as UserItem;
 			if (user.pushToken) {

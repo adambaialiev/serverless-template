@@ -2,8 +2,13 @@ import {
 	buildTransactionKey,
 	buildUserKey,
 	buildPreTransactionKey,
+	buildIncrementTransactionKey,
 } from '@/common/dynamo/buildKey';
-import { TableKeys, TransactionAttributes } from '@/common/dynamo/schema';
+import {
+	IncrementTransactionAttributes,
+	TableKeys,
+	TransactionAttributes,
+} from '@/common/dynamo/schema';
 import { UserSlug } from '@/services/user/types';
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
@@ -91,28 +96,26 @@ export default class BalanceService {
 		return true;
 	}
 
-	async incrementBalance(phoneNumber: string, amount: number) {
+	async incrementBalance(phoneNumber: string, amount: number, hash: string) {
 		const userKey = buildUserKey(phoneNumber);
 		const transactionId = v4();
 		const transactionKey = buildTransactionKey(transactionId);
+		const transactionHashKey = buildIncrementTransactionKey(hash);
 		const date = Date.now().toString();
 		await dynamoDB
 			.transactWrite({
 				TransactItems: [
 					{
-						Update: {
+						Put: {
+							Item: {
+								[TableKeys.PK]: transactionHashKey,
+								[TableKeys.SK]: transactionHashKey,
+								[IncrementTransactionAttributes.ID]: hash,
+								[IncrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
+								[IncrementTransactionAttributes.AMOUNT]: amount,
+							},
 							TableName: tableName,
-							Key: {
-								[TableKeys.PK]: userKey,
-								[TableKeys.SK]: userKey,
-							},
-							UpdateExpression: `SET #balance = #balance + :increase`,
-							ExpressionAttributeNames: {
-								'#balance': 'balance',
-							},
-							ExpressionAttributeValues: {
-								':increase': amount,
-							},
+							ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
 						},
 					},
 					{
@@ -130,6 +133,22 @@ export default class BalanceService {
 							},
 							TableName: tableName,
 							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
+					{
+						Update: {
+							TableName: tableName,
+							Key: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: userKey,
+							},
+							UpdateExpression: `SET #balance = #balance + :increase`,
+							ExpressionAttributeNames: {
+								'#balance': 'balance',
+							},
+							ExpressionAttributeValues: {
+								':increase': amount,
+							},
 						},
 					},
 				],
