@@ -93,20 +93,46 @@ export default class BalanceService {
 
 	async incrementBalance(phoneNumber: string, amount: number) {
 		const userKey = buildUserKey(phoneNumber);
+		const transactionId = v4();
+		const transactionKey = buildTransactionKey(transactionId);
+		const date = Date.now().toString();
 		await dynamoDB
-			.update({
-				TableName: tableName,
-				Key: {
-					[TableKeys.PK]: userKey,
-					[TableKeys.SK]: userKey,
-				},
-				UpdateExpression: `SET #balance = #balance + :increase`,
-				ExpressionAttributeNames: {
-					'#balance': 'balance',
-				},
-				ExpressionAttributeValues: {
-					':increase': amount,
-				},
+			.transactWrite({
+				TransactItems: [
+					{
+						Update: {
+							TableName: tableName,
+							Key: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: userKey,
+							},
+							UpdateExpression: `SET #balance = #balance + :increase`,
+							ExpressionAttributeNames: {
+								'#balance': 'balance',
+							},
+							ExpressionAttributeValues: {
+								':increase': amount,
+							},
+						},
+					},
+					{
+						Put: {
+							Item: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: transactionKey,
+								[TransactionAttributes.ID]: transactionId,
+								[TransactionAttributes.SOURCE]: phoneNumber,
+								[TransactionAttributes.TARGET]: phoneNumber,
+								[TransactionAttributes.AMOUNT]: amount,
+								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.STATUS]: '',
+								[TransactionAttributes.TYPE]: 'deposit',
+							},
+							TableName: tableName,
+							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
+				],
 			})
 			.promise();
 	}
