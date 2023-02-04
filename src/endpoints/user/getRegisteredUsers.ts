@@ -59,6 +59,11 @@ export const handler: APIGatewayProxyHandler = async (
 				};
 			}
 		}
+		console.log('incomingPhoneNumbers>', phoneNumbers);
+		console.log('countryCode>', countryCode);
+		console.log('newPhoneNumbers>', newPhoneNumbers);
+		console.log('numbersDictionary>', numbersDictionary);
+		console.log('results>', results);
 
 		callback(null, {
 			statusCode: 200,
