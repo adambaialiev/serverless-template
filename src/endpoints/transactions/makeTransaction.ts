@@ -1,7 +1,10 @@
 import { withAuthorization } from '@/middlewares/withAuthorization';
 import BalanceService from '@/services/balance/balance';
+import { PushNotifications } from '@/services/pushNotifications/pushNotification';
 import UserService from '@/services/user/user';
 import { APIGatewayProxyHandler } from 'aws-lambda';
+
+const pushNotificationService = new PushNotifications();
 
 const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	try {
@@ -21,6 +24,13 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 				source,
 				target,
 				Number(amount)
+			);
+		}
+		if (target.pushToken) {
+			await pushNotificationService.send(
+				target.pushToken,
+				'Shop wallet',
+				`You recieved ${amount} USDT`
 			);
 		}
 
