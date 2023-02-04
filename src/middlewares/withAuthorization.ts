@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET_KEY } from '@/services/auth/auth2';
+import { JWT_SECRET_KEY } from '@/services/auth/auth';
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys } from '@/common/dynamo/schema';

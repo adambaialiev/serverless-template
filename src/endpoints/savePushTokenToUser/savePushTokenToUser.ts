@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { getUserCompositeKey } from '@/services/auth/auth2';
+import { getUserCompositeKey } from '@/services/auth/auth';
 import { UserAttributes } from '@/common/dynamo/schema';
 import { withAuthorization } from '@/middlewares/withAuthorization';
 

@@ -1,7 +1,7 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys, UserItem } from '@/common/dynamo/schema';
-import { AuthService } from '@/services/auth/auth2';
+import { AuthService } from '@/services/auth/auth';
 import { sendResponse } from '@/utils/makeResponse';
 import { APIGatewayEvent } from 'aws-lambda';
 

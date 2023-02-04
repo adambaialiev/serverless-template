@@ -2,7 +2,7 @@ import { IWallet, UserAttributes } from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { CryptoWeb3Service } from '@/services/crypto/crypto-web3';
-import { getUserCompositeKey } from '@/services/auth/auth2';
+import { getUserCompositeKey } from '@/services/auth/auth';
 import { sendResponse } from '@/utils/makeResponse';
 import { withAuthorization } from '@/middlewares/withAuthorization';
 
