@@ -1,11 +1,12 @@
 import BalanceService from '@/services/balance/balance';
-import { httpsPost } from '@/utils/httpPost';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys } from '@/common/dynamo/schema';
+import { PushNotifications } from '@/services/pushNotifications/pushNotification';
 
 const dynamoDB = new DynamoMainTable();
+const pushNotificationService = new PushNotifications();
 
 const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	try {
@@ -21,19 +22,11 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 
 		await balanceService.incrementBalance(phoneNumber, Number(amount));
 
-		httpsPost({
-			hostname: 'exp.host',
-			path: '/--/api/v2/push/send',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				to: userOutput.Item.pushToken,
-				title: `Shop wallet`,
-				sound: 'default',
-				body: `You recieved ${amount} USDT`,
-			}),
-		});
+		await pushNotificationService.send(
+			userOutput.Item.pushToken,
+			'Shop wallet',
+			`You recieved ${amount} USDT`
+		);
 
 		callback(null, {
 			statusCode: 201,
