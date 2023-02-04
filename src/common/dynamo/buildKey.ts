@@ -15,3 +15,6 @@ export const buildTransactionKey = (id: string) =>
 
 export const buildPreTransactionKey = (id: string) =>
 	buildKey(Entities.PRE_TRANSACTION, id);
+
+export const buildIncrementTransactionKey = (hash: string) =>
+	buildKey(Entities.INCREMENT_TRANSACTION, hash);
