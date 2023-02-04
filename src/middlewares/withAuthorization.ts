@@ -1,10 +1,26 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET_KEY } from '@/services/auth/auth';
+import { buildUserKey } from '@/common/dynamo/buildKey';
+import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
+import { TableKeys } from '@/common/dynamo/schema';
+import { UserItem } from '../common/dynamo/schema';
+
+export interface JwtPayload {
+	phoneNumber: string;
+}
+
+interface IAPIGatewayEvent {
+	user: UserItem;
+}
+
+export type CustomAPIGateway = APIGatewayProxyEvent & IAPIGatewayEvent;
+
+const dynamoDB = new DynamoMainTable();
 
 export const withAuthorization =
 	(handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
-	async (event, context, callback) => {
+	async (event: CustomAPIGateway, context, callback) => {
 		const authHeader = event.headers['Authorization'];
 		if (!authHeader) {
 			return {
@@ -14,7 +30,14 @@ export const withAuthorization =
 		}
 		const token = authHeader.split(' ')[1];
 		try {
-			jwt.verify(token, JWT_SECRET_KEY);
+			const decoded = jwt.verify(token, JWT_SECRET_KEY) as JwtPayload;
+			const userKey = buildUserKey(decoded.phoneNumber);
+
+			const userOutput = await dynamoDB.getItem({
+				[TableKeys.PK]: userKey,
+				[TableKeys.SK]: userKey,
+			});
+			event.user = userOutput.Item as UserItem;
 			await handler(event, context, callback);
 		} catch (error: unknown) {
 			console.log({ error });
