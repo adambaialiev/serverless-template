@@ -16,14 +16,14 @@ export const handler: APIGatewayProxyHandler = async (
 ) => {
 	try {
 		const { phoneNumbers, countryCode } = JSON.parse(event.body as string);
-		console.log('incomingPhoneNumbers>', phoneNumbers);
-		console.log('countryCode>', countryCode);
+		console.log('incomingPhoneNumbers>', JSON.stringify(phoneNumbers, null, 2));
+		console.log('countryCode>', JSON.stringify(countryCode, null, 2));
 
 		const newPhoneNumbers = phoneNumbers
 			.map((number: string) => removeAllSpaces(number))
 			.map((el: string) => addCountryCodeToNumber(el, countryCode));
 
-		console.log('newPhoneNumbers>', newPhoneNumbers);
+		console.log('newPhoneNumbers>', JSON.stringify(newPhoneNumbers, null, 2));
 		const batches = batchRequestedItems(
 			Array.from(new Set([...newPhoneNumbers])),
 			100
@@ -47,10 +47,10 @@ export const handler: APIGatewayProxyHandler = async (
 				Keys = response.UnprocessedKeys[tableName] ?? [];
 			} while (Keys.length > 0);
 		}
-		console.log('results>', results);
+		console.log('results>', JSON.stringify(results, null, 2));
 
 		const numbersDictionary: Record<string, any> = {};
-		console.log('results>', results);
+		console.log('results>', JSON.stringify(results, null, 2));
 
 		for (const number of phoneNumbers) {
 			const number1 = removeAllSpaces(number);
@@ -68,6 +68,10 @@ export const handler: APIGatewayProxyHandler = async (
 			}
 		}
 
+		console.log(
+			'numbersDictionary>',
+			JSON.stringify(numbersDictionary, null, 2)
+		);
 		callback(null, {
 			statusCode: 200,
 			body: JSON.stringify({
