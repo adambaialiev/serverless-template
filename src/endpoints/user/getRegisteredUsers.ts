@@ -28,6 +28,7 @@ export const handler: APIGatewayProxyHandler = async (
 			Array.from(new Set([...newPhoneNumbers])),
 			100
 		);
+		console.log('batches>', JSON.stringify(batches, null, 2));
 		const results = [];
 
 		for (const keysBatch of batches) {
