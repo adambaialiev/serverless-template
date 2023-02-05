@@ -98,6 +98,13 @@ functions:
           path: /v1/wallet
           method: post
           cors: true
+  withdraw:
+    handler: build/src/endpoints/withdraw/withdraw.withdraw
+    events:
+      - http:
+          path: /v1/withdraw
+          method: post
+          cors: true
 
   savePushTokenToUser:
     handler: build/src/endpoints/savePushTokenToUser/savePushTokenToUser.savePushTokenToUser
