@@ -37,7 +37,7 @@ export const handler = async (
 				const wallets = user.wallets as IWallet[];
 				if (wallets) {
 					wallets.forEach((wallet) => {
-						if (wallet.network === 'erc20' && wallet.chain === 'mainnet') {
+						if (wallet.network === 'polygon' && wallet.chain === 'mainnet') {
 							addresses.push({
 								address: wallet.publicKey,
 								phoneNumber: user.phoneNumber,
