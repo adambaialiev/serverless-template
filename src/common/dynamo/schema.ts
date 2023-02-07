@@ -23,7 +23,7 @@ export enum Entities {
 export interface IWallet {
 	publicKey: string;
 	privateKey: string;
-	network: 'erc20' | 'trc20';
+	network: 'erc20' | 'trc20' | 'polygon';
 	chain: 'goerli' | 'mainnet';
 }
 

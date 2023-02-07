@@ -3,7 +3,7 @@ import { contractAbi } from '../crypto/constants';
 
 const web3 = new Web3(
 	new Web3.providers.HttpProvider(
-		'https://goerli.infura.io/v3/49dfcdb7a3254aaab0ff651e6d0ed870'
+		'https://polygon-mainnet.infura.io/v3/49dfcdb7a3254aaab0ff651e6d0ed870'
 	)
 );
 

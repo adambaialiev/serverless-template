@@ -25,7 +25,7 @@ export const handler: APIGatewayProxyHandler = async (
 			privateKey: privateKey,
 			publicKey: address,
 			chain: 'mainnet',
-			network: 'erc20',
+			network: 'polygon',
 		};
 
 		const params = {
