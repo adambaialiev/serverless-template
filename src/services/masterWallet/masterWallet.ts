@@ -35,7 +35,15 @@ export default class MasterWallet {
 		}
 	}
 
-	async moveFundsToMasterWallet(phoneNumber: string) {
+	async touchUserWallet() {
+		//
+	}
+
+	async moveFundsToMasterWallet(
+		phoneNumber: string,
+		amount: string,
+		publicAddress: string
+	) {
 		const userKey = buildUserKey(phoneNumber);
 		const userOutput = await dynamo
 			.get({
@@ -55,5 +63,9 @@ export default class MasterWallet {
 				}
 			}
 		}
+	}
+
+	async withdraw() {
+		//
 	}
 }

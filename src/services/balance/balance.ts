@@ -1,9 +1,9 @@
 import {
 	buildTransactionKey,
 	buildUserKey,
-	buildPreTransactionKey,
 	buildIncrementTransactionKey,
 } from '@/common/dynamo/buildKey';
+import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import {
 	IncrementTransactionAttributes,
 	TableKeys,
@@ -14,6 +14,7 @@ import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
+const dynamo = new DynamoMainTable();
 const tableName = process.env.dynamo_table as string;
 
 export interface MakeTransactionProps {
@@ -22,81 +23,15 @@ export interface MakeTransactionProps {
 }
 
 export default class BalanceService {
-	async preTransaction(source: UserSlug, target: UserSlug, amount: number) {
-		if (Number(source.balance) < Number(amount)) {
-			return {
-				statusCode: 400,
-				body: 'you don`t have enough money',
-			};
-		}
-
-		const sourceUserKey = buildUserKey(source.phoneNumber);
-		const targetUserKey = buildUserKey(target.phoneNumber);
-
-		const sourceTransactionId = source.phoneNumber;
-		const targetTransactionId = target.phoneNumber;
-
-		console.log({
-			sourceUserKey,
-			targetUserKey,
-			sourceTransactionId,
-			targetTransactionId,
-			amount,
-			source,
-			target,
-			tableName,
+	async incrementBalance(phoneNumber: string, amount: number, hash: string) {
+		const incrementTransactionOutput = await dynamo.getItem({
+			[TableKeys.PK]: buildIncrementTransactionKey(hash),
+			[TableKeys.SK]: buildIncrementTransactionKey(hash),
 		});
 
-		const sourcePreTransactionKey = buildPreTransactionKey(sourceTransactionId);
-		const targetPreTransactionKey = buildPreTransactionKey(targetTransactionId);
-
-		const date = Date.now().toString();
-		const status = 'pending';
-
-		await dynamoDB
-			.transactWrite({
-				TransactItems: [
-					{
-						Put: {
-							Item: {
-								[TableKeys.PK]: sourceUserKey,
-								[TableKeys.SK]: sourcePreTransactionKey,
-								[TransactionAttributes.ID]: sourceTransactionId,
-								[TransactionAttributes.SOURCE]: source.phoneNumber,
-								[TransactionAttributes.TARGET]: target.phoneNumber,
-								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.DATE]: date,
-								[TransactionAttributes.STATUS]: status,
-								[TransactionAttributes.TYPE]: 'out',
-							},
-							TableName: tableName,
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-					{
-						Put: {
-							Item: {
-								[TableKeys.PK]: targetUserKey,
-								[TableKeys.SK]: targetPreTransactionKey,
-								[TransactionAttributes.ID]: targetTransactionId,
-								[TransactionAttributes.SOURCE]: source.phoneNumber,
-								[TransactionAttributes.TARGET]: target.phoneNumber,
-								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.DATE]: date,
-								[TransactionAttributes.STATUS]: status,
-								[TransactionAttributes.TYPE]: 'in',
-							},
-							TableName: tableName,
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-				],
-			})
-			.promise();
-		return true;
-	}
-
-	async incrementBalance(phoneNumber: string, amount: number, hash: string) {
+		if (incrementTransactionOutput.Item) {
+			throw new Error(`Increment transaction with hash ${hash} already exist`);
+		}
 		const userKey = buildUserKey(phoneNumber);
 		const transactionId = v4();
 		const transactionKey = buildTransactionKey(transactionId);

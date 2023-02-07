@@ -169,11 +169,19 @@ functions:
           method: post
           cors: true
 
-  incrementUserBalance:
-    handler: build/src/endpoints/user/incrementUserBalance.incrementUserBalance
+  moveFundsToMasterWallet:
+    handler: build/src/endpoints/wallet/moveFundsToMasterWallet.moveFundsToMasterWallet
     events:
       - http:
-          path: /v1/users/increment-balance
+          path: /v1/move-funds-to-master-wallet
+          method: post
+          cors: true 
+
+  deposit:
+    handler: build/src/endpoints/wallet/deposit.deposit
+    events:
+      - http:
+          path: /v1/deposit
           method: post
           cors: true
 
