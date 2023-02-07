@@ -1,3 +1,10 @@
+export interface IWallet {
+	publicKey: string;
+	privateKey: string;
+	network: 'erc20' | 'trc20' | 'polygon';
+	chain: 'goerli' | 'mainnet';
+}
+
 export interface User {
 	phoneNumber: string;
 	firstName: string;
@@ -5,6 +12,7 @@ export interface User {
 	createdAt: string;
 	updatedAt: string;
 	balance: number;
+	wallets: IWallet[];
 }
 
 export interface UserSlug {

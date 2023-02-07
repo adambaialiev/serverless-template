@@ -7,6 +7,7 @@ import {
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys, UserItem } from '@/common/dynamo/schema';
 import { PushNotifications } from '@/services/pushNotifications/pushNotification';
+import { CryptoService } from '@/services/crypto/crypto';
 
 const dynamoDB = new DynamoMainTable();
 const pushNotificationService = new PushNotifications();
@@ -21,6 +22,8 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			throw new Error('not enough parameters');
 		}
 		const balanceService = new BalanceService();
+		const cryptoService = new CryptoService();
+
 		const userKey = buildUserKey(phoneNumber);
 
 		const userOutput = await dynamoDB.getItem({
@@ -55,7 +58,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			}
 		}
 
-		sendFundsToMasterWallet();
+		cryptoService.sendFundsToMasterWallet();
 
 		callback(null, {
 			statusCode: 201,

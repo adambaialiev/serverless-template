@@ -1,15 +1,7 @@
-import { IWallet, UserAttributes } from '@/common/dynamo/schema';
-import AWS from 'aws-sdk';
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { CryptoWeb3Service } from '@/services/crypto/crypto-web3';
-import { getUserCompositeKey } from '@/services/auth/auth';
 import { sendResponse } from '@/utils/makeResponse';
 import { withAuthorization } from '@/middlewares/withAuthorization';
-
-const cryptoService = new CryptoWeb3Service();
-const dynamo = new AWS.DynamoDB.DocumentClient();
-
-const TableName = process.env.dynamo_table as string;
+import MasterWallet from '@/services/masterWallet/masterWallet';
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -19,28 +11,7 @@ export const handler: APIGatewayProxyHandler = async (
 	try {
 		const { phoneNumber, amount, publicAddress } = JSON.parse(event.body);
 
-		const { privateKey, address } = cryptoService.createCryptoWallet();
-
-		const wallet: IWallet = {
-			privateKey: privateKey,
-			publicKey: address,
-			chain: 'mainnet',
-			network: 'polygon',
-		};
-
-		const params = {
-			TableName,
-			Key: getUserCompositeKey(phoneNumber),
-			UpdateExpression: `SET #wallets = :wallets`,
-			ExpressionAttributeNames: {
-				'#wallets': UserAttributes.WALLETS,
-			},
-			ExpressionAttributeValues: {
-				':wallets': [wallet],
-			},
-		};
-
-		await dynamo.update(params).promise();
+		const masterWalletService = await new MasterWallet();
 
 		callback(null, {
 			statusCode: 201,

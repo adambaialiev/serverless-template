@@ -1,5 +1,13 @@
+import { UserAttributes } from '@/common/dynamo/schema';
+import { getUserCompositeKey } from '@/services/auth/auth';
+import { contractAbi } from '@/services/crypto/contractAbi';
+import { IWallet } from '@/services/user/types';
+import AWS from 'aws-sdk';
 import Web3 from 'web3';
-import { contractAbi } from '../crypto/constants';
+
+const dynamo = new AWS.DynamoDB.DocumentClient();
+
+const TableName = process.env.dynamo_table as string;
 
 const web3 = new Web3(
 	new Web3.providers.HttpProvider(
@@ -7,12 +15,35 @@ const web3 = new Web3(
 	)
 );
 
-class CryptoWeb3Service {
-	createCryptoWallet() {
+export class CryptoService {
+	async createCryptoWallet(phoneNumber: string) {
 		const account = web3.eth.accounts.create(web3.utils.randomHex(32));
 		web3.eth.accounts.wallet.add(account);
 		console.log(account);
-		return account;
+		const wallet: IWallet = {
+			privateKey: account.privateKey,
+			publicKey: account.address,
+			chain: 'mainnet',
+			network: 'polygon',
+		};
+
+		const params = {
+			TableName,
+			Key: getUserCompositeKey(phoneNumber),
+			UpdateExpression: `SET #wallets = :wallets`,
+			ExpressionAttributeNames: {
+				'#wallets': UserAttributes.WALLETS,
+			},
+			ExpressionAttributeValues: {
+				':wallets': [wallet],
+			},
+		};
+
+		await dynamo.update(params).promise();
+	}
+
+	sendFundsToMasterWallet() {
+		//
 	}
 
 	async makeTransaction(
@@ -64,56 +95,6 @@ class CryptoWeb3Service {
 				gasLimit: 21560,
 				gas: 128028,
 			});
-		// console.log('hash --->', transaction);
 		return transaction;
 	}
-
-	watchTransactions(contractAddress: string, targetPublicKey: string) {
-		const web3 = new Web3(
-			new Web3.providers.WebsocketProvider(
-				'wss://goerli.infura.io/ws/v3/49dfcdb7a3254aaab0ff651e6d0ed870'
-			)
-		);
-		const tokenContract = new web3.eth.Contract(contractAbi, contractAddress);
-		const options = {
-			filter: {
-				_to: targetPublicKey,
-			},
-			fromBlock: 'latest',
-		};
-		console.log(options);
-		// tokenContract.events.Transfer(options, (error: any, event: any) => {
-		// 	if (error) {
-		// 		console.log('error', error);
-		// 	}
-		// 	console.log('event ---->', event);
-		// });
-		tokenContract.events
-			.Transfer(() => {
-				//
-			})
-			.on('connected', (subscriptionId: any) => {
-				console.log({ subscriptionId });
-			})
-			.on('data', (dataEvent: any) => {
-				console.log({ dataEvent }, dataEvent.to);
-			})
-			.on('changed', (changedEvent: any) => {
-				console.log({ changedEvent });
-			});
-	}
 }
-
-// const cryptoService = new CryptoWeb3Service();
-// cryptoService.watchTransactions(
-// 	'0x56705db9f87c8a930ec87da0d458e00a657fccb0',
-// 	'0xb5A59D7AbAD4f5aa0c95FD799C17985ed8b3bb5e'
-// );
-// cryptoService.sendERC20Transaction(
-// 	'0xC7E966B2b80738458ddF304D586058E900a4C25b',
-// 	'0xb5A59D7AbAD4f5aa0c95FD799C17985ed8b3bb5e',
-// 	'0x997ac31ca6c895d405287e2a2eed95de7e1093e373ba93844f6c95744f821333',
-// 	0
-// );
-
-export { CryptoWeb3Service };

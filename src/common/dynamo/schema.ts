@@ -15,13 +15,19 @@ export enum Entities {
 	USER = 'USER#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
+	MASTER_WALLET = 'MASTER_WALLET',
+	MASTER_WALLET_TRANSACTION = 'MASTER_WALLET_TRANSACTION#',
 }
 
-export interface IWallet {
-	publicKey: string;
-	privateKey: string;
-	network: 'erc20' | 'trc20' | 'polygon';
-	chain: 'goerli' | 'mainnet';
+export enum MasterWalletTransactionAttributes {
+	ID = 'id',
+	AMOUNT = 'amount',
+	FROM = 'from',
+	TO = 'to',
+	TRANSACTION_HASH = 'transactionHash',
+	STATUS = 'status',
+	TYPE = 'type',
+	NETWORK = 'network',
 }
 
 export enum UserAttributes {
@@ -39,6 +45,29 @@ export enum UserAttributes {
 	REFRESH_TOKEN = 'refreshToken',
 	WALLETS = 'wallets',
 	PUSH_TOKEN = 'pushToken',
+}
+
+export enum MasterWalletAttributes {
+	BALANCE = 'balance',
+}
+
+export interface MasterWalletItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[UserAttributes.BALANCE]: DocumentClient.NumberAttributeValue;
+}
+
+export interface MasterWalletTransactionItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[MasterWalletTransactionAttributes.ID]: DocumentClient.String;
+	[MasterWalletTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
+	[MasterWalletTransactionAttributes.FROM]: DocumentClient.String;
+	[MasterWalletTransactionAttributes.TO]: DocumentClient.String;
+	[MasterWalletTransactionAttributes.TRANSACTION_HASH]: DocumentClient.String;
+	[MasterWalletTransactionAttributes.STATUS]: DocumentClient.String;
+	[MasterWalletTransactionAttributes.TYPE]: DocumentClient.String;
+	[MasterWalletTransactionAttributes.NETWORK]: DocumentClient.String;
 }
 
 export interface UserItem {
