@@ -55,6 +55,8 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			}
 		}
 
+		sendFundsToMasterWallet();
+
 		callback(null, {
 			statusCode: 201,
 			body: JSON.stringify(true),

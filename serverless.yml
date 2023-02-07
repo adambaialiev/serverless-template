@@ -177,6 +177,14 @@ functions:
           method: post
           cors: true
 
+  withdraw:
+    handler: build/src/endpoints/withdraw
+    events:
+      - http:
+          path: /v1/withdraw
+          method: post
+          cors: true
+
   signIn:
     timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
