@@ -78,7 +78,7 @@ export interface IMasterWalletTransaction {
 	from: string;
 	to: string;
 	status: 'pending' | 'success';
-	type: 'home' | 'touch';
+	type: 'home' | 'touch' | 'withdraw';
 	network: 'polygon';
 	userPhoneNumber: string;
 }
