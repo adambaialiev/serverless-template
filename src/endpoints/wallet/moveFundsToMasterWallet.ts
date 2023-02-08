@@ -9,15 +9,11 @@ export const handler: APIGatewayProxyHandler = async (
 	callback
 ) => {
 	try {
-		const { phoneNumber, amount, publicAddress } = JSON.parse(event.body);
+		const { phoneNumber, amount } = JSON.parse(event.body);
 
-		const masterWalletService = await new MasterWallet();
+		const masterWallet = await new MasterWallet();
 
-		await masterWalletService.moveFundsToMasterWallet(
-			phoneNumber,
-			amount,
-			publicAddress
-		);
+		await masterWallet.moveFundsToMasterWallet(phoneNumber, amount);
 
 		callback(null, {
 			statusCode: 201,

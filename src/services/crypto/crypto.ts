@@ -1,6 +1,7 @@
 import { UserAttributes } from '@/common/dynamo/schema';
 import { getUserCompositeKey } from '@/services/auth/auth';
 import { contractAbi } from '@/services/crypto/contractAbi';
+import MasterWallet from '@/services/masterWallet/masterWallet';
 import { IWallet } from '@/services/user/types';
 import AWS from 'aws-sdk';
 import Web3 from 'web3';
@@ -42,59 +43,62 @@ export class CryptoService {
 		await dynamo.update(params).promise();
 	}
 
-	sendFundsToMasterWallet() {
-		//
-	}
-
-	async makeTransaction(
-		sourcePublicKey: string,
-		targetPublicKey: string,
-		sourcePrivateKey: string
-	) {
-		const nonce = await web3.eth.getTransactionCount(sourcePublicKey, 'latest');
-		const transaction = {
-			to: targetPublicKey,
-			value: web3.utils.toWei('.000001', 'ether'),
-			gas: '128028',
-			gasPrice: web3.utils.toWei('0.00000002', 'ether'),
-			nonce: nonce,
-		};
-		const signedTx = await web3.eth.accounts.signTransaction(
-			transaction,
-			sourcePrivateKey
+	async sendMaticToAddress(publicKey: string, amount: string) {
+		const masterWalletService = new MasterWallet();
+		const masterWallet = await masterWalletService.getMasterWallet();
+		if (!masterWallet) {
+			return;
+		}
+		const signer = web3.eth.accounts.privateKeyToAccount(
+			masterWallet.privateKey
 		);
-		web3.eth.sendSignedTransaction(signedTx.rawTransaction, (error, hash) => {
-			if (!error) {
-				console.log(
-					'🎉 The hash of your transaction is: ',
-					hash,
-					"\n Check Alchemy's Mempool to view the status of your transaction!"
-				);
-			} else {
-				console.log(
-					'❗Something went wrong while submitting your transaction:',
-					error
-				);
-			}
+		web3.eth.accounts.wallet.add(signer);
+		// Creating the transaction object
+		const tx = {
+			from: signer.address,
+			to: publicKey,
+			value: web3.utils.toWei(amount),
+			gas: 0,
+		};
+		// Assigning the right amount of gas
+		tx.gas = await web3.eth.estimateGas(tx);
+
+		const transactionHash = await new Promise<string | undefined>((resolve) => {
+			// Sending the transaction to the network
+			web3.eth.sendTransaction(tx).once('transactionHash', (txhash) => {
+				console.log(`Mining transaction ...`);
+				console.log(`Transaction hash: ${txhash}`);
+				resolve(txhash);
+			});
 		});
+		return transactionHash;
 	}
 
-	async sendERC20Transaction(
+	async makePolygonUsdtTransactionToMasterWallet(
+		privateKey: string,
 		sourcePublicKey: string,
-		targetPublicKey: string,
-		sourcePrivateKey: string,
-		amount: number
+		amount: string
 	) {
-		const contractAddress = '0x56705db9f87c8a930ec87da0d458e00a657fccb0';
-		web3.eth.accounts.wallet.add(sourcePrivateKey);
-		const tokenContract = new web3.eth.Contract(contractAbi, contractAddress);
-		const transaction = await tokenContract.methods
-			.transfer(targetPublicKey, amount)
-			.send({
-				from: sourcePublicKey,
-				gasLimit: 21560,
-				gas: 128028,
+		const masterWalletService = new MasterWallet();
+		const masterWallet = await masterWalletService.getMasterWallet();
+		if (masterWallet) {
+			const signer = web3.eth.accounts.privateKeyToAccount(privateKey);
+			web3.eth.accounts.wallet.add(signer);
+			const contractAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
+
+			const contract = new web3.eth.Contract(contractAbi, contractAddress);
+
+			const hash = await new Promise<string | undefined>((resolve) => {
+				contract.methods
+					.transfer(sourcePublicKey, amount)
+					.send({ from: signer.address })
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					.on('transactionHash', (hash: any) => {
+						console.log({ hash });
+						resolve(hash);
+					});
 			});
-		return transaction;
+			return hash;
+		}
 	}
 }

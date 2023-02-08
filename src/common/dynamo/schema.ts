@@ -24,7 +24,6 @@ export enum MasterWalletTransactionAttributes {
 	AMOUNT = 'amount',
 	FROM = 'from',
 	TO = 'to',
-	TRANSACTION_HASH = 'transactionHash',
 	STATUS = 'status',
 	TYPE = 'type',
 	NETWORK = 'network',
@@ -49,12 +48,16 @@ export enum UserAttributes {
 
 export enum MasterWalletAttributes {
 	BALANCE = 'balance',
+	PUBLIC_ADDRESS = 'publicAddress',
+	PRIVATE_KEY = 'privateKey',
 }
 
 export interface MasterWalletItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
-	[UserAttributes.BALANCE]: DocumentClient.NumberAttributeValue;
+	[MasterWalletAttributes.BALANCE]: DocumentClient.NumberAttributeValue;
+	[MasterWalletAttributes.PUBLIC_ADDRESS]: DocumentClient.String;
+	[MasterWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
 }
 
 export interface MasterWalletTransactionItem {
@@ -64,10 +67,19 @@ export interface MasterWalletTransactionItem {
 	[MasterWalletTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
 	[MasterWalletTransactionAttributes.FROM]: DocumentClient.String;
 	[MasterWalletTransactionAttributes.TO]: DocumentClient.String;
-	[MasterWalletTransactionAttributes.TRANSACTION_HASH]: DocumentClient.String;
 	[MasterWalletTransactionAttributes.STATUS]: DocumentClient.String;
 	[MasterWalletTransactionAttributes.TYPE]: DocumentClient.String;
 	[MasterWalletTransactionAttributes.NETWORK]: DocumentClient.String;
+}
+
+export interface IMasterWalletTransaction {
+	id: string;
+	amount: number;
+	from: string;
+	to: string;
+	status: 'pending' | 'success';
+	type: 'home' | 'touch';
+	network: 'polygon';
 }
 
 export interface UserItem {

@@ -2,6 +2,7 @@ import BalanceService from '@/services/balance/balance';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { PushNotifications } from '@/services/pushNotifications/pushNotification';
 import MasterWallet from '@/services/masterWallet/masterWallet';
+import UserService from '@/services/user/user';
 
 const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	try {
@@ -28,7 +29,15 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			`You recieved ${amount} USDT`
 		);
 
-		await masterWallet.touchUserWallet();
+		const userService = new UserService();
+		const user = await userService.getUser(phoneNumber);
+
+		if (user.wallets && user.wallets.length) {
+			const wallet = user.wallets.find((w) => w.network === 'polygon');
+			if (wallet) {
+				await masterWallet.touchUserWallet(wallet.publicKey);
+			}
+		}
 
 		callback(null, {
 			statusCode: 201,
