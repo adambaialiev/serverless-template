@@ -1,4 +1,7 @@
-import { withAuthorization } from '@/middlewares/withAuthorization';
+import {
+	withAuthorization,
+	CustomAPIGateway,
+} from '@/middlewares/withAuthorization';
 import BalanceService from '@/services/balance/balance';
 import { PushNotifications } from '@/services/pushNotifications/pushNotification';
 import UserService from '@/services/user/user';
@@ -6,9 +9,10 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 
 const pushNotificationService = new PushNotifications();
 
-const handler: APIGatewayProxyHandler = async (event, context, callback) => {
+const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
-		const { from, to, amount } = JSON.parse(event.body as string);
+		const { to, amount } = JSON.parse(event.body as string);
+		const from = event.user.phoneNumber;
 
 		const balanceService = new BalanceService();
 		const userService = new UserService();
@@ -16,34 +20,40 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 		const source = await userService.getSlug(from);
 		console.log('event', JSON.stringify(event, null, 2));
 
+		if (Number(source.balance) < Number(amount)) {
+			throw new Error('Not enough money');
+		}
+
 		const target = await userService.getSlug(to);
 
-		let balanceServiceOutput;
-		if (source && target) {
-			balanceServiceOutput = await balanceService.makeTransaction(
+		if (target) {
+			if (from === target.phoneNumber) {
+				throw new Error('Source number and target number are the same');
+			}
+			const balanceServiceOutput = await balanceService.makeTransaction(
 				source,
 				target,
 				Number(amount)
 			);
+			if (target.pushToken) {
+				await pushNotificationService.send(
+					target.pushToken,
+					'Shop wallet',
+					`You recieved ${amount} USDT`
+				);
+			}
+			return {
+				statusCode: 201,
+				body: JSON.stringify(balanceServiceOutput),
+			};
 		}
-		if (target.pushToken) {
-			await pushNotificationService.send(
-				target.pushToken,
-				'Shop wallet',
-				`You recieved ${amount} USDT`
-			);
-		}
-
-		callback(null, {
-			statusCode: 201,
-			body: JSON.stringify(balanceServiceOutput),
-		});
+		throw new Error('This user in not registered in our system');
 	} catch (error: unknown) {
+		console.log(error);
 		if (error instanceof Error) {
-			console.log({ error });
 			return {
 				statusCode: 500,
-				body: error.message,
+				body: JSON.stringify({ message: error.message }),
 			};
 		}
 	}

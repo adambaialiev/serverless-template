@@ -198,29 +198,11 @@ export default class BalanceService {
 		return dynamoDB.query(params).promise();
 	}
 	async makeTransaction(source: UserSlug, target: UserSlug, amount: number) {
-		if (Number(source.balance) < Number(amount)) {
-			return {
-				statusCode: 400,
-				body: 'you don`t have enough money',
-			};
-		}
-
 		const sourceUserKey = buildUserKey(source.phoneNumber);
 		const targetUserKey = buildUserKey(target.phoneNumber);
 
 		const sourceTransactionId = v4();
 		const targetTransactionId = v4();
-
-		console.log({
-			sourceUserKey,
-			targetUserKey,
-			sourceTransactionId,
-			targetTransactionId,
-			amount,
-			source,
-			target,
-			tableName,
-		});
 
 		const sourceTransactionKey = buildTransactionKey(sourceTransactionId);
 		const targetTransactionKey = buildTransactionKey(targetTransactionId);
