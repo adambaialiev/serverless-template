@@ -70,7 +70,7 @@ export default class MasterWallet {
 		return undefined;
 	}
 
-	async touchUserWallet(address: string) {
+	async touchUserWallet(address: string, phoneNumber: string) {
 		const crypto = new CryptoService();
 		const masterWalletService = new MasterWallet();
 		const masterWallet = await masterWalletService.getMasterWallet();
@@ -86,6 +86,7 @@ export default class MasterWallet {
 			[MasterWalletTransactionAttributes.STATUS]: 'pending',
 			[MasterWalletTransactionAttributes.TO]: address,
 			[MasterWalletTransactionAttributes.TYPE]: 'touch',
+			[MasterWalletTransactionAttributes.USER_PHONE_NUMBER]: phoneNumber,
 		};
 		await dynamo
 			.put({

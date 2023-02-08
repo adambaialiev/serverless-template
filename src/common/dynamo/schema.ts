@@ -27,6 +27,7 @@ export enum MasterWalletTransactionAttributes {
 	STATUS = 'status',
 	TYPE = 'type',
 	NETWORK = 'network',
+	USER_PHONE_NUMBER = 'userPhoneNumber',
 }
 
 export enum UserAttributes {
@@ -70,6 +71,7 @@ export interface MasterWalletTransactionItem {
 	[MasterWalletTransactionAttributes.STATUS]: DocumentClient.String;
 	[MasterWalletTransactionAttributes.TYPE]: DocumentClient.String;
 	[MasterWalletTransactionAttributes.NETWORK]: DocumentClient.String;
+	[MasterWalletTransactionAttributes.USER_PHONE_NUMBER]: DocumentClient.String;
 }
 
 export interface IMasterWalletTransaction {
