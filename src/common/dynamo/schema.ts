@@ -48,7 +48,6 @@ export enum UserAttributes {
 }
 
 export enum MasterWalletAttributes {
-	BALANCE = 'balance',
 	PUBLIC_ADDRESS = 'publicAddress',
 	PRIVATE_KEY = 'privateKey',
 }
@@ -56,7 +55,6 @@ export enum MasterWalletAttributes {
 export interface MasterWalletItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
-	[MasterWalletAttributes.BALANCE]: DocumentClient.NumberAttributeValue;
 	[MasterWalletAttributes.PUBLIC_ADDRESS]: DocumentClient.String;
 	[MasterWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
 }
@@ -82,6 +80,7 @@ export interface IMasterWalletTransaction {
 	status: 'pending' | 'success';
 	type: 'home' | 'touch';
 	network: 'polygon';
+	userPhoneNumber: string;
 }
 
 export interface UserItem {

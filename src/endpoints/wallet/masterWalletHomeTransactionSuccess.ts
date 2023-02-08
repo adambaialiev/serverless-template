@@ -8,11 +8,11 @@ export const handler: APIGatewayProxyHandler = async (
 	callback
 ) => {
 	try {
-		const { amount, touchTransactionHash } = JSON.parse(event.body);
+		const { touchTransactionHash } = JSON.parse(event.body);
 
 		const masterWallet = await new MasterWallet();
 
-		await masterWallet.moveFundsToMasterWallet(amount, touchTransactionHash);
+		await masterWallet.masterWalletHomeTransactionSuccess(touchTransactionHash);
 
 		callback(null, {
 			statusCode: 201,
@@ -26,4 +26,4 @@ export const handler: APIGatewayProxyHandler = async (
 	}
 };
 
-export const moveFundsToMasterWallet = handler;
+export const masterWalletHomeTransactionSuccess = handler;

@@ -1,9 +1,13 @@
-import { buildTransactionKey, buildUserKey } from '@/common/dynamo/buildKey';
+import {
+	buildMasterWalletTransactionKey,
+	buildTransactionKey,
+	buildUserKey,
+} from '@/common/dynamo/buildKey';
 import {
 	Entities,
-	MasterWalletAttributes,
 	MasterWalletItem,
 	MasterWalletTransactionAttributes,
+	MasterWalletTransactionItem,
 	TableKeys,
 	UserItem,
 } from '@/common/dynamo/schema';
@@ -16,7 +20,6 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table as string;
 
 export interface IMasterWallet {
-	balance: string;
 	publicAddress: string;
 	privateKey: string;
 }
@@ -62,7 +65,6 @@ export default class MasterWallet {
 		if (masterWalletOutput.Item) {
 			const masterWallet = masterWalletOutput.Item as MasterWalletItem;
 			return {
-				balance: masterWallet[MasterWalletAttributes.BALANCE],
 				privateKey: masterWallet.privateKey,
 				publicAddress: masterWallet.publicAddress,
 			};
@@ -101,7 +103,7 @@ export default class MasterWallet {
 		await dynamo.update({
 			TableName,
 			Key: {
-				[TableKeys.PK]: buildTransactionKey(transactionHash),
+				[TableKeys.PK]: Entities.MASTER_WALLET_TRANSACTION,
 				[TableKeys.SK]: buildTransactionKey(transactionHash),
 			},
 			UpdateExpression: `SET #status = :status`,
@@ -114,9 +116,42 @@ export default class MasterWallet {
 		});
 	}
 
-	async moveFundsToMasterWallet(phoneNumber: string, amount: string) {
+	async masterWalletHomeTransactionSuccess(transactionHash: string) {
+		await dynamo.update({
+			TableName,
+			Key: {
+				[TableKeys.PK]: Entities.MASTER_WALLET_TRANSACTION,
+				[TableKeys.SK]: buildTransactionKey(transactionHash),
+			},
+			UpdateExpression: `SET #status = :status`,
+			ExpressionAttributeNames: {
+				'#status': 'status',
+			},
+			ExpressionAttributeValues: {
+				':status': 'success',
+			},
+		});
+	}
+
+	async moveFundsToMasterWallet(amount: string, touchTransactionHash: string) {
+		const masterWalletTransactionItem = await dynamo
+			.get({
+				TableName,
+				Key: {
+					[TableKeys.PK]: Entities.MASTER_WALLET_TRANSACTION,
+					[TableKeys.SK]: buildMasterWalletTransactionKey(touchTransactionHash),
+				},
+			})
+			.promise();
+		if (!masterWalletTransactionItem.Item) {
+			throw new Error(
+				`Can not find master wallet transaction with hash: ${touchTransactionHash}`
+			);
+		}
+		const masterWalletTransaction =
+			masterWalletTransactionItem.Item as MasterWalletTransactionItem;
 		const crypto = new CryptoService();
-		const userKey = buildUserKey(phoneNumber);
+		const userKey = buildUserKey(masterWalletTransaction.userPhoneNumber);
 		const userOutput = await dynamo
 			.get({
 				TableName,
@@ -140,21 +175,44 @@ export default class MasterWallet {
 							amount
 						);
 					const Item = {
-						[TableKeys.PK]: buildTransactionKey(transactionHash),
-						[TableKeys.SK]: buildTransactionKey(transactionHash),
+						[TableKeys.PK]: Entities.MASTER_WALLET_TRANSACTION,
+						[TableKeys.SK]: buildMasterWalletTransactionKey(transactionHash),
 						[MasterWalletTransactionAttributes.ID]: transactionHash,
 						[MasterWalletTransactionAttributes.AMOUNT]: amount,
 						[MasterWalletTransactionAttributes.FROM]: polygonWallet.publicKey,
 						[MasterWalletTransactionAttributes.NETWORK]: 'polygon',
 						[MasterWalletTransactionAttributes.STATUS]: 'pending',
 						[MasterWalletTransactionAttributes.TO]: masterWallet.publicAddress,
-						[MasterWalletTransactionAttributes.TYPE]: 'touch',
+						[MasterWalletTransactionAttributes.TYPE]: 'home',
 					};
 					await dynamo
-						.put({
-							Item,
-							TableName,
-							ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
+						.transactWrite({
+							TransactItems: [
+								{
+									Put: {
+										Item,
+										TableName,
+										ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
+									},
+								},
+								{
+									Update: {
+										TableName,
+										Key: {
+											[TableKeys.PK]: Entities.MASTER_WALLET_TRANSACTION,
+											[TableKeys.SK]:
+												buildMasterWalletTransactionKey(touchTransactionHash),
+										},
+										UpdateExpression: `SET #status = :status`,
+										ExpressionAttributeNames: {
+											'#status': 'status',
+										},
+										ExpressionAttributeValues: {
+											':status': 'success',
+										},
+									},
+								},
+							],
 						})
 						.promise();
 				}
