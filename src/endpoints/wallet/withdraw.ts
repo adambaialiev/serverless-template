@@ -11,7 +11,7 @@ export const handler: APIGatewayProxyHandler = async (
 	try {
 		// const { phoneNumber, amount, publicAddress } = JSON.parse(event.body);
 
-		const masterWalletService = await new MasterWallet();
+		const masterWalletService = new MasterWallet();
 
 		await masterWalletService.withdraw();
 

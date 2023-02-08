@@ -15,6 +15,7 @@ export enum Entities {
 	USER = 'USER#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
+	DECREMENT_TRANSACTION = 'DECREMENT_TRANSACTION#',
 	MASTER_WALLET = 'MASTER_WALLET',
 	MASTER_WALLET_TRANSACTION = 'MASTER_WALLET_TRANSACTION#',
 }
@@ -118,10 +119,24 @@ export enum IncrementTransactionAttributes {
 	AMOUNT = 'amount',
 }
 
+export enum DecrementTransactionAttributes {
+	ID = 'id',
+	PHONE_NUMBER = 'phoneNumber',
+	AMOUNT = 'amount',
+}
+
 export interface IncrementTransactionItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
 	[IncrementTransactionAttributes.ID]: DocumentClient.String;
 	[IncrementTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[IncrementTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
+}
+
+export interface DecrementTransactionItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[DecrementTransactionAttributes.ID]: DocumentClient.String;
+	[DecrementTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
+	[DecrementTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
 }

@@ -1,13 +1,16 @@
 import {
+	buildDecrementTransactionKey,
+	buildIncrementTransactionKey,
 	buildTransactionKey,
 	buildUserKey,
-	buildIncrementTransactionKey,
 } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import {
+	DecrementTransactionAttributes,
 	IncrementTransactionAttributes,
 	TableKeys,
 	TransactionAttributes,
+	Entities,
 } from '@/common/dynamo/schema';
 import { UserSlug } from '@/services/user/types';
 import AWS from 'aws-sdk';
@@ -25,7 +28,7 @@ export interface MakeTransactionProps {
 export default class BalanceService {
 	async incrementBalance(phoneNumber: string, amount: number, hash: string) {
 		const incrementTransactionOutput = await dynamo.getItem({
-			[TableKeys.PK]: buildIncrementTransactionKey(hash),
+			[TableKeys.PK]: Entities.INCREMENT_TRANSACTION,
 			[TableKeys.SK]: buildIncrementTransactionKey(hash),
 		});
 
@@ -43,7 +46,7 @@ export default class BalanceService {
 					{
 						Put: {
 							Item: {
-								[TableKeys.PK]: transactionHashKey,
+								[TableKeys.PK]: Entities.INCREMENT_TRANSACTION,
 								[TableKeys.SK]: transactionHashKey,
 								[IncrementTransactionAttributes.ID]: hash,
 								[IncrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
@@ -90,6 +93,75 @@ export default class BalanceService {
 			})
 			.promise();
 	}
+
+	async decrementBalance(phoneNumber: string, amount: number, hash: string) {
+		const decrementTransactionOutput = await dynamo.getItem({
+			[TableKeys.PK]: Entities.DECREMENT_TRANSACTION,
+			[TableKeys.SK]: buildDecrementTransactionKey(hash),
+		});
+
+		if (decrementTransactionOutput.Item) {
+			throw new Error(`Decrement transaction with hash ${hash} already exist`);
+		}
+
+		const userKey = buildUserKey(phoneNumber);
+		const transactionId = v4();
+		const transactionKey = buildTransactionKey(transactionId);
+		const date = Date.now().toString();
+		await dynamoDB
+			.transactWrite({
+				TransactItems: [
+					{
+						Put: {
+							Item: {
+								[TableKeys.PK]: Entities.DECREMENT_TRANSACTION,
+								[TableKeys.SK]: buildDecrementTransactionKey(hash),
+								[DecrementTransactionAttributes.ID]: hash,
+								[DecrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
+								[DecrementTransactionAttributes.AMOUNT]: amount,
+							},
+							TableName: tableName,
+							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
+					{
+						Put: {
+							Item: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: transactionKey,
+								[TransactionAttributes.ID]: transactionId,
+								[TransactionAttributes.SOURCE]: phoneNumber,
+								[TransactionAttributes.TARGET]: phoneNumber,
+								[TransactionAttributes.AMOUNT]: amount,
+								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.STATUS]: '',
+								[TransactionAttributes.TYPE]: 'withdraw',
+							},
+							TableName: tableName,
+							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
+					{
+						Update: {
+							TableName: tableName,
+							Key: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: userKey,
+							},
+							UpdateExpression: `SET #balance = #balance + :increase`,
+							ExpressionAttributeNames: {
+								'#balance': 'balance',
+							},
+							ExpressionAttributeValues: {
+								':increase': amount,
+							},
+						},
+					},
+				],
+			})
+			.promise();
+	}
+
 	async getTransactions(phoneNumber: string) {
 		const userKey = buildUserKey(phoneNumber);
 

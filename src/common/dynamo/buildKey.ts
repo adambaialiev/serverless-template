@@ -11,5 +11,8 @@ export const buildTransactionKey = (id: string) =>
 export const buildIncrementTransactionKey = (hash: string) =>
 	buildKey(Entities.INCREMENT_TRANSACTION, hash);
 
+export const buildDecrementTransactionKey = (hash: string) =>
+	buildKey(Entities.DECREMENT_TRANSACTION, hash);
+
 export const buildMasterWalletTransactionKey = (hash: string) =>
 	buildKey(Entities.MASTER_WALLET_TRANSACTION, hash);
