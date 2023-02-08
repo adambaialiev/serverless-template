@@ -1,12 +1,11 @@
 import { APIGatewayEvent, APIGatewayProxyCallback, Context } from 'aws-lambda';
 import {
 	Entities,
-	IndexNames,
+	MasterWalletTransactionAttributes,
+	MasterWalletTransactionItem,
 	TableKeys,
-	UserItem,
 } from '@/common/dynamo/schema';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { IWallet } from '@/services/user/types';
 
 const dynamoDb = new DocumentClient();
 
@@ -20,35 +19,23 @@ export const handler = async (
 			.query({
 				TableName: process.env.dynamo_table as string,
 				KeyConditionExpression: '#pk = :pk',
-				IndexName: IndexNames.GSI1,
+				FilterExpression: '#status = :status',
 				ExpressionAttributeNames: {
-					'#pk': TableKeys.GSI1PK,
+					'#pk': TableKeys.PK,
+					'#status': MasterWalletTransactionAttributes.STATUS,
 				},
 				ExpressionAttributeValues: {
-					':pk': Entities.USER,
+					':pk': Entities.MASTER_WALLET_TRANSACTION,
+					':status': 'pending',
 				},
 			})
 			.promise();
 		console.log({ output });
 		if (output.Items) {
-			const users = output.Items as UserItem[];
-			const addresses: { address: string; phoneNumber: string }[] = [];
-			users.forEach((user) => {
-				const wallets = user.wallets as IWallet[];
-				if (wallets) {
-					wallets.forEach((wallet) => {
-						if (wallet.network === 'polygon' && wallet.chain === 'mainnet') {
-							addresses.push({
-								address: wallet.publicKey,
-								phoneNumber: user.phoneNumber,
-							});
-						}
-					});
-				}
-			});
+			const transactions = output.Items as MasterWalletTransactionItem[];
 			callback(null, {
 				statusCode: 201,
-				body: JSON.stringify(addresses),
+				body: JSON.stringify(transactions),
 			});
 		} else {
 			return {
@@ -67,4 +54,4 @@ export const handler = async (
 	}
 };
 
-export const getAllWalletsAddresses = handler;
+export const getPendingMasterWalletTransactions = handler;

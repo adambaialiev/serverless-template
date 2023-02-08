@@ -77,7 +77,7 @@ export default class MasterWallet {
 		const amount = '0.01';
 		const transactionHash = await crypto.sendMaticToAddress(address, amount);
 		const Item = {
-			[TableKeys.PK]: buildTransactionKey(transactionHash),
+			[TableKeys.PK]: Entities.MASTER_WALLET_TRANSACTION,
 			[TableKeys.SK]: buildTransactionKey(transactionHash),
 			[MasterWalletTransactionAttributes.ID]: transactionHash,
 			[MasterWalletTransactionAttributes.AMOUNT]: amount,
@@ -91,7 +91,7 @@ export default class MasterWallet {
 			.put({
 				Item,
 				TableName,
-				ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
+				ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
 			})
 			.promise();
 	}

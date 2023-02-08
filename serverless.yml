@@ -153,6 +153,15 @@ functions:
           path: /v1/users/get-all-wallets-addresses
           method: get
           cors: true
+
+  getPendingMasterWalletTransactions:
+    handler: build/src/endpoints/wallet/getPendingMasterWalletTransactions.getPendingMasterWalletTransactions
+    events:
+      - http:
+          path: /v1/wallet/get-pending-master-wallet-transactions
+          method: get
+          cors: true
+
   debug:
     handler: build/src/endpoints/debug/debug.debug
     events:
