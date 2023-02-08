@@ -177,7 +177,7 @@ export class AuthService {
 		otpCode,
 		sessionId,
 		user,
-	}: VerifySignInProps): Promise<AuthTokens | undefined> {
+	}: VerifySignInProps): Promise<AuthTokens | undefined | string> {
 		const verified = user.sessionId === sessionId && user.otpCode === otpCode;
 
 		if (verified) {
@@ -192,6 +192,12 @@ export class AuthService {
 				accessToken,
 				refreshToken,
 			};
+		}
+		if (user.sessionId !== sessionId) {
+			return 'Invalid session id';
+		}
+		if (user.otpCode !== otpCode) {
+			return 'Invalid OTP code';
 		}
 	}
 

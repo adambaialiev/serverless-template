@@ -20,18 +20,22 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 			[TableKeys.SK]: userKey,
 		});
 
-		const res = await authService.verifySignIn({
-			phoneNumber,
-			otpCode,
-			sessionId,
-			user: userOutput.Item as UserItem,
-		});
+		let verifyResponse;
 
-		if (userOutput.Item && res) {
-			const user = userOutput.Item as UserItem;
-			return sendResponse(201, { ...res, user });
+		if (userOutput.Item) {
+			verifyResponse = await authService.verifySignIn({
+				phoneNumber,
+				otpCode,
+				sessionId,
+				user: userOutput.Item as UserItem,
+			});
 		}
-		return sendResponse(500, { message: 'user is not found' });
+
+		if (verifyResponse && typeof verifyResponse !== 'string') {
+			const user = userOutput.Item as UserItem;
+			return sendResponse(201, { ...verifyResponse, user });
+		}
+		return sendResponse(500, verifyResponse);
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			console.log({ error });
