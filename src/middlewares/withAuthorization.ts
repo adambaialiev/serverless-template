@@ -1,4 +1,9 @@
-import { APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda';
+import {
+	APIGatewayProxyHandler,
+	APIGatewayProxyEvent,
+	Context,
+	APIGatewayProxyCallback,
+} from 'aws-lambda';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET_KEY } from '@/services/auth/auth';
 import { buildUserKey } from '@/common/dynamo/buildKey';
@@ -19,8 +24,12 @@ export type CustomAPIGateway = APIGatewayProxyEvent & IAPIGatewayEvent;
 const dynamoDB = new DynamoMainTable();
 
 export const withAuthorization =
-	(handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
-	async (event: CustomAPIGateway, context, callback) => {
+	(handler: APIGatewayProxyHandler) =>
+	async (
+		event: CustomAPIGateway,
+		context: Context,
+		callback: APIGatewayProxyCallback
+	) => {
 		const authHeader = event.headers['Authorization'];
 		if (!authHeader) {
 			return {
@@ -38,7 +47,7 @@ export const withAuthorization =
 				[TableKeys.SK]: userKey,
 			});
 			event.user = userOutput.Item as UserItem;
-			await handler(event, context, callback);
+			return handler(event, context, callback);
 		} catch (error: unknown) {
 			console.log({ error });
 			if (error instanceof Error) {

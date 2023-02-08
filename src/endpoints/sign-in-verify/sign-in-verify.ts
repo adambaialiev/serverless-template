@@ -37,8 +37,8 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 		}
 		return sendResponse(500, verifyResponse);
 	} catch (error: unknown) {
+		console.log({ error });
 		if (error instanceof Error) {
-			console.log({ error });
 			return sendResponse(500, { message: error.message });
 		}
 	}
