@@ -99,10 +99,10 @@ functions:
           method: post
           cors: true
   withdraw:
-    handler: build/src/endpoints/withdraw/withdraw.withdraw
+    handler: build/src/endpoints/wallet/withdraw.withdraw
     events:
       - http:
-          path: /v1/withdraw
+          path: /v1/wallet/withdraw
           method: post
           cors: true
 
@@ -184,7 +184,7 @@ functions:
       - http:
           path: /v1/wallet/move-funds-to-master-wallet
           method: post
-          cors: true 
+          cors: true
 
   masterWalletHomeTransactionSuccess:
     handler: build/src/endpoints/wallet/masterWalletHomeTransactionSuccess.masterWalletHomeTransactionSuccess
@@ -192,7 +192,7 @@ functions:
       - http:
           path: /v1/wallet/master-wallet-home-transaction-success
           method: post
-          cors: true 
+          cors: true
 
   deposit:
     handler: build/src/endpoints/wallet/deposit.deposit
@@ -202,21 +202,13 @@ functions:
           method: post
           cors: true
 
-  withdraw:
-    handler: build/src/endpoints/withdraw
-    events:
-      - http:
-          path: /v1/withdraw
-          method: post
-          cors: true
-
   withdrawTransactionSuccess:
     handler: build/src/endpoints/wallet/withdrawTransactionSuccess.withdrawTransactionSuccess
     events:
       - http:
           path: /v1/wallet/withdraw-transaction-success
           method: post
-          cors: true 
+          cors: true
 
   signIn:
     timeout: 10
