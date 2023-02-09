@@ -210,6 +210,14 @@ functions:
           method: post
           cors: true
 
+  withdrawTransactionSuccess:
+    handler: build/src/endpoints/wallet/withdrawTransactionSuccess.withdrawTransactionSuccess
+    events:
+      - http:
+          path: /v1/wallet/withdraw-transaction-success
+          method: post
+          cors: true 
+
   signIn:
     timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn

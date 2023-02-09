@@ -66,7 +66,7 @@ export default class BalanceService {
 								[TransactionAttributes.TARGET]: phoneNumber,
 								[TransactionAttributes.AMOUNT]: amount,
 								[TransactionAttributes.DATE]: date,
-								[TransactionAttributes.STATUS]: '',
+								[TransactionAttributes.STATUS]: 'success',
 								[TransactionAttributes.TYPE]: 'deposit',
 							},
 							TableName: tableName,

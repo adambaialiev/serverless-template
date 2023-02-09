@@ -25,7 +25,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 
 		await pushNotificationService.send(
 			phoneNumber,
-			'Shop wallet',
+			'ShopWallet',
 			`You recieved ${amount} USDT`
 		);
 

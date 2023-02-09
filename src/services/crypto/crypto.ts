@@ -6,6 +6,8 @@ import { IWallet } from '@/services/user/types';
 import AWS from 'aws-sdk';
 import Web3 from 'web3';
 
+const USDT_CONTRACT_IN_POLYON = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
+
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
@@ -84,13 +86,46 @@ export class CryptoService {
 		if (masterWallet) {
 			const signer = web3.eth.accounts.privateKeyToAccount(privateKey);
 			web3.eth.accounts.wallet.add(signer);
-			const contractAddress = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
 
-			const contract = new web3.eth.Contract(contractAbi, contractAddress);
+			const contract = new web3.eth.Contract(
+				contractAbi,
+				USDT_CONTRACT_IN_POLYON
+			);
 
 			const hash = await new Promise<string | undefined>((resolve) => {
 				contract.methods
 					.transfer(sourcePublicKey, amount)
+					.send({ from: signer.address })
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					.on('transactionHash', (hash: any) => {
+						console.log({ hash });
+						resolve(hash);
+					});
+			});
+			return hash;
+		}
+	}
+
+	async makePolygonUsdtTransactionWithdrawFromMasterWallet(
+		targetPublicKey: string,
+		amount: string
+	) {
+		const masterWalletService = new MasterWallet();
+		const masterWallet = await masterWalletService.getMasterWallet();
+		if (masterWallet) {
+			const signer = web3.eth.accounts.privateKeyToAccount(
+				masterWallet.privateKey
+			);
+			web3.eth.accounts.wallet.add(signer);
+
+			const contract = new web3.eth.Contract(
+				contractAbi,
+				USDT_CONTRACT_IN_POLYON
+			);
+
+			const hash = await new Promise<string | undefined>((resolve) => {
+				contract.methods
+					.transfer(targetPublicKey, amount)
 					.send({ from: signer.address })
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					.on('transactionHash', (hash: any) => {

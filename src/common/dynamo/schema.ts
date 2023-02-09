@@ -29,6 +29,7 @@ export enum MasterWalletTransactionAttributes {
 	TYPE = 'type',
 	NETWORK = 'network',
 	USER_PHONE_NUMBER = 'userPhoneNumber',
+	DATE = 'date',
 }
 
 export enum UserAttributes {
@@ -84,6 +85,19 @@ export interface IMasterWalletTransaction {
 	userPhoneNumber: string;
 }
 
+export const unmarshallMasterWalletTransaction = (
+	item: MasterWalletTransactionItem
+): IMasterWalletTransaction => ({
+	id: item[MasterWalletTransactionAttributes.ID],
+	amount: Number(item.amount),
+	from: item.from,
+	to: item.to,
+	status: item.status as 'pending' | 'success',
+	type: item.type as 'home' | 'touch' | 'withdraw',
+	network: item.network as 'polygon',
+	userPhoneNumber: item.userPhoneNumber,
+});
+
 export interface UserItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
@@ -111,6 +125,26 @@ export enum TransactionAttributes {
 	DATE = 'date',
 	STATUS = 'status',
 	TYPE = 'type',
+}
+
+export interface TransactionItem {
+	[TransactionAttributes.ID]: DocumentClient.String;
+	[TransactionAttributes.SOURCE]: DocumentClient.String;
+	[TransactionAttributes.TARGET]: DocumentClient.String;
+	[TransactionAttributes.AMOUNT]: DocumentClient.String;
+	[TransactionAttributes.DATE]: DocumentClient.String;
+	[TransactionAttributes.STATUS]: DocumentClient.String;
+	[TransactionAttributes.TYPE]: DocumentClient.String;
+}
+
+export interface ITransaction {
+	id: string;
+	source: string;
+	target: string;
+	amount: number;
+	date: string;
+	status: 'pending' | 'success';
+	type: 'in' | 'out' | 'deposit' | 'withdraw';
 }
 
 export enum IncrementTransactionAttributes {
