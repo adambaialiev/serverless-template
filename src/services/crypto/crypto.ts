@@ -12,14 +12,18 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
 
-const web3 = new Web3(
-	new Web3.providers.HttpProvider(
-		'https://polygon-mainnet.infura.io/v3/49dfcdb7a3254aaab0ff651e6d0ed870'
-	)
-);
+const getWeb3Instance = () => {
+	const web3 = new Web3(
+		new Web3.providers.HttpProvider(
+			'https://polygon-mainnet.infura.io/v3/49dfcdb7a3254aaab0ff651e6d0ed870'
+		)
+	);
+	return web3;
+};
 
 export class CryptoService {
 	async createCryptoWallet(phoneNumber: string) {
+		const web3 = getWeb3Instance();
 		const account = web3.eth.accounts.create(web3.utils.randomHex(32));
 		web3.eth.accounts.wallet.add(account);
 		console.log(account);
@@ -45,7 +49,15 @@ export class CryptoService {
 		await dynamo.update(params).promise();
 	}
 
+	async createMasterWallet() {
+		const web3 = getWeb3Instance();
+		const account = web3.eth.accounts.create(web3.utils.randomHex(32));
+		web3.eth.accounts.wallet.add(account);
+		return account;
+	}
+
 	async sendMaticToAddress(publicKey: string, amount: string) {
+		const web3 = getWeb3Instance();
 		const masterWalletService = new MasterWallet();
 		const masterWallet = await masterWalletService.getMasterWallet();
 		if (!masterWallet) {
@@ -81,6 +93,7 @@ export class CryptoService {
 		sourcePublicKey: string,
 		amount: string
 	) {
+		const web3 = getWeb3Instance();
 		const masterWalletService = new MasterWallet();
 		const masterWallet = await masterWalletService.getMasterWallet();
 		if (masterWallet) {
@@ -110,6 +123,7 @@ export class CryptoService {
 		targetPublicKey: string,
 		amount: string
 	) {
+		const web3 = getWeb3Instance();
 		const masterWalletService = new MasterWallet();
 		const masterWallet = await masterWalletService.getMasterWallet();
 		if (masterWallet) {

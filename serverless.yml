@@ -154,7 +154,7 @@ functions:
           method: get
           cors: true
 
-  getPendingMasterWalletTransactions:
+  getPendingMWTran:
     handler: build/src/endpoints/wallet/getPendingMasterWalletTransactions.getPendingMasterWalletTransactions
     events:
       - http:
@@ -178,7 +178,7 @@ functions:
           method: post
           cors: true
 
-  moveFundsToMasterWallet:
+  moveFundsToMW:
     handler: build/src/endpoints/wallet/moveFundsToMasterWallet.moveFundsToMasterWallet
     events:
       - http:
@@ -186,7 +186,7 @@ functions:
           method: post
           cors: true
 
-  masterWalletHomeTransactionSuccess:
+  MWHomeTransactionSuccess:
     handler: build/src/endpoints/wallet/masterWalletHomeTransactionSuccess.masterWalletHomeTransactionSuccess
     events:
       - http:
@@ -202,7 +202,7 @@ functions:
           method: post
           cors: true
 
-  withdrawTransactionSuccess:
+  withdrawSuccess:
     handler: build/src/endpoints/wallet/withdrawTransactionSuccess.withdrawTransactionSuccess
     events:
       - http:

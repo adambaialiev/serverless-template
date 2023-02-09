@@ -5,6 +5,7 @@ import {
 } from '@/common/dynamo/buildKey';
 import {
 	Entities,
+	MasterWalletAttributes,
 	MasterWalletItem,
 	MasterWalletTransactionAttributes,
 	MasterWalletTransactionItem,
@@ -28,6 +29,8 @@ export interface IMasterWallet {
 
 export default class MasterWallet {
 	async createMasterWalletIfNeeded() {
+		const cryptoService = new CryptoService();
+		const wallet = await cryptoService.createMasterWallet();
 		const mainWalletOutput = await dynamo
 			.get({
 				TableName,
@@ -42,12 +45,15 @@ export default class MasterWallet {
 			const Item = {
 				[TableKeys.PK]: Entities.MASTER_WALLET,
 				[TableKeys.SK]: Entities.MASTER_WALLET,
+				[MasterWalletAttributes.PRIVATE_KEY]: wallet.privateKey,
+				[MasterWalletAttributes.PUBLIC_ADDRESS]: wallet.address,
 			};
 
 			await dynamo
 				.put({
 					Item,
 					TableName,
+
 					ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
 				})
 				.promise();
