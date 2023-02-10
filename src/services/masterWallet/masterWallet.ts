@@ -47,6 +47,7 @@ export default class MasterWallet {
 				[TableKeys.SK]: Entities.MASTER_WALLET,
 				[MasterWalletAttributes.PRIVATE_KEY]: wallet.privateKey,
 				[MasterWalletAttributes.PUBLIC_ADDRESS]: wallet.address,
+				[MasterWalletAttributes.NETWORK]: 'polygon',
 			};
 
 			await dynamo
@@ -84,11 +85,12 @@ export default class MasterWallet {
 		const crypto = new CryptoService();
 		const masterWalletService = new MasterWallet();
 		const masterWallet = await masterWalletService.getMasterWallet();
+		console.log({ masterWallet });
 		const amount = '0.01';
 		const transactionHash = await crypto.sendMaticToAddress(address, amount);
 		const Item = {
 			[TableKeys.PK]: Entities.MASTER_WALLET_TRANSACTION,
-			[TableKeys.SK]: buildTransactionKey(transactionHash),
+			[TableKeys.SK]: buildMasterWalletTransactionKey(transactionHash),
 			[MasterWalletTransactionAttributes.ID]: transactionHash,
 			[MasterWalletTransactionAttributes.AMOUNT]: amount,
 			[MasterWalletTransactionAttributes.FROM]: masterWallet.publicAddress,

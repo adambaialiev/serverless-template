@@ -22,20 +22,23 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			Number(amount),
 			transactionHash
 		);
-
+		console.log('after increment balance');
 		await pushNotificationService.send(
 			phoneNumber,
 			'ShopWallet',
 			`You recieved ${amount} USDT`
 		);
-
+		console.log('after push notification send');
 		const userService = new UserService();
 		const user = await userService.getUser(phoneNumber);
+		console.log({ user });
 
 		if (user.wallets && user.wallets.length) {
 			const wallet = user.wallets.find((w) => w.network === 'polygon');
+			console.log({ wallet });
 			if (wallet) {
 				await masterWallet.touchUserWallet(wallet.publicKey, phoneNumber);
+				console.log('after touch user wallet');
 			}
 		}
 
@@ -54,4 +57,4 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	}
 };
 
-export const incrementUserBalance = handler;
+export const deposit = handler;

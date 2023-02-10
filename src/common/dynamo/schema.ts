@@ -52,6 +52,7 @@ export enum UserAttributes {
 export enum MasterWalletAttributes {
 	PUBLIC_ADDRESS = 'publicAddress',
 	PRIVATE_KEY = 'privateKey',
+	NETWORK = 'NETWORK',
 }
 
 export interface MasterWalletItem {

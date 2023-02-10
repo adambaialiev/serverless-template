@@ -5,6 +5,21 @@ import MasterWallet from '@/services/masterWallet/masterWallet';
 import { IWallet } from '@/services/user/types';
 import AWS from 'aws-sdk';
 import Web3 from 'web3';
+import axios from 'axios';
+
+interface GasOracle {
+	status: string;
+	message: string;
+	result: {
+		LastBlock: string;
+		SafeGasPrice: string;
+		ProposeGasPrice: string;
+		FastGasPrice: string;
+		suggestBaseFee: string;
+		gasUsedRatio: string;
+		UsdPrice: string;
+	};
+}
 
 const USDT_CONTRACT_IN_POLYON = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
 
@@ -58,6 +73,7 @@ export class CryptoService {
 
 	async sendMaticToAddress(publicKey: string, amount: string) {
 		const web3 = getWeb3Instance();
+		console.log({ web3 });
 		const masterWalletService = new MasterWallet();
 		const masterWallet = await masterWalletService.getMasterWallet();
 		if (!masterWallet) {
@@ -66,16 +82,30 @@ export class CryptoService {
 		const signer = web3.eth.accounts.privateKeyToAccount(
 			masterWallet.privateKey
 		);
+		console.log({ signer });
 		web3.eth.accounts.wallet.add(signer);
-		// Creating the transaction object
+
+		const gasOracleResponse = await axios.get<GasOracle>(
+			'https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=5X5SKNQ1M31NP3FP8A7SVJNV9UEM2FFQFT'
+		);
+
+		if (!gasOracleResponse.data) {
+			throw new Error('Can not retrieve gasOracleResponse');
+		}
+
+		const gasOracle = gasOracleResponse.data;
+
 		const tx = {
 			from: signer.address,
 			to: publicKey,
 			value: web3.utils.toWei(amount),
 			gas: 0,
+			gasPrice: web3.utils.toWei(gasOracle.result.SafeGasPrice, 'Gwei'),
 		};
-		// Assigning the right amount of gas
+
 		tx.gas = await web3.eth.estimateGas(tx);
+
+		console.log({ tx });
 
 		const transactionHash = await new Promise<string | undefined>((resolve) => {
 			// Sending the transaction to the network
@@ -85,6 +115,7 @@ export class CryptoService {
 				resolve(txhash);
 			});
 		});
+		console.log({ transactionHash });
 		return transactionHash;
 	}
 
@@ -96,6 +127,7 @@ export class CryptoService {
 		const web3 = getWeb3Instance();
 		const masterWalletService = new MasterWallet();
 		const masterWallet = await masterWalletService.getMasterWallet();
+		console.log({ masterWallet });
 		if (masterWallet) {
 			const signer = web3.eth.accounts.privateKeyToAccount(privateKey);
 			web3.eth.accounts.wallet.add(signer);
