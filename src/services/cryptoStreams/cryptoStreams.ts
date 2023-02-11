@@ -19,7 +19,7 @@ export default class CryptoStreams {
 		const stream = {
 			chains: [EvmChain.POLYGON],
 			description: `monitor master wallet ${stage}`,
-			tag: `masterWallet${stage}`,
+			tag: `masterWallet-${stage}`,
 			webhookUrl: 'https://webhook.site/a3618227-e317-44d6-a60d-7548cf75ce82',
 			includeNativeTxs: true,
 		};
@@ -31,6 +31,22 @@ export default class CryptoStreams {
 			address: stageToMasterWalletAddress[stage],
 			id,
 		});
+		return id;
+	}
+
+	async createWalletsStream() {
+		const stage = process.env.stage as string;
+		const stream = {
+			chains: [EvmChain.POLYGON],
+			description: `monitor all user wallets in ${stage}`,
+			tag: `userWallets-${stage}`,
+			webhookUrl: 'https://webhook.site/a3618227-e317-44d6-a60d-7548cf75ce82',
+			includeNativeTxs: true,
+		};
+		const newStream = await Moralis.Streams.add(stream);
+		const { id } = newStream.toJSON();
+		console.log({ streamId: id });
+		//save stream id to dynamodb
 		return id;
 	}
 

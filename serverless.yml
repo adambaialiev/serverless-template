@@ -100,6 +100,14 @@ functions:
           method: post
           cors: true
 
+  createWalletsStream:
+    handler: build/src/endpoints/wallet/createWalletsStream.createWalletsStream
+    events:
+      - http:
+          path: /v1/wallet/create-wallets-stream
+          method: post
+          cors: true
+
   createWallet:
     handler: build/src/endpoints/wallet/createWallet.createWallet
     events:
