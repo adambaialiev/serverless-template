@@ -197,7 +197,12 @@ export default class BalanceService {
 
 		return dynamoDB.query(params).promise();
 	}
-	async makeTransaction(source: UserSlug, target: UserSlug, amount: number) {
+	async makeTransaction(
+		source: UserSlug,
+		target: UserSlug,
+		amount: number,
+		comment?: string
+	) {
 		const sourceUserKey = buildUserKey(source.phoneNumber);
 		const targetUserKey = buildUserKey(target.phoneNumber);
 
@@ -221,6 +226,7 @@ export default class BalanceService {
 								[TransactionAttributes.ID]: sourceTransactionId,
 								[TransactionAttributes.SOURCE]: source.phoneNumber,
 								[TransactionAttributes.TARGET]: target.phoneNumber,
+								[TransactionAttributes.COMMENT]: comment ?? '',
 								[TransactionAttributes.AMOUNT]: amount,
 								[TransactionAttributes.DATE]: date,
 								[TransactionAttributes.STATUS]: status,
@@ -238,6 +244,7 @@ export default class BalanceService {
 								[TransactionAttributes.ID]: targetTransactionId,
 								[TransactionAttributes.SOURCE]: source.phoneNumber,
 								[TransactionAttributes.TARGET]: target.phoneNumber,
+								[TransactionAttributes.COMMENT]: comment ?? '',
 								[TransactionAttributes.AMOUNT]: amount,
 								[TransactionAttributes.DATE]: date,
 								[TransactionAttributes.STATUS]: status,

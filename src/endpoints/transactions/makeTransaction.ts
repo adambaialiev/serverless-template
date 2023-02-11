@@ -11,7 +11,7 @@ const pushNotificationService = new PushNotifications();
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
-		const { to, amount } = JSON.parse(event.body as string);
+		const { to, amount, comment } = JSON.parse(event.body as string);
 		const from = event.user.phoneNumber;
 
 		const balanceService = new BalanceService();
@@ -33,7 +33,8 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			const balanceServiceOutput = await balanceService.makeTransaction(
 				source,
 				target,
-				Number(amount)
+				Number(amount),
+				comment
 			);
 			if (target.pushToken) {
 				await pushNotificationService.send(

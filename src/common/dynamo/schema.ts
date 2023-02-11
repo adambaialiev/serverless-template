@@ -82,6 +82,7 @@ export enum TransactionAttributes {
 	DATE = 'date',
 	STATUS = 'status',
 	TYPE = 'type',
+	COMMENT = 'comment',
 }
 
 export enum IncrementTransactionAttributes {
