@@ -52,7 +52,8 @@ export enum UserAttributes {
 export enum MasterWalletAttributes {
 	PUBLIC_ADDRESS = 'publicAddress',
 	PRIVATE_KEY = 'privateKey',
-	NETWORK = 'NETWORK',
+	NETWORK = 'network',
+	STREAM_ID = 'streamId',
 }
 
 export interface MasterWalletItem {
@@ -60,6 +61,8 @@ export interface MasterWalletItem {
 	[TableKeys.SK]: DocumentClient.String;
 	[MasterWalletAttributes.PUBLIC_ADDRESS]: DocumentClient.String;
 	[MasterWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
+	[MasterWalletAttributes.NETWORK]: DocumentClient.String;
+	[MasterWalletAttributes.STREAM_ID]: DocumentClient.String;
 }
 
 export interface MasterWalletTransactionItem {

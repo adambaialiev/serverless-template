@@ -10,6 +10,7 @@ provider:
   region: us-east-1
   profile: ${opt:stage, "dev"}
   environment:
+    stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
   iamRoleStatements:

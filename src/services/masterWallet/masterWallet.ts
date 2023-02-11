@@ -15,6 +15,7 @@ import {
 	UserItem,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
+import CryptoStreams from '@/services/cryptoStreams/cryptoStreams';
 import { unmarshallUser } from '@/services/user/unmarshall';
 import AWS from 'aws-sdk';
 
@@ -25,12 +26,17 @@ const TableName = process.env.dynamo_table as string;
 export interface IMasterWallet {
 	publicAddress: string;
 	privateKey: string;
+	network: string;
+	streamId: string | undefined;
 }
 
 export default class MasterWallet {
 	async createMasterWalletIfNeeded() {
 		const cryptoService = new CryptoService();
+		const cryptoStreams = new CryptoStreams();
 		const wallet = await cryptoService.createMasterWallet();
+		const streamId = await cryptoStreams.createMasterWalletStream();
+
 		const mainWalletOutput = await dynamo
 			.get({
 				TableName,
@@ -48,6 +54,7 @@ export default class MasterWallet {
 				[MasterWalletAttributes.PRIVATE_KEY]: wallet.privateKey,
 				[MasterWalletAttributes.PUBLIC_ADDRESS]: wallet.address,
 				[MasterWalletAttributes.NETWORK]: 'polygon',
+				[MasterWalletAttributes.STREAM_ID]: streamId,
 			};
 
 			await dynamo
@@ -76,6 +83,8 @@ export default class MasterWallet {
 			return {
 				privateKey: masterWallet.privateKey,
 				publicAddress: masterWallet.publicAddress,
+				network: masterWallet.network,
+				streamId: masterWallet.streamId,
 			};
 		}
 		return undefined;
