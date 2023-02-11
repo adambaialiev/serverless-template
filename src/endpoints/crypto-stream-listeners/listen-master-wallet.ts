@@ -25,4 +25,4 @@ export const handler: APIGatewayProxyHandler = async (
 	}
 };
 
-export const createWallet = handler;
+export const listenMasterWallet = handler;

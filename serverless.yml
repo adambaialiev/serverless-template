@@ -44,6 +44,20 @@ custom:
     createRoute53Record: true
 
 functions:
+  listenWallets:
+    handler: build/src/endpoints/crypto-stream-listeners/listenWallets.listenWallets
+    events:
+      - http:
+          path: /v1/listeners/listen-user-wallets
+          method: post
+          cors: true
+  listenMasterWallet:
+    handler: build/src/endpoints/crypto-stream-listeners/listenMasterWallet.listenMasterWallet
+    events:
+      - http:
+          path: /v1/listeners/listen-master-wallet
+          method: post
+          cors: true
   createWallet:
     handler: build/src/endpoints/wallet/createWallet.createWallet
     events:
