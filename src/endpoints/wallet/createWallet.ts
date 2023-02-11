@@ -18,9 +18,10 @@ export const handler: APIGatewayProxyHandler = async (
 		const cryptoStreams = new CryptoStreams();
 
 		await masterWallet.createMasterWalletIfNeeded();
+		const streamId = await cryptoStreams.createWalletsStreamIfNeeded();
 
 		const account = await cryptoService.createCryptoWallet(phoneNumber);
-		await cryptoStreams.addWalletToStream(account.address);
+		await cryptoStreams.addWalletToStream(account.address, streamId);
 
 		callback(null, {
 			statusCode: 201,

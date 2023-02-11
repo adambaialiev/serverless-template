@@ -44,70 +44,6 @@ custom:
     createRoute53Record: true
 
 functions:
-  makeMerchantTransaction:
-    handler: build/src/endpoints/merchant/preTransaction.preTransaction
-    events:
-      - http:
-          path: /v1/merchant/transaction/{apiKey}
-          method: post
-          cors: true
-
-  ConfirmPreTransaction:
-    handler: build/src/endpoints/merchant/confirmPreTransaction.ConfirmPreTransaction
-    events:
-      - http:
-          path: /v1/users/confirm-transaction
-          method: post
-          cors: true
-
-  createApiKey:
-    handler: build/src/endpoints/merchant/createApiKey.createApiKey
-    events:
-      - http:
-          path: /v1/merchant/apikey
-          method: post
-          cors: true
-
-  makeTransaction:
-    handler: build/src/endpoints/transactions/makeTransaction.makeTransaction
-    events:
-      - http:
-          path: /v1/transaction
-          method: post
-          cors: true
-
-  getTransactionByAdmin:
-    handler: build/src/endpoints/transactions/getTransactionByAdmin.getTransactions
-    events:
-      - http:
-          path: /v1/transactions
-          method: get
-          cors: true
-
-  getTransactions:
-    handler: build/src/endpoints/transactions/getTransactions.getTransactions
-    events:
-      - http:
-          path: /v1/transactions/{phoneNumber}
-          method: get
-          cors: true
-
-  createMWStream:
-    handler: build/src/endpoints/wallet/createMasterWalletStream.createMasterWalletStream
-    events:
-      - http:
-          path: /v1/wallet/create-master-wallet-stream
-          method: post
-          cors: true
-
-  createWalletsStream:
-    handler: build/src/endpoints/wallet/createWalletsStream.createWalletsStream
-    events:
-      - http:
-          path: /v1/wallet/create-wallets-stream
-          method: post
-          cors: true
-
   createWallet:
     handler: build/src/endpoints/wallet/createWallet.createWallet
     events:
@@ -123,12 +59,36 @@ functions:
           method: post
           cors: true
 
+  deposit:
+    handler: build/src/endpoints/wallet/deposit.deposit
+    events:
+      - http:
+          path: /v1/wallet/deposit
+          method: post
+          cors: true
+
   savePushTokenToUser:
     handler: build/src/endpoints/savePushTokenToUser/savePushTokenToUser.savePushTokenToUser
     events:
       - http:
           path: /v1/users/pushToken
           method: post
+          cors: true
+
+  makeTransaction:
+    handler: build/src/endpoints/transactions/makeTransaction.makeTransaction
+    events:
+      - http:
+          path: /v1/transaction
+          method: post
+          cors: true
+
+  getTransactions:
+    handler: build/src/endpoints/transactions/getTransactions.getTransactions
+    events:
+      - http:
+          path: /v1/transactions/{phoneNumber}
+          method: get
           cors: true
 
   getTransactionsRoom:
@@ -139,92 +99,12 @@ functions:
           method: post
           cors: true
 
-  merchantSignin:
-    handler: build/src/endpoints/merchant/sign-in.signIn
-    events:
-      - http:
-          path: /v1/merchant/sign-in
-          method: post
-          cors: true
-
-  merchantSigninVerify:
-    handler: build/src/endpoints/merchant/sign-in-verify.signInVerify
-    events:
-      - http:
-          path: /v1/merchant/sign-in-verify
-          method: post
-          cors: true
-
   getUser:
     handler: build/src/endpoints/user/getUser.getUser
     events:
       - http:
           path: /v1/users/{phoneNumber}
           method: get
-          cors: true
-
-  getAllWalletsAddresses:
-    handler: build/src/endpoints/user/getAllWalletsAddresses.getAllWalletsAddresses
-    events:
-      - http:
-          path: /v1/users/get-all-wallets-addresses
-          method: get
-          cors: true
-
-  getPendingMWTran:
-    handler: build/src/endpoints/wallet/getPendingMasterWalletTransactions.getPendingMasterWalletTransactions
-    events:
-      - http:
-          path: /v1/wallet/get-pending-master-wallet-transactions
-          method: get
-          cors: true
-
-  debug:
-    handler: build/src/endpoints/debug/debug.debug
-    events:
-      - http:
-          path: /v1/debug
-          method: post
-          cors: true
-
-  getRegisteredUsers:
-    handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
-    events:
-      - http:
-          path: /v1/users/registered
-          method: post
-          cors: true
-
-  moveFundsToMW:
-    handler: build/src/endpoints/wallet/moveFundsToMasterWallet.moveFundsToMasterWallet
-    events:
-      - http:
-          path: /v1/wallet/move-funds-to-master-wallet
-          method: post
-          cors: true
-
-  MWHomeTransactionSuccess:
-    handler: build/src/endpoints/wallet/masterWalletHomeTransactionSuccess.masterWalletHomeTransactionSuccess
-    events:
-      - http:
-          path: /v1/wallet/master-wallet-home-transaction-success
-          method: post
-          cors: true
-
-  deposit:
-    handler: build/src/endpoints/wallet/deposit.deposit
-    events:
-      - http:
-          path: /v1/wallet/deposit
-          method: post
-          cors: true
-
-  withdrawSuccess:
-    handler: build/src/endpoints/wallet/withdrawTransactionSuccess.withdrawTransactionSuccess
-    events:
-      - http:
-          path: /v1/wallet/withdraw-transaction-success
-          method: post
           cors: true
 
   signIn:
@@ -251,6 +131,14 @@ functions:
     events:
       - http:
           path: /v1/auth/refreshToken
+          method: post
+          cors: true
+
+  debug:
+    handler: build/src/endpoints/debug/debug.debug
+    events:
+      - http:
+          path: /v1/debug
           method: post
           cors: true
 

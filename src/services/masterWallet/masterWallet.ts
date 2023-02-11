@@ -1,8 +1,4 @@
-import {
-	buildMasterWalletTransactionKey,
-	buildTransactionKey,
-	buildUserKey,
-} from '@/common/dynamo/buildKey';
+import { buildTransactionKey, buildUserKey } from '@/common/dynamo/buildKey';
 import {
 	Entities,
 	MasterWalletAttributes,
@@ -34,8 +30,6 @@ export default class MasterWallet {
 	async createMasterWalletIfNeeded() {
 		const cryptoService = new CryptoService();
 		const cryptoStreams = new CryptoStreams();
-		const wallet = await cryptoService.createMasterWallet();
-		const streamId = await cryptoStreams.createMasterWalletStream();
 
 		const mainWalletOutput = await dynamo
 			.get({
@@ -48,6 +42,10 @@ export default class MasterWallet {
 			.promise();
 
 		if (!mainWalletOutput.Item) {
+			const wallet = await cryptoService.createMasterWallet();
+			const streamId = await cryptoStreams.createMasterWalletStream(
+				wallet.address
+			);
 			const Item = {
 				[TableKeys.PK]: Entities.MASTER_WALLET,
 				[TableKeys.SK]: Entities.MASTER_WALLET,

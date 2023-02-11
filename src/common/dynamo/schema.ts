@@ -13,6 +13,7 @@ export enum IndexNames {
 
 export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
+	WALLETS_STREAM = 'WALLETS_STREAM',
 	USER = 'USER#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
@@ -23,6 +24,18 @@ export enum Entities {
 	HOME_SUCCESS = 'HOME_SUCCESS#',
 	WITHDRAWAL_PENDING = 'WITHDRAWAL_PENDING#',
 	WITHDRAWAL_SUCCESS = 'WITHDRAWAL_SUCCESS#',
+}
+
+export enum WalletsStreamAttributes {
+	ID = 'id',
+	CREATED_AT = 'createdAt',
+}
+
+export interface WalletsStreamItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[WalletsStreamAttributes.ID]: DocumentClient.String;
+	[WalletsStreamAttributes.CREATED_AT]: DocumentClient.String;
 }
 
 export enum MasterWalletTransactionAttributes {
