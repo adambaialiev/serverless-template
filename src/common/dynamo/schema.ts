@@ -13,7 +13,8 @@ export enum IndexNames {
 
 export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
-	WALLETS_STREAM = 'WALLETS_STREAM',
+	WALLETS_STREAM_MATIC = 'WALLETS_STREAM_MATIC',
+	WALLETS_STREAM_USDT = 'WALLETS_STREAM_USDT',
 	USER = 'USER#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
@@ -38,16 +39,29 @@ export interface WalletsStreamItem {
 	[WalletsStreamAttributes.CREATED_AT]: DocumentClient.String;
 }
 
-export enum MasterWalletTransactionAttributes {
+export enum MasterWalletInvolvedTransactionAttributes {
 	ID = 'id',
+	CREATED_AT = 'createdAt',
 	AMOUNT = 'amount',
-	FROM = 'from',
-	TO = 'to',
-	STATUS = 'status',
-	TYPE = 'type',
 	NETWORK = 'network',
-	USER_PHONE_NUMBER = 'userPhoneNumber',
-	DATE = 'date',
+	PHONE_NUMBER = 'phoneNumber',
+}
+
+export interface MasterWalletInvolvedTransactionItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[MasterWalletInvolvedTransactionAttributes.ID]: DocumentClient.String;
+	[MasterWalletInvolvedTransactionAttributes.CREATED_AT]: DocumentClient.String;
+	[MasterWalletInvolvedTransactionAttributes.AMOUNT]: DocumentClient.String;
+	[MasterWalletInvolvedTransactionAttributes.NETWORK]: DocumentClient.String;
+	[MasterWalletInvolvedTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
+}
+
+export enum TouchSuccessAttributes {
+	ID = 'id',
+	CREATED_AT = 'createdAt',
+	AMOUNT = 'amount',
+	NETWORK = 'network',
 }
 
 export enum UserAttributes {
@@ -67,59 +81,6 @@ export enum UserAttributes {
 	PUSH_TOKEN = 'pushToken',
 }
 
-export enum MasterWalletAttributes {
-	PUBLIC_ADDRESS = 'publicAddress',
-	PRIVATE_KEY = 'privateKey',
-	NETWORK = 'network',
-	STREAM_ID = 'streamId',
-}
-
-export interface MasterWalletItem {
-	[TableKeys.PK]: DocumentClient.String;
-	[TableKeys.SK]: DocumentClient.String;
-	[MasterWalletAttributes.PUBLIC_ADDRESS]: DocumentClient.String;
-	[MasterWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
-	[MasterWalletAttributes.NETWORK]: DocumentClient.String;
-	[MasterWalletAttributes.STREAM_ID]: DocumentClient.String;
-}
-
-export interface MasterWalletTransactionItem {
-	[TableKeys.PK]: DocumentClient.String;
-	[TableKeys.SK]: DocumentClient.String;
-	[MasterWalletTransactionAttributes.ID]: DocumentClient.String;
-	[MasterWalletTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
-	[MasterWalletTransactionAttributes.FROM]: DocumentClient.String;
-	[MasterWalletTransactionAttributes.TO]: DocumentClient.String;
-	[MasterWalletTransactionAttributes.STATUS]: DocumentClient.String;
-	[MasterWalletTransactionAttributes.TYPE]: DocumentClient.String;
-	[MasterWalletTransactionAttributes.NETWORK]: DocumentClient.String;
-	[MasterWalletTransactionAttributes.USER_PHONE_NUMBER]: DocumentClient.String;
-}
-
-export interface IMasterWalletTransaction {
-	id: string;
-	amount: number;
-	from: string;
-	to: string;
-	status: 'pending' | 'success';
-	type: 'home' | 'touch' | 'withdraw';
-	network: 'polygon';
-	userPhoneNumber: string;
-}
-
-export const unmarshallMasterWalletTransaction = (
-	item: MasterWalletTransactionItem
-): IMasterWalletTransaction => ({
-	id: item[MasterWalletTransactionAttributes.ID],
-	amount: Number(item.amount),
-	from: item.from,
-	to: item.to,
-	status: item.status as 'pending' | 'success',
-	type: item.type as 'home' | 'touch' | 'withdraw',
-	network: item.network as 'polygon',
-	userPhoneNumber: item.userPhoneNumber,
-});
-
 export interface UserItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
@@ -137,6 +98,22 @@ export interface UserItem {
 	[UserAttributes.REFRESH_TOKEN]: DocumentClient.String;
 	[UserAttributes.WALLETS]: DocumentClient.ListAttributeValue;
 	[UserAttributes.PUSH_TOKEN]: DocumentClient.String;
+}
+
+export enum MasterWalletAttributes {
+	PUBLIC_ADDRESS = 'publicAddress',
+	PRIVATE_KEY = 'privateKey',
+	NETWORK = 'network',
+	STREAM_ID = 'streamId',
+}
+
+export interface MasterWalletItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[MasterWalletAttributes.PUBLIC_ADDRESS]: DocumentClient.String;
+	[MasterWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
+	[MasterWalletAttributes.NETWORK]: DocumentClient.String;
+	[MasterWalletAttributes.STREAM_ID]: DocumentClient.String;
 }
 
 export enum TransactionAttributes {
@@ -175,18 +152,18 @@ export enum IncrementTransactionAttributes {
 	AMOUNT = 'amount',
 }
 
-export enum DecrementTransactionAttributes {
-	ID = 'id',
-	PHONE_NUMBER = 'phoneNumber',
-	AMOUNT = 'amount',
-}
-
 export interface IncrementTransactionItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
 	[IncrementTransactionAttributes.ID]: DocumentClient.String;
 	[IncrementTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[IncrementTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
+}
+
+export enum DecrementTransactionAttributes {
+	ID = 'id',
+	PHONE_NUMBER = 'phoneNumber',
+	AMOUNT = 'amount',
 }
 
 export interface DecrementTransactionItem {

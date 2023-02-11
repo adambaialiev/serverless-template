@@ -1,6 +1,6 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
 import { TableKeys, UserItem } from '@/common/dynamo/schema';
-import { User, UserSlug } from '@/services/user/types';
+import { IWallet, User, UserSlug } from '@/services/user/types';
 import { unmarshallUser, unmarshallUserSlug } from '@/services/user/unmarshall';
 import AWS from 'aws-sdk';
 
@@ -43,5 +43,14 @@ export default class UserService {
 			return unmarshallUser(userOutput.Item as UserItem);
 		}
 		return undefined;
+	}
+
+	async getUserPolygonWallet(
+		phoneNumber: string
+	): Promise<IWallet | undefined> {
+		const user = await this.getUser(phoneNumber);
+		if (user) {
+			return user.wallets.find((w) => w.network === 'polygon');
+		}
 	}
 }
