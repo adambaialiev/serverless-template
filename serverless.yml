@@ -91,6 +91,14 @@ functions:
           method: get
           cors: true
 
+  createMWStream:
+    handler: build/src/endpoints/wallet/createMasterWalletStream.createMasterWalletStream
+    events:
+      - http:
+          path: /v1/wallet/create-master-wallet-stream
+          method: post
+          cors: true
+
   createWallet:
     handler: build/src/endpoints/wallet/createWallet.createWallet
     events:

@@ -62,6 +62,7 @@ export class CryptoService {
 		};
 
 		await dynamo.update(params).promise();
+		return account;
 	}
 
 	async createMasterWallet() {

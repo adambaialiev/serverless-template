@@ -4,9 +4,6 @@ import { withAuthorization } from '@/middlewares/withAuthorization';
 import { CryptoService } from '@/services/crypto/crypto';
 import MasterWallet from '@/services/masterWallet/masterWallet';
 
-const cryptoService = new CryptoService();
-const masterWallet = new MasterWallet();
-
 export const handler: APIGatewayProxyHandler = async (
 	event,
 	context,
@@ -14,6 +11,9 @@ export const handler: APIGatewayProxyHandler = async (
 ) => {
 	try {
 		const { phoneNumber } = JSON.parse(event.body);
+
+		const cryptoService = new CryptoService();
+		const masterWallet = new MasterWallet();
 
 		await cryptoService.createCryptoWallet(phoneNumber);
 
