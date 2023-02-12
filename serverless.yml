@@ -44,13 +44,6 @@ custom:
     createRoute53Record: true
 
 functions:
-  createWallet:
-    handler: build/src/endpoints/wallet/createWallet.createWallet
-    events:
-      - http:
-          path: /v1/wallet
-          method: post
-          cors: true
   withdraw:
     handler: build/src/endpoints/wallet/withdraw.withdraw
     events:
