@@ -144,7 +144,7 @@ export default class MasterWallet {
 
 		if (output.Items) {
 			const pusherService = new PusherService();
-			pusherService.triggerTouchPendingTransactionsUpdated(
+			await pusherService.triggerTouchPendingTransactionsUpdated(
 				output.Items as MasterWalletInvolvedTransactionItem[]
 			);
 		}
@@ -202,7 +202,7 @@ export default class MasterWallet {
 
 		if (output.Items) {
 			const pusherService = new PusherService();
-			pusherService.triggerTouchPendingTransactionsUpdated(
+			await pusherService.triggerTouchPendingTransactionsUpdated(
 				output.Items as MasterWalletInvolvedTransactionItem[]
 			);
 		}
@@ -252,7 +252,7 @@ export default class MasterWallet {
 
 		if (output.Items) {
 			const pusherService = new PusherService();
-			pusherService.triggerHomePendingTransactionsUpdated(
+			await pusherService.triggerHomePendingTransactionsUpdated(
 				output.Items as MasterWalletInvolvedTransactionItem[]
 			);
 		}
@@ -311,7 +311,7 @@ export default class MasterWallet {
 
 		if (output.Items) {
 			const pusherService = new PusherService();
-			pusherService.triggerHomePendingTransactionsUpdated(
+			await pusherService.triggerHomePendingTransactionsUpdated(
 				output.Items as MasterWalletInvolvedTransactionItem[]
 			);
 		}
@@ -397,7 +397,7 @@ export default class MasterWallet {
 
 		if (output.Items) {
 			const pusherService = new PusherService();
-			pusherService.triggerHomePendingTransactionsUpdated(
+			await pusherService.triggerWithdrawalPendingTransactionsUpdated(
 				output.Items as MasterWalletInvolvedTransactionItem[]
 			);
 		}
@@ -454,7 +454,7 @@ export default class MasterWallet {
 
 		if (output.Items) {
 			const pusherService = new PusherService();
-			pusherService.triggerHomePendingTransactionsUpdated(
+			await pusherService.triggerWithdrawalPendingTransactionsUpdated(
 				output.Items as MasterWalletInvolvedTransactionItem[]
 			);
 		}

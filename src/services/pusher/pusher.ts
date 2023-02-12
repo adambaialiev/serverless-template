@@ -17,33 +17,33 @@ export default class PusherService {
 
 	async triggerUsersWalletsUpdated() {
 		const wallets = await getAllWalletsAddresses();
-		this.pusher.trigger('mutations', 'usersWalletsUpdated', wallets);
+		await this.pusher.trigger('mutations', 'usersWalletsUpdated', wallets);
 	}
 
-	triggerTouchPendingTransactionsUpdated(
+	async triggerTouchPendingTransactionsUpdated(
 		transactions: MasterWalletInvolvedTransactionItem[]
 	) {
-		this.pusher.trigger(
+		await this.pusher.trigger(
 			'mutations',
 			'touchPendingTransactionsUpdated',
 			transactions
 		);
 	}
 
-	triggerHomePendingTransactionsUpdated(
+	async triggerHomePendingTransactionsUpdated(
 		transactions: MasterWalletInvolvedTransactionItem[]
 	) {
-		this.pusher.trigger(
+		await this.pusher.trigger(
 			'mutations',
 			'homePendingTransactionsUpdated',
 			transactions
 		);
 	}
 
-	triggerWithdrawalPendingTransactionsUpdated(
+	async triggerWithdrawalPendingTransactionsUpdated(
 		transactions: MasterWalletInvolvedTransactionItem[]
 	) {
-		this.pusher.trigger(
+		await this.pusher.trigger(
 			'mutations',
 			'withdrawalPendingTransactionsUpdated',
 			transactions
