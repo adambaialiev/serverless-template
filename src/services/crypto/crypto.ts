@@ -6,6 +6,7 @@ import { IWallet } from '@/services/user/types';
 import AWS from 'aws-sdk';
 import Web3 from 'web3';
 import axios from 'axios';
+import PusherService from '@/services/pusher/pusher';
 
 interface GasOracle {
 	status: string;
@@ -41,7 +42,7 @@ export class CryptoService {
 		const web3 = getWeb3Instance();
 		const account = web3.eth.accounts.create(web3.utils.randomHex(32));
 		web3.eth.accounts.wallet.add(account);
-		console.log(account);
+
 		const wallet: IWallet = {
 			privateKey: account.privateKey,
 			publicKey: account.address,
@@ -63,6 +64,10 @@ export class CryptoService {
 		};
 
 		await dynamo.update(params).promise();
+
+		const pusherService = new PusherService();
+
+		await pusherService.triggerUsersWalletsUpdated();
 		return account;
 	}
 

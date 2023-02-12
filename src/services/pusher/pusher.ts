@@ -1,5 +1,5 @@
 import { MasterWalletInvolvedTransactionItem } from '@/common/dynamo/schema';
-import { IWallet } from '@/services/user/types';
+import { getAllWalletsAddresses } from '@/services/user/getAllWalletsAddresses';
 import Pusher from 'pusher';
 
 export default class PusherService {
@@ -15,7 +15,8 @@ export default class PusherService {
 
 	pusher: Pusher;
 
-	triggerUsersWalletsUpdated(wallets: IWallet[]) {
+	async triggerUsersWalletsUpdated() {
+		const wallets = await getAllWalletsAddresses();
 		this.pusher.trigger('mutations', 'usersWalletsUpdated', wallets);
 	}
 

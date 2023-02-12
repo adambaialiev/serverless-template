@@ -40,7 +40,7 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 
 			const user = await userService.getUser(phoneNumber);
 
-			if (!user.wallets.length) {
+			if (!user.wallets || !user.wallets.length) {
 				await cryptoService.createCryptoWallet(phoneNumber);
 			}
 
