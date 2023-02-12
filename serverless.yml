@@ -91,6 +91,14 @@ functions:
           method: post
           cors: true
 
+  homeSuccess:
+    handler: build/src/endpoints/store/homeSuccess.homeSuccess
+    events:
+      - http:
+          path: /v1/store/homePendingTransactions
+          method: post
+          cors: true
+
   withdrawPendingAll:
     handler: build/src/endpoints/store/withdrawPendingAll.withdrawPendingAll
     events:
