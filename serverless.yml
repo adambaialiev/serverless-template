@@ -44,6 +44,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  debugUsdtTransactions:
+    handler: build/src/endpoints/wallet/debugUsdtTransactions.debugUsdtTransactions
+    events:
+      - http:
+          path: /v1/wallet/debugUsdtTransactions
+          method: post
+          cors: true
   withdraw:
     handler: build/src/endpoints/wallet/withdraw.withdraw
     events:

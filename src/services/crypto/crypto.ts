@@ -144,7 +144,7 @@ export class CryptoService {
 				USDT_CONTRACT_IN_POLYON
 			);
 
-			const balance = contract.methods.balanceOf(sourcePublicKey);
+			const balance = await contract.methods.balanceOf(sourcePublicKey).call();
 			console.log({ balance });
 
 			const hash = await new Promise<string | undefined>((resolve) => {
