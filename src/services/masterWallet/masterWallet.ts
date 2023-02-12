@@ -216,8 +216,7 @@ export default class MasterWallet {
 		const transactionHash =
 			await cryptoService.makePolygonUsdtTransactionToMasterWallet(
 				wallet.privateKey,
-				wallet.publicKey,
-				amount
+				wallet.publicKey
 			);
 
 		await dynamo

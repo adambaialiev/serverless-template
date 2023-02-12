@@ -128,10 +128,10 @@ export class CryptoService {
 
 	async makePolygonUsdtTransactionToMasterWallet(
 		privateKey: string,
-		sourcePublicKey: string,
-		amount: string
+		sourcePublicKey: string
 	) {
 		const web3 = getWeb3Instance();
+
 		const masterWalletService = new MasterWallet();
 		const masterWallet = await masterWalletService.getMasterWallet();
 		console.log({ masterWallet });
@@ -144,9 +144,12 @@ export class CryptoService {
 				USDT_CONTRACT_IN_POLYON
 			);
 
+			const balance = contract.methods.balanceOf(sourcePublicKey);
+			console.log({ balance });
+
 			const hash = await new Promise<string | undefined>((resolve) => {
 				contract.methods
-					.transfer(sourcePublicKey, amount)
+					.transfer(sourcePublicKey, balance)
 					.send({ from: signer.address })
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					.on('transactionHash', (hash: any) => {
