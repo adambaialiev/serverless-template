@@ -26,6 +26,7 @@
 		"crypto-secure-random-digit": "^1.0.10",
 		"jsonwebtoken": "^9.0.0",
 		"moralis": "^2.14.1",
+		"pusher": "^5.1.2",
 		"serverless-middleware": "^3.1.0",
 		"serverless-offline": "^12.0.4",
 		"tronweb": "^5.0.0",

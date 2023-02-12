@@ -18,6 +18,7 @@ import {
 	TransactionAttributes,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
+import PusherService from '@/services/pusher/pusher';
 import UserService from '@/services/user/user';
 import AWS from 'aws-sdk';
 
@@ -108,9 +109,6 @@ export default class MasterWallet {
 
 	async touchUserWallet(address: string, phoneNumber: string) {
 		const crypto = new CryptoService();
-		const masterWalletService = new MasterWallet();
-		const masterWallet = await masterWalletService.getMasterWallet();
-		console.log({ masterWallet });
 		const amount = '0.02';
 		const transactionHash = await crypto.sendMaticToAddress(address, amount);
 
@@ -130,6 +128,26 @@ export default class MasterWallet {
 				ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
 			})
 			.promise();
+
+		const output = await dynamo
+			.query({
+				TableName: process.env.dynamo_table as string,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.TOUCH_PENDING,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			const pusherService = new PusherService();
+			pusherService.triggerTouchPendingTransactionsUpdated(
+				output.Items as MasterWalletInvolvedTransactionItem[]
+			);
+		}
 	}
 
 	async touchUserWalletSuccess(
@@ -169,6 +187,25 @@ export default class MasterWallet {
 				],
 			})
 			.promise();
+		const output = await dynamo
+			.query({
+				TableName: process.env.dynamo_table as string,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.TOUCH_PENDING,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			const pusherService = new PusherService();
+			pusherService.triggerTouchPendingTransactionsUpdated(
+				output.Items as MasterWalletInvolvedTransactionItem[]
+			);
+		}
 		await this.homeUserWallet(phoneNumber, amount);
 	}
 
@@ -199,6 +236,26 @@ export default class MasterWallet {
 				ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
 			})
 			.promise();
+
+		const output = await dynamo
+			.query({
+				TableName: process.env.dynamo_table as string,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.HOME_PENDING,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			const pusherService = new PusherService();
+			pusherService.triggerHomePendingTransactionsUpdated(
+				output.Items as MasterWalletInvolvedTransactionItem[]
+			);
+		}
 	}
 
 	async homeUserWalletSuccess(
@@ -238,6 +295,26 @@ export default class MasterWallet {
 				],
 			})
 			.promise();
+
+		const output = await dynamo
+			.query({
+				TableName: process.env.dynamo_table as string,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.HOME_PENDING,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			const pusherService = new PusherService();
+			pusherService.triggerHomePendingTransactionsUpdated(
+				output.Items as MasterWalletInvolvedTransactionItem[]
+			);
+		}
 	}
 
 	async withdraw(address: string, amount: string, phoneNumber: string) {
@@ -304,6 +381,26 @@ export default class MasterWallet {
 				],
 			})
 			.promise();
+
+		const output = await dynamo
+			.query({
+				TableName: process.env.dynamo_table as string,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.WITHDRAWAL_PENDING,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			const pusherService = new PusherService();
+			pusherService.triggerHomePendingTransactionsUpdated(
+				output.Items as MasterWalletInvolvedTransactionItem[]
+			);
+		}
 	}
 
 	async withdrawSuccess(
@@ -341,5 +438,25 @@ export default class MasterWallet {
 				},
 			],
 		});
+
+		const output = await dynamo
+			.query({
+				TableName: process.env.dynamo_table as string,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.WITHDRAWAL_PENDING,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			const pusherService = new PusherService();
+			pusherService.triggerHomePendingTransactionsUpdated(
+				output.Items as MasterWalletInvolvedTransactionItem[]
+			);
+		}
 	}
 }
