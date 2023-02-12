@@ -13,8 +13,6 @@ export enum IndexNames {
 
 export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
-	WALLETS_STREAM_MATIC = 'WALLETS_STREAM_MATIC',
-	WALLETS_STREAM_USDT = 'WALLETS_STREAM_USDT',
 	USER = 'USER#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
@@ -25,18 +23,6 @@ export enum Entities {
 	HOME_SUCCESS = 'HOME_SUCCESS#',
 	WITHDRAWAL_PENDING = 'WITHDRAWAL_PENDING#',
 	WITHDRAWAL_SUCCESS = 'WITHDRAWAL_SUCCESS#',
-}
-
-export enum WalletsStreamAttributes {
-	ID = 'id',
-	CREATED_AT = 'createdAt',
-}
-
-export interface WalletsStreamItem {
-	[TableKeys.PK]: DocumentClient.String;
-	[TableKeys.SK]: DocumentClient.String;
-	[WalletsStreamAttributes.ID]: DocumentClient.String;
-	[WalletsStreamAttributes.CREATED_AT]: DocumentClient.String;
 }
 
 export enum MasterWalletInvolvedTransactionAttributes {
@@ -55,6 +41,14 @@ export interface MasterWalletInvolvedTransactionItem {
 	[MasterWalletInvolvedTransactionAttributes.AMOUNT]: DocumentClient.String;
 	[MasterWalletInvolvedTransactionAttributes.NETWORK]: DocumentClient.String;
 	[MasterWalletInvolvedTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
+}
+
+export interface IMasterWalletInvolvedTransaction {
+	id: string;
+	createdAt: string;
+	amount: string;
+	network: string;
+	phoneNumber: string;
 }
 
 export enum TouchSuccessAttributes {

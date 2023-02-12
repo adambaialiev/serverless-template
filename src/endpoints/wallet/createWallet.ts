@@ -3,7 +3,6 @@ import { sendResponse } from '@/utils/makeResponse';
 import { withAuthorization } from '@/middlewares/withAuthorization';
 import { CryptoService } from '@/services/crypto/crypto';
 import MasterWallet from '@/services/masterWallet/masterWallet';
-import CryptoStreams from '@/services/cryptoStreams/cryptoStreams';
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -15,13 +14,10 @@ export const handler: APIGatewayProxyHandler = async (
 
 		const cryptoService = new CryptoService();
 		const masterWallet = new MasterWallet();
-		const cryptoStreams = new CryptoStreams();
 
 		await masterWallet.createMasterWalletIfNeeded();
-		const streamId = await cryptoStreams.createWalletsStreamIfNeeded();
 
-		const account = await cryptoService.createCryptoWallet(phoneNumber);
-		await cryptoStreams.addWalletToStream(account.address, streamId);
+		await cryptoService.createCryptoWallet(phoneNumber);
 
 		callback(null, {
 			statusCode: 201,

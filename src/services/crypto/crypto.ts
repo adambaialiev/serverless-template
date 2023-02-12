@@ -47,6 +47,7 @@ export class CryptoService {
 			publicKey: account.address,
 			chain: 'mainnet',
 			network: 'polygon',
+			phoneNumber,
 		};
 
 		const params = {

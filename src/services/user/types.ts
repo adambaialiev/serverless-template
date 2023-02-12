@@ -3,6 +3,7 @@ export interface IWallet {
 	privateKey: string;
 	network: 'erc20' | 'trc20' | 'polygon';
 	chain: 'goerli' | 'mainnet';
+	phoneNumber: string;
 }
 
 export interface User {

@@ -44,20 +44,6 @@ custom:
     createRoute53Record: true
 
 functions:
-  listenWallets:
-    handler: build/src/endpoints/crypto-stream-listeners/listenWallets.listenWallets
-    events:
-      - http:
-          path: /v1/listeners/listen-user-wallets
-          method: post
-          cors: true
-  listenMasterWallet:
-    handler: build/src/endpoints/crypto-stream-listeners/listenMasterWallet.listenMasterWallet
-    events:
-      - http:
-          path: /v1/listeners/listen-master-wallet
-          method: post
-          cors: true
   createWallet:
     handler: build/src/endpoints/wallet/createWallet.createWallet
     events:
@@ -78,6 +64,38 @@ functions:
     events:
       - http:
           path: /v1/wallet/deposit
+          method: post
+          cors: true
+
+  usersWalletAddresses:
+    handler: build/src/endpoints/store/usersWalletAddresses.usersWalletAddresses
+    events:
+      - http:
+          path: /v1/store/usersWalletAddresses
+          method: post
+          cors: true
+
+  touchPendingAll:
+    handler: build/src/endpoints/store/touchPendingAll.touchPendingAll
+    events:
+      - http:
+          path: /v1/store/touchPendingTransactions
+          method: post
+          cors: true
+
+  homePendingAll:
+    handler: build/src/endpoints/store/homePendingAll.homePendingAll
+    events:
+      - http:
+          path: /v1/store/homePendingTransactions
+          method: post
+          cors: true
+
+  withdrawPendingAll:
+    handler: build/src/endpoints/store/withdrawPendingAll.withdrawPendingAll
+    events:
+      - http:
+          path: /v1/store/withdrawPendingTransactions
           method: post
           cors: true
 
