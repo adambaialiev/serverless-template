@@ -34,4 +34,4 @@ export const handler = async (
 	}
 };
 
-export const homePendingAll = handler;
+export const withdrawSuccess = handler;
