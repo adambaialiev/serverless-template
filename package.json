@@ -24,6 +24,7 @@
 		"bcrypt": "^5.1.0",
 		"countries-list": "^2.6.1",
 		"crypto-secure-random-digit": "^1.0.10",
+		"ethers": "^6.0.2",
 		"jsonwebtoken": "^9.0.0",
 		"moralis": "^2.14.1",
 		"pusher": "^5.1.2",

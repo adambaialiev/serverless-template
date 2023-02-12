@@ -31,7 +31,7 @@ const TableName = process.env.dynamo_table as string;
 const getWeb3Instance = () => {
 	const web3 = new Web3(
 		new Web3.providers.HttpProvider(
-			'https://polygon-mainnet.infura.io/v3/49dfcdb7a3254aaab0ff651e6d0ed870'
+			'https://nd-552-463-930.p2pify.com/14b83362eb8642f9ebc4922235a55a15'
 		)
 	);
 	return web3;
@@ -147,10 +147,28 @@ export class CryptoService {
 			const balance = await contract.methods.balanceOf(sourcePublicKey).call();
 			console.log({ balance });
 
+			const gasOracleResponse = await axios.get<GasOracle>(
+				'https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=5X5SKNQ1M31NP3FP8A7SVJNV9UEM2FFQFT'
+			);
+
+			if (!gasOracleResponse.data) {
+				throw new Error('Can not retrieve gasOracleResponse');
+			}
+
+			const gasOracle = gasOracleResponse.data;
+
+			const tx = {
+				from: signer.address,
+				gas: 0,
+				gasPrice: web3.utils.toWei(gasOracle.result.SafeGasPrice, 'Gwei'),
+			};
+			console.log({ tx });
+			tx.gas = await web3.eth.estimateGas(tx);
+
 			const hash = await new Promise<string | undefined>((resolve) => {
 				contract.methods
-					.transfer(sourcePublicKey, balance)
-					.send({ from: signer.address })
+					.transfer(masterWallet.publicAddress, balance)
+					.send(tx)
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					.on('transactionHash', (hash: any) => {
 						console.log({ hash });
