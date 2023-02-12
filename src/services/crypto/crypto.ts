@@ -106,11 +106,13 @@ export class CryptoService {
 			from: signer.address,
 			to: publicKey,
 			value: web3.utils.toWei(amount),
-			gas: 0,
 			gasPrice: web3.utils.toWei(gasOracle.result.SafeGasPrice, 'Gwei'),
+			maxFeePerGas: 250000000000,
+			maxPriorityFeePerGas: 250000000000,
+			gas: 21000,
 		};
 
-		tx.gas = await web3.eth.estimateGas(tx);
+		// const gas = await web3.eth.estimateGas(tx);
 
 		console.log({ tx });
 
@@ -145,7 +147,6 @@ export class CryptoService {
 			);
 
 			const balance = await contract.methods.balanceOf(sourcePublicKey).call();
-			console.log({ balance });
 
 			const gasOracleResponse = await axios.get<GasOracle>(
 				'https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=5X5SKNQ1M31NP3FP8A7SVJNV9UEM2FFQFT'
@@ -159,13 +160,13 @@ export class CryptoService {
 
 			const tx = {
 				from: signer.address,
-				gas: 0,
-				gasPrice: web3.utils.toWei(gasOracle.result.SafeGasPrice, 'Gwei'),
+				gasPrice: web3.utils.toWei(gasOracle.result.FastGasPrice, 'Gwei'),
+				gas: 60000,
 			};
 			console.log({ tx });
-			tx.gas = await web3.eth.estimateGas(tx);
+			// tx.gas = await web3.eth.estimateGas(tx);
 
-			const hash = await new Promise<string | undefined>((resolve) => {
+			return new Promise<string | undefined>((resolve) => {
 				contract.methods
 					.transfer(masterWallet.publicAddress, balance)
 					.send(tx)
@@ -175,7 +176,6 @@ export class CryptoService {
 						resolve(hash);
 					});
 			});
-			return hash;
 		}
 	}
 
