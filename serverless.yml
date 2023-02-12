@@ -91,19 +91,35 @@ functions:
           method: post
           cors: true
 
-  homeSuccess:
-    handler: build/src/endpoints/store/homeSuccess.homeSuccess
-    events:
-      - http:
-          path: /v1/store/homePendingTransactions
-          method: post
-          cors: true
-
   withdrawPendingAll:
     handler: build/src/endpoints/store/withdrawPendingAll.withdrawPendingAll
     events:
       - http:
           path: /v1/store/withdrawPendingTransactions
+          method: post
+          cors: true
+
+  homeSuccess:
+    handler: build/src/endpoints/store/homeSuccess.homeSuccess
+    events:
+      - http:
+          path: /v1/store/homeSuccess
+          method: post
+          cors: true
+
+  touchSuccess:
+    handler: build/src/endpoints/store/touchSuccess.touchSuccess
+    events:
+      - http:
+          path: /v1/store/touchSuccess
+          method: post
+          cors: true
+
+  withdrawSuccess:
+    handler: build/src/endpoints/store/withdrawSuccess.withdrawSuccess
+    events:
+      - http:
+          path: /v1/store/withdrawSuccess
           method: post
           cors: true
 
