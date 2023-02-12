@@ -22,13 +22,13 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			Number(amount),
 			transactionHash
 		);
-		console.log('after increment balance');
+
 		await pushNotificationService.send(
 			phoneNumber,
 			'ShopWallet',
 			`You recieved ${amount} USDT`
 		);
-		console.log('after push notification send');
+
 		const userService = new UserService();
 		const user = await userService.getUser(phoneNumber);
 		console.log({ user });
