@@ -110,11 +110,11 @@ export default class MasterWallet {
 		}
 	}
 
-	async touchUserWallet(address: string, phoneNumber: string) {
+	async touchUserWallet(privateKey: string, phoneNumber: string) {
 		const crypto = new CryptoEthersService();
 		const amount = '0.02';
 		const transactionHash = await crypto.makePolygonMaticTransaction(
-			address,
+			privateKey,
 			amount
 		);
 
