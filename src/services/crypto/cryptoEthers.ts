@@ -22,7 +22,18 @@ interface GasOracle {
 	};
 }
 
-const amountToRaw = (amount: number) => amount.toFixed(6).replace(/\./g, '');
+export const amountToRaw = (amount: number) =>
+	amount.toFixed(6).replace(/\./g, '');
+
+export const rawAmountToRealAmount = (value: string) => {
+	if (value.length < 6) {
+		throw new Error(`value: ${value} length is lower than 6.`);
+	}
+	const decimals = value.slice(-6);
+	const main = value.slice(0, value.length - 6);
+
+	return `${main}.${decimals}`;
+};
 
 export default class CryptoEthersService {
 	constructor() {
@@ -33,10 +44,20 @@ export default class CryptoEthersService {
 
 	provider: ethers.JsonRpcProvider;
 
+	async getBalanceOfAddress(address: string) {
+		const erc20_r = new ethers.Contract(
+			USDT_CONTRACT_IN_POLYON,
+			contractAbi,
+			this.provider
+		);
+		const balance = await erc20_r.balanceOf(address);
+		return String(balance);
+	}
+
 	async makePolygonUsdtTransaction(
 		privateKey: string,
 		targetPublicKey: string,
-		amount: number
+		amount: string
 	) {
 		const gasOracleResponse = await axios.get<GasOracle>(ORACLE_ENDPOINT);
 		if (!gasOracleResponse.data) {
@@ -48,9 +69,8 @@ export default class CryptoEthersService {
 			contractAbi,
 			signer
 		);
-		const rawAmount = amountToRaw(amount);
-		console.log({ rawAmount });
-		const transaction = await erc20_rw.transfer(targetPublicKey, rawAmount, {
+		console.log({ amount });
+		const transaction = await erc20_rw.transfer(targetPublicKey, amount, {
 			from: signer.address,
 			gasPrice: Web3.utils.toWei(
 				gasOracleResponse.data.result.SafeGasPrice,
@@ -58,9 +78,10 @@ export default class CryptoEthersService {
 			),
 		});
 		console.log({ transaction });
+		return transaction.hash;
 	}
 
-	async makePolygonMaticTransaction(privateKey: string) {
+	async makePolygonMaticTransaction(privateKey: string, value: string) {
 		const gasOracleResponse = await axios.get<GasOracle>(ORACLE_ENDPOINT);
 		if (!gasOracleResponse.data) {
 			throw new Error('Can not retrieve gasOracleResponse');
@@ -69,7 +90,7 @@ export default class CryptoEthersService {
 		const tx = {
 			from: signer.address,
 			to: '0x9cddeB80a7BE37e7daCA7e9c4F193e781dD157e6',
-			value: parseEther('0.02'),
+			value: parseEther(value),
 			gasPrice: Web3.utils.toWei(
 				gasOracleResponse.data.result.FastGasPrice,
 				'Gwei'
@@ -77,5 +98,6 @@ export default class CryptoEthersService {
 		};
 		const transaction = await signer.sendTransaction(tx);
 		console.log({ transaction });
+		return transaction.hash;
 	}
 }

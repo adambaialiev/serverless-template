@@ -18,6 +18,9 @@ import {
 	TransactionAttributes,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
+import CryptoEthersService, {
+	amountToRaw,
+} from '@/services/crypto/cryptoEthers';
 import PusherService from '@/services/pusher/pusher';
 import UserService from '@/services/user/user';
 import AWS from 'aws-sdk';
@@ -108,9 +111,12 @@ export default class MasterWallet {
 	}
 
 	async touchUserWallet(address: string, phoneNumber: string) {
-		const crypto = new CryptoService();
+		const crypto = new CryptoEthersService();
 		const amount = '0.02';
-		const transactionHash = await crypto.sendMaticToAddress(address, amount);
+		const transactionHash = await crypto.makePolygonMaticTransaction(
+			address,
+			amount
+		);
 
 		await dynamo
 			.put({
@@ -211,13 +217,20 @@ export default class MasterWallet {
 
 	async homeUserWallet(phoneNumber: string, amount: string) {
 		const userService = new UserService();
-		const cryptoService = new CryptoService();
+		const cryptoService = new CryptoEthersService();
 		const wallet = await userService.getUserPolygonWallet(phoneNumber);
-		const transactionHash =
-			await cryptoService.makePolygonUsdtTransactionToMasterWallet(
-				wallet.privateKey,
-				wallet.publicKey
-			);
+		const masterWallet = await this.getMasterWallet();
+		if (!masterWallet) {
+			throw new Error('no masterwallet found');
+		}
+		const addressBalance = await cryptoService.getBalanceOfAddress(
+			wallet.publicKey
+		);
+		const transactionHash = await cryptoService.makePolygonUsdtTransaction(
+			wallet.privateKey,
+			masterWallet.publicAddress,
+			addressBalance
+		);
 
 		await dynamo
 			.put({
@@ -330,13 +343,21 @@ export default class MasterWallet {
 		if (!userOutput.Item) {
 			throw new Error(`user with phone number: ${phoneNumber} is not found`);
 		}
-		const crypto = new CryptoService();
+		const crypto = new CryptoEthersService();
 
-		const transactionHash =
-			await crypto.makePolygonUsdtTransactionWithdrawFromMasterWallet(
-				address,
-				amount
-			);
+		const masterWallet = await this.getMasterWallet();
+
+		if (!masterWallet) {
+			throw new Error('can not find master wallet');
+		}
+
+		const rawAmount = amountToRaw(Number(amount));
+
+		const transactionHash = await crypto.makePolygonUsdtTransaction(
+			masterWallet.privateKey,
+			address,
+			rawAmount
+		);
 
 		const date = Date.now().toString();
 
