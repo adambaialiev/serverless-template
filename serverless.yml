@@ -45,7 +45,7 @@ custom:
 
 functions:
   debugUsdtTransactions:
-    timeout: 20
+    timeout: 30
     handler: build/src/endpoints/wallet/debugUsdtTransactions.debugUsdtTransactions
     events:
       - http:
