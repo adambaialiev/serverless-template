@@ -53,6 +53,7 @@ functions:
           method: post
           cors: true
   withdraw:
+    timeout: 30
     handler: build/src/endpoints/wallet/withdraw.withdraw
     events:
       - http:
@@ -61,6 +62,7 @@ functions:
           cors: true
 
   deposit:
+    timeout: 30
     handler: build/src/endpoints/wallet/deposit.deposit
     events:
       - http:
@@ -109,6 +111,7 @@ functions:
           cors: true
 
   touchSuccess:
+    timeout: 30
     handler: build/src/endpoints/store/touchSuccess.touchSuccess
     events:
       - http:

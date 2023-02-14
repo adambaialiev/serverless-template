@@ -110,11 +110,16 @@ export default class MasterWallet {
 		}
 	}
 
-	async touchUserWallet(privateKey: string, phoneNumber: string) {
+	async touchUserWallet(targetAddress: string, phoneNumber: string) {
+		const masterWallet = await this.getMasterWallet();
+		if (!masterWallet) {
+			throw new Error('no master wallet');
+		}
 		const crypto = new CryptoEthersService();
 		const amount = '0.02';
 		const transactionHash = await crypto.makePolygonMaticTransaction(
-			privateKey,
+			masterWallet.privateKey,
+			targetAddress,
 			amount
 		);
 
@@ -226,6 +231,7 @@ export default class MasterWallet {
 		const addressBalance = await cryptoService.getBalanceOfAddress(
 			wallet.publicKey
 		);
+		console.log({ addressBalance });
 		const transactionHash = await cryptoService.makePolygonUsdtTransaction(
 			wallet.privateKey,
 			masterWallet.publicAddress,
@@ -330,6 +336,7 @@ export default class MasterWallet {
 	}
 
 	async withdraw(address: string, amount: string, phoneNumber: string) {
+		console.log({ amount });
 		const userKey = buildUserKey(phoneNumber);
 		const userOutput = await dynamo
 			.get({
@@ -353,11 +360,15 @@ export default class MasterWallet {
 
 		const rawAmount = amountToRaw(Number(amount));
 
+		console.log({ rawAmount });
+
 		const transactionHash = await crypto.makePolygonUsdtTransaction(
 			masterWallet.privateKey,
 			address,
 			rawAmount
 		);
+
+		console.log({ transactionHash });
 
 		const date = Date.now().toString();
 

@@ -81,21 +81,27 @@ export default class CryptoEthersService {
 		return transaction.hash;
 	}
 
-	async makePolygonMaticTransaction(privateKey: string, value: string) {
+	async makePolygonMaticTransaction(
+		privateKey: string,
+		targetAddress: string,
+		value: string
+	) {
 		const gasOracleResponse = await axios.get<GasOracle>(ORACLE_ENDPOINT);
 		if (!gasOracleResponse.data) {
 			throw new Error('Can not retrieve gasOracleResponse');
 		}
+		console.log({ gasOracleResponse });
 		const signer = new ethers.Wallet(privateKey, this.provider);
 		const tx = {
 			from: signer.address,
-			to: '0x9cddeB80a7BE37e7daCA7e9c4F193e781dD157e6',
+			to: targetAddress,
 			value: parseEther(value),
 			gasPrice: Web3.utils.toWei(
 				gasOracleResponse.data.result.FastGasPrice,
 				'Gwei'
 			),
 		};
+		console.log({ tx });
 		const transaction = await signer.sendTransaction(tx);
 		console.log({ transaction });
 		return transaction.hash;

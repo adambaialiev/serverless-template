@@ -41,7 +41,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			const wallet = user.wallets.find((w) => w.network === 'polygon');
 			console.log({ wallet });
 			if (wallet) {
-				await masterWallet.touchUserWallet(wallet.privateKey, phoneNumber);
+				await masterWallet.touchUserWallet(wallet.publicKey, phoneNumber);
 				console.log('after touch user wallet');
 			}
 		}
