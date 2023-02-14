@@ -2,6 +2,9 @@ import { buildUserKey } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys, UserItem } from '@/common/dynamo/schema';
 import { AuthService } from '@/services/auth/auth';
+import { CryptoService } from '@/services/crypto/crypto';
+import MasterWallet from '@/services/masterWallet/masterWallet';
+import UserService from '@/services/user/user';
 import { sendResponse } from '@/utils/makeResponse';
 import { APIGatewayEvent } from 'aws-lambda';
 
@@ -20,22 +23,35 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 			[TableKeys.SK]: userKey,
 		});
 
-		let verifyResponse;
-
 		if (userOutput.Item) {
-			verifyResponse = await authService.verifySignIn({
+			const userItem = userOutput.Item as UserItem;
+			const authTokens = await authService.verifySignIn({
 				phoneNumber,
 				otpCode,
 				sessionId,
-				user: userOutput.Item as UserItem,
+				user: userItem,
 			});
+
+			if (typeof authTokens === 'string') {
+				return sendResponse(500, authTokens);
+			}
+
+			const cryptoService = new CryptoService();
+			const masterWallet = new MasterWallet();
+			const userService = new UserService();
+
+			await masterWallet.createMasterWalletIfNeeded();
+
+			const user = await userService.getUser(phoneNumber);
+
+			if (!user.wallets || !user.wallets.length) {
+				await cryptoService.createCryptoWallet(phoneNumber);
+			}
+
+			return sendResponse(201, { ...authTokens, user });
 		}
 
-		if (verifyResponse && typeof verifyResponse !== 'string') {
-			const user = userOutput.Item as UserItem;
-			return sendResponse(201, { ...verifyResponse, user });
-		}
-		return sendResponse(500, verifyResponse);
+		return sendResponse(500, { message: 'user is not found' });
 	} catch (error: unknown) {
 		console.log({ error });
 		if (error instanceof Error) {

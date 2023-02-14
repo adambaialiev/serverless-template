@@ -5,16 +5,29 @@ export const buildKey = (entity: Entities, id: string) => `${entity}${id}`;
 export const buildUserKey = (phoneNumber: string) =>
 	buildKey(Entities.USER, phoneNumber);
 
-export const buildMerchantKey = (phonNumber: string) =>
-	buildKey(Entities.MERCHANT, phonNumber);
-
-export const buildApiKey = (api: string) => buildKey(Entities.API, api);
-
 export const buildTransactionKey = (id: string) =>
 	buildKey(Entities.TRANSACTION, id);
 
-export const buildPreTransactionKey = (id: string) =>
-	buildKey(Entities.PRE_TRANSACTION, id);
-
 export const buildIncrementTransactionKey = (hash: string) =>
 	buildKey(Entities.INCREMENT_TRANSACTION, hash);
+
+export const buildDecrementTransactionKey = (hash: string) =>
+	buildKey(Entities.DECREMENT_TRANSACTION, hash);
+
+export const buildTouchPendingKey = (hash: string) =>
+	buildKey(Entities.TOUCH_PENDING, hash);
+
+export const buildTouchSuccessKey = (hash: string) =>
+	buildKey(Entities.TOUCH_SUCCESS, hash);
+
+export const buildHomePendingKey = (hash: string) =>
+	buildKey(Entities.HOME_PENDING, hash);
+
+export const buildHomeSuccessKey = (hash: string) =>
+	buildKey(Entities.HOME_SUCCESS, hash);
+
+export const buildWithdrawalPendingKey = (hash: string) =>
+	buildKey(Entities.WITHDRAWAL_PENDING, hash);
+
+export const buildWithdrawalSuccessKey = (hash: string) =>
+	buildKey(Entities.WITHDRAWAL_SUCCESS, hash);

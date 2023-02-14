@@ -1,18 +1,18 @@
 {
-  "compilerOptions": {
-    "module": "CommonJS",
-    "rootDir": "./",
-    "target": "ES2015",
-    "lib": ["es2018"],
-    "noImplicitAny": true,
-    "moduleResolution": "node",
-    "outDir": "./build",
-    "esModuleInterop": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  },
-  "exclude": ["node_modules"],
-  "include": ["**/*.ts"]
+	"compilerOptions": {
+		"module": "CommonJS",
+		"rootDir": "./",
+		"target": "ES2015",
+		"lib": ["es2018"],
+		"noImplicitAny": true,
+		"moduleResolution": "node16",
+		"outDir": "./build",
+		"esModuleInterop": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		}
+	},
+	"exclude": ["node_modules"],
+	"include": ["**/*.ts"]
 }

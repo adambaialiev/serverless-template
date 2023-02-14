@@ -1,10 +1,8 @@
 import { APIGatewayEvent, APIGatewayProxyCallback, Context } from 'aws-lambda';
 import {
 	Entities,
-	IndexNames,
-	IWallet,
+	MasterWalletInvolvedTransactionItem,
 	TableKeys,
-	UserItem,
 } from '@/common/dynamo/schema';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
@@ -20,40 +18,26 @@ export const handler = async (
 			.query({
 				TableName: process.env.dynamo_table as string,
 				KeyConditionExpression: '#pk = :pk',
-				IndexName: IndexNames.GSI1,
 				ExpressionAttributeNames: {
-					'#pk': TableKeys.GSI1PK,
+					'#pk': TableKeys.PK,
 				},
 				ExpressionAttributeValues: {
-					':pk': Entities.USER,
+					':pk': Entities.TOUCH_PENDING,
 				},
 			})
 			.promise();
-		console.log({ output });
+
 		if (output.Items) {
-			const users = output.Items as UserItem[];
-			const addresses: { address: string; phoneNumber: string }[] = [];
-			users.forEach((user) => {
-				const wallets = user.wallets as IWallet[];
-				if (wallets) {
-					wallets.forEach((wallet) => {
-						if (wallet.network === 'polygon' && wallet.chain === 'mainnet') {
-							addresses.push({
-								address: wallet.publicKey,
-								phoneNumber: user.phoneNumber,
-							});
-						}
-					});
-				}
-			});
+			const transactions =
+				output.Items as MasterWalletInvolvedTransactionItem[];
 			callback(null, {
 				statusCode: 201,
-				body: JSON.stringify(addresses),
+				body: JSON.stringify(transactions),
 			});
 		} else {
 			return {
 				statusCode: 500,
-				body: 'no users',
+				body: 'no transactions',
 			};
 		}
 	} catch (error: unknown) {
@@ -67,4 +51,4 @@ export const handler = async (
 	}
 };
 
-export const getAllWalletsAddresses = handler;
+export const touchPendingAll = handler;
