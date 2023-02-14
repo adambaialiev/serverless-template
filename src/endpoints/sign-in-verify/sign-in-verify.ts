@@ -32,6 +32,10 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 				user: userItem,
 			});
 
+			if (typeof authTokens === 'string') {
+				return sendResponse(500, authTokens);
+			}
+
 			const cryptoService = new CryptoService();
 			const masterWallet = new MasterWallet();
 			const userService = new UserService();
@@ -49,8 +53,8 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 
 		return sendResponse(500, { message: 'user is not found' });
 	} catch (error: unknown) {
+		console.log({ error });
 		if (error instanceof Error) {
-			console.log({ error });
 			return sendResponse(500, { message: error.message });
 		}
 	}
