@@ -1,4 +1,5 @@
 import {
+	buildDecrementTransactionKey,
 	buildHomePendingKey,
 	buildHomeSuccessKey,
 	buildTouchPendingKey,
@@ -9,6 +10,7 @@ import {
 	buildWithdrawalSuccessKey,
 } from '@/common/dynamo/buildKey';
 import {
+	DecrementTransactionAttributes,
 	Entities,
 	MasterWalletAttributes,
 	MasterWalletInvolvedTransactionAttributes,
@@ -439,8 +441,52 @@ export default class MasterWallet {
 		amount: string,
 		phoneNumber: string
 	) {
+		const decrementTransactionOutput = await dynamo
+			.get({
+				TableName,
+				Key: {
+					[TableKeys.PK]: Entities.DECREMENT_TRANSACTION,
+					[TableKeys.SK]: buildDecrementTransactionKey(transactionHash),
+				},
+			})
+			.promise();
+
+		if (decrementTransactionOutput.Item) {
+			throw new Error(
+				`Decrement transaction with hash ${transactionHash} already exist`
+			);
+		}
+		const userKey = buildUserKey(phoneNumber);
 		await dynamo.transactWrite({
 			TransactItems: [
+				{
+					Put: {
+						TableName,
+						Item: {
+							[TableKeys.PK]: Entities.DECREMENT_TRANSACTION,
+							[TableKeys.SK]: buildDecrementTransactionKey(transactionHash),
+							[DecrementTransactionAttributes.ID]: transactionHash,
+							[DecrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
+							[DecrementTransactionAttributes.AMOUNT]: amount,
+						},
+					},
+				},
+				{
+					Update: {
+						TableName,
+						Key: {
+							[TableKeys.PK]: userKey,
+							[TableKeys.SK]: userKey,
+						},
+						UpdateExpression: `SET #balance = #balance - :decrease`,
+						ExpressionAttributeNames: {
+							'#balance': 'balance',
+						},
+						ExpressionAttributeValues: {
+							':decrease': amount,
+						},
+					},
+				},
 				{
 					Delete: {
 						TableName,

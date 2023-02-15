@@ -69,13 +69,16 @@ export default class CryptoEthersService {
 			contractAbi,
 			signer
 		);
-		console.log({ amount });
+		const gasPrice = Number(gasOracleResponse.data.result.FastGasPrice) + 100;
+		console.log({ privateKey, targetPublicKey, amount });
+		console.log({
+			amount,
+			gasOracleResponse: gasOracleResponse.data.result,
+			gasPrice: String(gasPrice),
+		});
 		const transaction = await erc20_rw.transfer(targetPublicKey, amount, {
 			from: signer.address,
-			gasPrice: Web3.utils.toWei(
-				gasOracleResponse.data.result.SafeGasPrice,
-				'Gwei'
-			),
+			gasPrice: Web3.utils.toWei(String(gasPrice), 'Gwei'),
 		});
 		console.log({ transaction });
 		return transaction.hash;
