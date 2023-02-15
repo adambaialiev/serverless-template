@@ -14,6 +14,7 @@ export enum IndexNames {
 export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
 	USER = 'USER#',
+	FEEDBACK = 'FEEDBACK#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
 	DECREMENT_TRANSACTION = 'DECREMENT_TRANSACTION#',
@@ -73,6 +74,24 @@ export enum UserAttributes {
 	REFRESH_TOKEN = 'refreshToken',
 	WALLETS = 'wallets',
 	PUSH_TOKEN = 'pushToken',
+}
+export enum FeedbackAttributes {
+	ID = 'id',
+	CREATED_AT = 'createdAt',
+	UPDATED_AT = 'updatedAt',
+	COMMENT = 'comment',
+	RATING = 'rating',
+	USER = 'user',
+}
+
+export interface FeedbackItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[FeedbackAttributes.COMMENT]: DocumentClient.String;
+	[FeedbackAttributes.CREATED_AT]: DocumentClient.String;
+	[FeedbackAttributes.UPDATED_AT]: DocumentClient.String;
+	[FeedbackAttributes.RATING]: DocumentClient.NumberAttributeValue;
+	[FeedbackAttributes.USER]: DocumentClient.String;
 }
 
 export interface UserItem {

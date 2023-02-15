@@ -166,9 +166,15 @@ functions:
           path: /v1/users/{phoneNumber}
           method: get
           cors: true
+  getRegisteredUsers:
+    handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
+    events:
+      - http:
+          path: /v1/users/registered
+          method: post
+          cors: true
 
   signIn:
-    timeout: 10
     handler: build/src/endpoints/sign-in/sign-in.signIn
     events:
       - http:
@@ -177,7 +183,6 @@ functions:
           cors: true
 
   signInVerify:
-    timeout: 10
     handler: build/src/endpoints/sign-in-verify/sign-in-verify.signInVerify
     events:
       - http:
@@ -186,7 +191,6 @@ functions:
           cors: true
 
   refreshToken:
-    timeout: 10
     handler: build/src/endpoints/refreshToken/refreshToken.refreshTokenHandler
     events:
       - http:
@@ -194,11 +198,11 @@ functions:
           method: post
           cors: true
 
-  debug:
-    handler: build/src/endpoints/debug/debug.debug
+  createFeedback:
+    handler: build/src/endpoints/feedback/createFeedback.createFeedback
     events:
       - http:
-          path: /v1/debug
+          path: /v1/feedback
           method: post
           cors: true
 
