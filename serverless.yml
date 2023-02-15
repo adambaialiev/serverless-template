@@ -172,6 +172,12 @@ functions:
       - http:
           path: /v1/users/registered
           method: post
+  updateUser:
+    handler: build/src/endpoints/user/updateUser.updateUser
+    events:
+      - http:
+          path: /v1/users/update
+          method: put
           cors: true
 
   signIn:

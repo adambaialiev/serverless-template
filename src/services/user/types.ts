@@ -24,3 +24,10 @@ export interface UserSlug {
 	balance: string;
 	pushToken: string;
 }
+
+export interface IUpdateUserParams {
+	firstName: string;
+	lastName: string;
+	email: string;
+	phoneNumber: string;
+}

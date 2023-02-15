@@ -1,10 +1,17 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
-import { TableKeys, UserItem } from '@/common/dynamo/schema';
-import { IWallet, User, UserSlug } from '@/services/user/types';
+import { TableKeys, UserItem, UserAttributes } from '@/common/dynamo/schema';
+import {
+	IUpdateUserParams,
+	IWallet,
+	User,
+	UserSlug,
+} from '@/services/user/types';
 import { unmarshallUser, unmarshallUserSlug } from '@/services/user/unmarshall';
 import AWS from 'aws-sdk';
+import { getUserCompositeKey } from '../auth/auth';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
+const TableName = process.env.dynamo_table as string;
 
 export default class UserService {
 	async getSlug(phoneNumber: string): Promise<UserSlug | undefined> {
@@ -43,6 +50,28 @@ export default class UserService {
 			return unmarshallUser(userOutput.Item as UserItem);
 		}
 		return undefined;
+	}
+
+	async update({ email, firstName, lastName, phoneNumber }: IUpdateUserParams) {
+		const params = {
+			TableName,
+			Key: getUserCompositeKey(phoneNumber),
+			UpdateExpression: `SET #firstName = :firstName, #lastName = :lastName, #email = :email, #updatedAt = :updatedAt`,
+			ExpressionAttributeNames: {
+				'#firstName': UserAttributes.FIRST_NAME,
+				'#lastName': UserAttributes.LAST_NAME,
+				'#email': UserAttributes.EMAIL,
+				'#updatedAt': UserAttributes.UPDATED_AT,
+			},
+			ExpressionAttributeValues: {
+				':firstName': firstName ?? '',
+				':lastName': lastName ?? '',
+				':email': email ?? '',
+				':updatedAt': Date.now().toString(),
+			},
+		};
+
+		await dynamoDB.update(params).promise();
 	}
 
 	async getUserPolygonWallet(
