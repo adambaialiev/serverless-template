@@ -16,7 +16,6 @@ export class FeedbackService {
 	async create(user: UserItem, comment: string | undefined, rating: number) {
 		const feedbackKey = buildFeedbackKey(v4());
 		const feedbackId = v4();
-		console.log('user', JSON.stringify(user, null, 2));
 
 		const Item = {
 			[TableKeys.PK]: Entities.FEEDBACK,

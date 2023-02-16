@@ -69,9 +69,10 @@ export default class UserService {
 				':email': email ?? '',
 				':updatedAt': Date.now().toString(),
 			},
+			ReturnValues: 'ALL_NEW',
 		};
 
-		await dynamoDB.update(params).promise();
+		return (await dynamoDB.update(params).promise()).Attributes;
 	}
 
 	async getUserPolygonWallet(

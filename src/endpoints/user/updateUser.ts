@@ -14,14 +14,14 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 
 		const phoneNumber = event.user.phoneNumber;
 
-		await userService.update({
+		const updatedResponse = await userService.update({
 			firstName,
 			email,
 			lastName,
 			phoneNumber,
 		});
 
-		return sendResponse(200, { message: 'Success' });
+		return sendResponse(200, updatedResponse);
 	} catch (error: unknown) {
 		console.log(error);
 		if (error instanceof Error) {
