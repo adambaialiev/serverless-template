@@ -44,6 +44,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  setStoreValues:
+    handler: build/src/endpoints/store/setStoreValues.setStoreValues
+    events:
+      - http:
+          path: /v1/store/set-store-values
+          method: post
+          cors: true
   getStoreValuesForAdmin:
     handler: build/src/endpoints/store/getStoreValuesForAdmin.getStoreValuesForAdmin
     events:
