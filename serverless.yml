@@ -44,6 +44,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  getUsersForAdmin:
+    handler: build/src/endpoints/wallet/getUsersForAdmin.getUsersForAdmin
+    events:
+      - http:
+          path: /v1/users/get-users-for-admin
+          method: post
+          cors: true
   debugUsdtTransactions:
     timeout: 30
     handler: build/src/endpoints/wallet/debugUsdtTransactions.debugUsdtTransactions
@@ -78,44 +85,11 @@ functions:
           method: post
           cors: true
 
-  touchPendingAll:
-    handler: build/src/endpoints/store/touchPendingAll.touchPendingAll
-    events:
-      - http:
-          path: /v1/store/touchPendingTransactions
-          method: post
-          cors: true
-
-  homePendingAll:
-    handler: build/src/endpoints/store/homePendingAll.homePendingAll
-    events:
-      - http:
-          path: /v1/store/homePendingTransactions
-          method: post
-          cors: true
-
   withdrawPendingAll:
     handler: build/src/endpoints/store/withdrawPendingAll.withdrawPendingAll
     events:
       - http:
           path: /v1/store/withdrawPendingTransactions
-          method: post
-          cors: true
-
-  homeSuccess:
-    handler: build/src/endpoints/store/homeSuccess.homeSuccess
-    events:
-      - http:
-          path: /v1/store/homeSuccess
-          method: post
-          cors: true
-
-  touchSuccess:
-    timeout: 30
-    handler: build/src/endpoints/store/touchSuccess.touchSuccess
-    events:
-      - http:
-          path: /v1/store/touchSuccess
           method: post
           cors: true
 

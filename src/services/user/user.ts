@@ -1,5 +1,10 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
-import { TableKeys, UserItem } from '@/common/dynamo/schema';
+import {
+	Entities,
+	IndexNames,
+	TableKeys,
+	UserItem,
+} from '@/common/dynamo/schema';
 import { IWallet, User, UserSlug } from '@/services/user/types';
 import { unmarshallUser, unmarshallUserSlug } from '@/services/user/unmarshall';
 import AWS from 'aws-sdk';
@@ -51,6 +56,25 @@ export default class UserService {
 		const user = await this.getUser(phoneNumber);
 		if (user) {
 			return user.wallets.find((w) => w.network === 'polygon');
+		}
+	}
+
+	async getUsersForAdmin(): Promise<User[] | undefined> {
+		const output = await dynamoDB
+			.query({
+				TableName: process.env.dynamo_table as string,
+				IndexName: IndexNames.GSI1,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.USER,
+				},
+			})
+			.promise();
+		if (output.Items) {
+			return output.Items.map((item) => unmarshallUser(item as UserItem));
 		}
 	}
 }
