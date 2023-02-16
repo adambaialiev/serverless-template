@@ -44,6 +44,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  getKey:
+    handler: build/src/endpoints/transactions/getKey.getKey
+    events:
+      - http:
+          path: /v1/user/get-key
+          method: post
+          cors: true
   setStoreValues:
     handler: build/src/endpoints/store/setStoreValues.setStoreValues
     events:
