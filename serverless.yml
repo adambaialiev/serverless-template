@@ -44,8 +44,15 @@ custom:
     createRoute53Record: true
 
 functions:
+  getStoreValuesForAdmin:
+    handler: build/src/endpoints/store/getStoreValuesForAdmin.getStoreValuesForAdmin
+    events:
+      - http:
+          path: /v1/store/get-store-values-for-admin
+          method: post
+          cors: true
   getUsersForAdmin:
-    handler: build/src/endpoints/wallet/getUsersForAdmin.getUsersForAdmin
+    handler: build/src/endpoints/user/getUsersForAdmin.getUsersForAdmin
     events:
       - http:
           path: /v1/users/get-users-for-admin

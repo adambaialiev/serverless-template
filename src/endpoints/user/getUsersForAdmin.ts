@@ -20,4 +20,4 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	}
 };
 
-export const debugUsdtTransactions = handler;
+export const getUsersForAdmin = handler;

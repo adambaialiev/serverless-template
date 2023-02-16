@@ -13,8 +13,6 @@ import {
 	DecrementTransactionAttributes,
 	Entities,
 	MasterWalletAttributes,
-	MasterWalletInvolvedTransactionAttributes,
-	MasterWalletInvolvedTransactionItem,
 	MasterWalletItem,
 	TableKeys,
 	TransactionAttributes,
