@@ -233,7 +233,7 @@ export default class MasterWallet {
 		const addressBalance = await cryptoService.getBalanceOfAddress(
 			wallet.publicKey
 		);
-		console.log({ addressBalance });
+		console.log({ addressBalance, wallet });
 		const transactionHash = await cryptoService.makePolygonUsdtTransaction(
 			wallet.privateKey,
 			masterWallet.publicAddress,
@@ -400,7 +400,7 @@ export default class MasterWallet {
 								[TableKeys.PK]: userKey,
 								[TableKeys.SK]: buildTransactionKey(transactionHash),
 								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.CREATED_AT]: date,
 								[TransactionAttributes.ID]: transactionHash,
 								[TransactionAttributes.SOURCE]: phoneNumber,
 								[TransactionAttributes.STATUS]: 'pending',

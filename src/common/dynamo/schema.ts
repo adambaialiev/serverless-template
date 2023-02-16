@@ -98,6 +98,7 @@ export enum MasterWalletAttributes {
 	PUBLIC_ADDRESS = 'publicAddress',
 	PRIVATE_KEY = 'privateKey',
 	NETWORK = 'network',
+	CREATED_AT = 'createdAt',
 }
 
 export interface MasterWalletItem {
@@ -106,6 +107,7 @@ export interface MasterWalletItem {
 	[MasterWalletAttributes.PUBLIC_ADDRESS]: DocumentClient.String;
 	[MasterWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
 	[MasterWalletAttributes.NETWORK]: DocumentClient.String;
+	[MasterWalletAttributes.CREATED_AT]: DocumentClient.String;
 }
 
 export enum TransactionAttributes {
@@ -113,7 +115,7 @@ export enum TransactionAttributes {
 	SOURCE = 'source',
 	TARGET = 'target',
 	AMOUNT = 'amount',
-	DATE = 'date',
+	CREATED_AT = 'createdAt',
 	STATUS = 'status',
 	TYPE = 'type',
 	COMMENT = 'comment',
@@ -124,7 +126,7 @@ export interface TransactionItem {
 	[TransactionAttributes.SOURCE]: DocumentClient.String;
 	[TransactionAttributes.TARGET]: DocumentClient.String;
 	[TransactionAttributes.AMOUNT]: DocumentClient.String;
-	[TransactionAttributes.DATE]: DocumentClient.String;
+	[TransactionAttributes.CREATED_AT]: DocumentClient.String;
 	[TransactionAttributes.STATUS]: DocumentClient.String;
 	[TransactionAttributes.TYPE]: DocumentClient.String;
 }
@@ -134,7 +136,7 @@ export interface ITransaction {
 	source: string;
 	target: string;
 	amount: number;
-	date: string;
+	createdAt: string;
 	status: 'pending' | 'success';
 	type: 'in' | 'out' | 'deposit' | 'withdraw';
 }
@@ -143,6 +145,7 @@ export enum IncrementTransactionAttributes {
 	ID = 'id',
 	PHONE_NUMBER = 'phoneNumber',
 	AMOUNT = 'amount',
+	CREATED_AT = 'createdAt',
 }
 
 export interface IncrementTransactionItem {
@@ -151,12 +154,14 @@ export interface IncrementTransactionItem {
 	[IncrementTransactionAttributes.ID]: DocumentClient.String;
 	[IncrementTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[IncrementTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
+	[IncrementTransactionAttributes.CREATED_AT]: DocumentClient.String;
 }
 
 export enum DecrementTransactionAttributes {
 	ID = 'id',
 	PHONE_NUMBER = 'phoneNumber',
 	AMOUNT = 'amount',
+	CREATED_AT = 'createdAt',
 }
 
 export interface DecrementTransactionItem {
@@ -165,4 +170,5 @@ export interface DecrementTransactionItem {
 	[DecrementTransactionAttributes.ID]: DocumentClient.String;
 	[DecrementTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[DecrementTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
+	[DecrementTransactionAttributes.CREATED_AT]: DocumentClient.String;
 }
