@@ -1,9 +1,5 @@
 import {
 	buildDecrementTransactionKey,
-	buildHomePendingKey,
-	buildHomeSuccessKey,
-	buildTouchPendingKey,
-	buildTouchSuccessKey,
 	buildTransactionKey,
 	buildUserKey,
 	buildWithdrawalPendingKey,
@@ -16,13 +12,14 @@ import {
 	MasterWalletItem,
 	TableKeys,
 	TransactionAttributes,
+	WithdrawalTransactionAttributes,
+	WithdrawalTransactionItem,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
 import CryptoEthersService, {
 	amountToRaw,
 } from '@/services/crypto/cryptoEthers';
 import PusherService from '@/services/pusher/pusher';
-import UserService from '@/services/user/user';
 import AWS from 'aws-sdk';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
@@ -91,250 +88,6 @@ export default class MasterWallet {
 		return undefined;
 	}
 
-	async getTouchPendingTransactions() {
-		const output = await dynamo
-			.query({
-				TableName,
-				KeyConditionExpression: '#pk = :pk',
-				ExpressionAttributeNames: {
-					'#pk': TableKeys.PK,
-				},
-				ExpressionAttributeValues: {
-					':pk': Entities.TOUCH_PENDING,
-				},
-			})
-			.promise();
-
-		if (output.Items) {
-			return output.Items as MasterWalletInvolvedTransactionItem[];
-		}
-	}
-
-	async touchUserWallet(targetAddress: string, phoneNumber: string) {
-		const masterWallet = await this.getMasterWallet();
-		if (!masterWallet) {
-			throw new Error('no master wallet');
-		}
-		const crypto = new CryptoEthersService();
-		const amount = '0.02';
-		const transactionHash = await crypto.makePolygonMaticTransaction(
-			masterWallet.privateKey,
-			targetAddress,
-			amount
-		);
-
-		await dynamo
-			.put({
-				Item: {
-					[TableKeys.PK]: Entities.TOUCH_PENDING,
-					[TableKeys.SK]: buildTouchPendingKey(transactionHash),
-					[MasterWalletInvolvedTransactionAttributes.ID]: transactionHash,
-					[MasterWalletInvolvedTransactionAttributes.CREATED_AT]:
-						Date.now().toString(),
-					[MasterWalletInvolvedTransactionAttributes.AMOUNT]: amount,
-					[MasterWalletInvolvedTransactionAttributes.NETWORK]: 'polygon',
-					[MasterWalletInvolvedTransactionAttributes.PHONE_NUMBER]: phoneNumber,
-				},
-				TableName,
-				ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-			})
-			.promise();
-
-		const output = await dynamo
-			.query({
-				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: '#pk = :pk',
-				ExpressionAttributeNames: {
-					'#pk': TableKeys.PK,
-				},
-				ExpressionAttributeValues: {
-					':pk': Entities.TOUCH_PENDING,
-				},
-			})
-			.promise();
-
-		if (output.Items) {
-			const pusherService = new PusherService();
-			await pusherService.triggerTouchPendingTransactionsUpdated(
-				output.Items as MasterWalletInvolvedTransactionItem[]
-			);
-		}
-	}
-
-	async touchUserWalletSuccess(
-		transactionHash: string,
-		amount: string,
-		phoneNumber: string
-	) {
-		await dynamo
-			.transactWrite({
-				TransactItems: [
-					{
-						Delete: {
-							TableName,
-							Key: {
-								[TableKeys.PK]: Entities.TOUCH_PENDING,
-								[TableKeys.SK]: buildTouchPendingKey(transactionHash),
-							},
-						},
-					},
-					{
-						Put: {
-							TableName,
-							Item: {
-								[TableKeys.PK]: Entities.TOUCH_SUCCESS,
-								[TableKeys.SK]: buildTouchSuccessKey(transactionHash),
-								[MasterWalletInvolvedTransactionAttributes.AMOUNT]: amount,
-								[MasterWalletInvolvedTransactionAttributes.CREATED_AT]:
-									Date.now().toString(),
-								[MasterWalletInvolvedTransactionAttributes.ID]: transactionHash,
-								[MasterWalletInvolvedTransactionAttributes.NETWORK]: 'polygon',
-								[MasterWalletInvolvedTransactionAttributes.PHONE_NUMBER]:
-									phoneNumber,
-							},
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-				],
-			})
-			.promise();
-		const output = await dynamo
-			.query({
-				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: '#pk = :pk',
-				ExpressionAttributeNames: {
-					'#pk': TableKeys.PK,
-				},
-				ExpressionAttributeValues: {
-					':pk': Entities.TOUCH_PENDING,
-				},
-			})
-			.promise();
-
-		if (output.Items) {
-			const pusherService = new PusherService();
-			await pusherService.triggerTouchPendingTransactionsUpdated(
-				output.Items as MasterWalletInvolvedTransactionItem[]
-			);
-		}
-		await this.homeUserWallet(phoneNumber, amount);
-	}
-
-	async homeUserWallet(phoneNumber: string, amount: string) {
-		const userService = new UserService();
-		const cryptoService = new CryptoEthersService();
-		const wallet = await userService.getUserPolygonWallet(phoneNumber);
-		const masterWallet = await this.getMasterWallet();
-		if (!masterWallet) {
-			throw new Error('no masterwallet found');
-		}
-		const addressBalance = await cryptoService.getBalanceOfAddress(
-			wallet.publicKey
-		);
-		console.log({ addressBalance, wallet });
-		const transactionHash = await cryptoService.makePolygonUsdtTransaction(
-			wallet.privateKey,
-			masterWallet.publicAddress,
-			addressBalance
-		);
-
-		await dynamo
-			.put({
-				TableName,
-				Item: {
-					[TableKeys.PK]: Entities.HOME_PENDING,
-					[TableKeys.SK]: buildHomePendingKey(transactionHash),
-					[MasterWalletInvolvedTransactionAttributes.AMOUNT]: amount,
-					[MasterWalletInvolvedTransactionAttributes.CREATED_AT]:
-						Date.now().toString(),
-					[MasterWalletInvolvedTransactionAttributes.ID]: transactionHash,
-					[MasterWalletInvolvedTransactionAttributes.NETWORK]: 'polygon',
-					[MasterWalletInvolvedTransactionAttributes.PHONE_NUMBER]: phoneNumber,
-				},
-				ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-			})
-			.promise();
-
-		const output = await dynamo
-			.query({
-				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: '#pk = :pk',
-				ExpressionAttributeNames: {
-					'#pk': TableKeys.PK,
-				},
-				ExpressionAttributeValues: {
-					':pk': Entities.HOME_PENDING,
-				},
-			})
-			.promise();
-
-		if (output.Items) {
-			const pusherService = new PusherService();
-			await pusherService.triggerHomePendingTransactionsUpdated(
-				output.Items as MasterWalletInvolvedTransactionItem[]
-			);
-		}
-	}
-
-	async homeUserWalletSuccess(
-		transactionHash: string,
-		amount: string,
-		phoneNumber: string
-	) {
-		await dynamo
-			.transactWrite({
-				TransactItems: [
-					{
-						Delete: {
-							TableName,
-							Key: {
-								[TableKeys.PK]: Entities.HOME_PENDING,
-								[TableKeys.SK]: buildHomePendingKey(transactionHash),
-							},
-						},
-					},
-					{
-						Put: {
-							TableName,
-							Item: {
-								[TableKeys.PK]: Entities.HOME_SUCCESS,
-								[TableKeys.SK]: buildHomeSuccessKey(transactionHash),
-								[MasterWalletInvolvedTransactionAttributes.AMOUNT]: amount,
-								[MasterWalletInvolvedTransactionAttributes.CREATED_AT]:
-									Date.now().toString(),
-								[MasterWalletInvolvedTransactionAttributes.ID]: transactionHash,
-								[MasterWalletInvolvedTransactionAttributes.NETWORK]: 'polygon',
-								[MasterWalletInvolvedTransactionAttributes.PHONE_NUMBER]:
-									phoneNumber,
-							},
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-				],
-			})
-			.promise();
-
-		const output = await dynamo
-			.query({
-				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: '#pk = :pk',
-				ExpressionAttributeNames: {
-					'#pk': TableKeys.PK,
-				},
-				ExpressionAttributeValues: {
-					':pk': Entities.HOME_PENDING,
-				},
-			})
-			.promise();
-
-		if (output.Items) {
-			const pusherService = new PusherService();
-			await pusherService.triggerHomePendingTransactionsUpdated(
-				output.Items as MasterWalletInvolvedTransactionItem[]
-			);
-		}
-	}
-
 	async withdraw(address: string, amount: string, phoneNumber: string) {
 		console.log({ amount });
 		const userKey = buildUserKey(phoneNumber);
@@ -380,13 +133,12 @@ export default class MasterWallet {
 							Item: {
 								[TableKeys.PK]: Entities.WITHDRAWAL_PENDING,
 								[TableKeys.SK]: buildTransactionKey(transactionHash),
-								[MasterWalletInvolvedTransactionAttributes.AMOUNT]: amount,
-								[MasterWalletInvolvedTransactionAttributes.CREATED_AT]:
+								[WithdrawalTransactionAttributes.AMOUNT]: amount,
+								[WithdrawalTransactionAttributes.CREATED_AT]:
 									Date.now().toString(),
-								[MasterWalletInvolvedTransactionAttributes.ID]: transactionHash,
-								[MasterWalletInvolvedTransactionAttributes.NETWORK]: 'polygon',
-								[MasterWalletInvolvedTransactionAttributes.PHONE_NUMBER]:
-									phoneNumber,
+								[WithdrawalTransactionAttributes.ID]: transactionHash,
+								[WithdrawalTransactionAttributes.NETWORK]: 'polygon',
+								[WithdrawalTransactionAttributes.PHONE_NUMBER]: phoneNumber,
 							},
 							TableName,
 							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
@@ -429,7 +181,7 @@ export default class MasterWallet {
 		if (output.Items) {
 			const pusherService = new PusherService();
 			await pusherService.triggerWithdrawalPendingTransactionsUpdated(
-				output.Items as MasterWalletInvolvedTransactionItem[]
+				output.Items as WithdrawalTransactionItem[]
 			);
 		}
 	}
@@ -500,13 +252,12 @@ export default class MasterWallet {
 						Item: {
 							[TableKeys.PK]: Entities.WITHDRAWAL_SUCCESS,
 							[TableKeys.SK]: buildWithdrawalSuccessKey(transactionHash),
-							[MasterWalletInvolvedTransactionAttributes.AMOUNT]: amount,
-							[MasterWalletInvolvedTransactionAttributes.CREATED_AT]:
+							[WithdrawalTransactionAttributes.AMOUNT]: amount,
+							[WithdrawalTransactionAttributes.CREATED_AT]:
 								Date.now().toString(),
-							[MasterWalletInvolvedTransactionAttributes.ID]: transactionHash,
-							[MasterWalletInvolvedTransactionAttributes.NETWORK]: 'polygon',
-							[MasterWalletInvolvedTransactionAttributes.PHONE_NUMBER]:
-								phoneNumber,
+							[WithdrawalTransactionAttributes.ID]: transactionHash,
+							[WithdrawalTransactionAttributes.NETWORK]: 'polygon',
+							[WithdrawalTransactionAttributes.PHONE_NUMBER]: phoneNumber,
 						},
 						ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
 					},
@@ -530,7 +281,7 @@ export default class MasterWallet {
 		if (output.Items) {
 			const pusherService = new PusherService();
 			await pusherService.triggerWithdrawalPendingTransactionsUpdated(
-				output.Items as MasterWalletInvolvedTransactionItem[]
+				output.Items as WithdrawalTransactionItem[]
 			);
 		}
 	}
