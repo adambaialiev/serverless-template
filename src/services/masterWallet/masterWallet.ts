@@ -2,7 +2,6 @@ import {
 	buildDecrementTransactionKey,
 	buildTransactionKey,
 	buildUserKey,
-	buildWithdrawalToProcessKey,
 } from '@/common/dynamo/buildKey';
 import {
 	DecrementTransactionAttributes,
@@ -11,7 +10,6 @@ import {
 	MasterWalletItem,
 	TableKeys,
 	TransactionAttributes,
-	WithdrawalToProcessAttributes,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
 import PusherService from '@/services/pusher/pusher';
@@ -26,7 +24,7 @@ interface WithdrawToProcessProps {
 
 interface WithdrawSuccessProps {
 	transactionHash: string;
-	withdrawalToProcessId: string;
+	transactionId: string;
 	amount: string;
 	phoneNumber: string;
 	address: string;
@@ -120,30 +118,11 @@ export default class MasterWallet {
 
 		const date = Date.now().toString();
 
-		const withdrawalToProcessId = v4();
 		const transactionId = v4();
 
 		await dynamo
 			.transactWrite({
 				TransactItems: [
-					{
-						Put: {
-							Item: {
-								[TableKeys.PK]: Entities.WITHDRAWAL_TO_PROCESS,
-								[TableKeys.SK]: buildWithdrawalToProcessKey(
-									withdrawalToProcessId
-								),
-								[WithdrawalToProcessAttributes.AMOUNT]: amount,
-								[WithdrawalToProcessAttributes.CREATED_AT]: date,
-								[WithdrawalToProcessAttributes.ID]: withdrawalToProcessId,
-								[WithdrawalToProcessAttributes.NETWORK]: 'polygon',
-								[WithdrawalToProcessAttributes.PHONE_NUMBER]: phoneNumber,
-								[WithdrawalToProcessAttributes.ADDRESS]: address,
-							},
-							TableName,
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
 					{
 						Put: {
 							Item: {
@@ -167,7 +146,7 @@ export default class MasterWallet {
 
 		const pusherService = new PusherService();
 		await pusherService.triggerWithdrawalToProcess({
-			id: withdrawalToProcessId,
+			id: transactionId,
 			createdAt: date,
 			amount,
 			phoneNumber,
@@ -177,7 +156,7 @@ export default class MasterWallet {
 
 	async withdrawSuccess({
 		transactionHash,
-		withdrawalToProcessId,
+		transactionId,
 		amount,
 		phoneNumber,
 		address,
@@ -230,13 +209,18 @@ export default class MasterWallet {
 					},
 				},
 				{
-					Delete: {
+					Update: {
 						TableName,
 						Key: {
-							[TableKeys.PK]: Entities.WITHDRAWAL_TO_PROCESS,
-							[TableKeys.SK]: buildWithdrawalToProcessKey(
-								withdrawalToProcessId
-							),
+							[TableKeys.PK]: userKey,
+							[TableKeys.SK]: buildTransactionKey(transactionId),
+						},
+						UpdateExpression: `SET #status = :status`,
+						ExpressionAttributeNames: {
+							'#status': 'status',
+						},
+						ExpressionAttributeValues: {
+							':status': 'success',
 						},
 					},
 				},

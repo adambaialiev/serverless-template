@@ -73,7 +73,6 @@ functions:
           method: post
           cors: true
   debugUsdtTransactions:
-    timeout: 30
     handler: build/src/endpoints/wallet/debugUsdtTransactions.debugUsdtTransactions
     events:
       - http:
@@ -81,7 +80,6 @@ functions:
           method: post
           cors: true
   withdraw:
-    timeout: 30
     handler: build/src/endpoints/wallet/withdraw.withdraw
     events:
       - http:
@@ -90,7 +88,6 @@ functions:
           cors: true
 
   deposit:
-    timeout: 30
     handler: build/src/endpoints/wallet/deposit.deposit
     events:
       - http:
@@ -103,14 +100,6 @@ functions:
     events:
       - http:
           path: /v1/store/usersWalletAddresses
-          method: post
-          cors: true
-
-  withdrawPendingAll:
-    handler: build/src/endpoints/store/withdrawPendingAll.withdrawPendingAll
-    events:
-      - http:
-          path: /v1/store/withdrawPendingTransactions
           method: post
           cors: true
 

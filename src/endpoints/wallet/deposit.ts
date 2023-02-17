@@ -8,7 +8,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			event.body as string
 		);
 		console.log({ phoneNumber, amount, transactionHash, address });
-		if (!phoneNumber || !amount || !transactionHash) {
+		if (!phoneNumber || !amount || !transactionHash || !address) {
 			throw new Error('not enough parameters');
 		}
 		const balanceService = new BalanceService();
