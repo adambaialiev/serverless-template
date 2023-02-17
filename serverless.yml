@@ -45,7 +45,7 @@ custom:
 
 functions:
   getUserWallet:
-    handler: build/src/endpoints/transactions/getUserWallet.getUserWallet
+    handler: build/src/endpoints/user/getUserWallet.getUserWallet
     events:
       - http:
           path: /v1/user/wallet
