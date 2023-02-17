@@ -44,11 +44,11 @@ custom:
     createRoute53Record: true
 
 functions:
-  getKey:
-    handler: build/src/endpoints/transactions/getKey.getKey
+  getUserWallet:
+    handler: build/src/endpoints/transactions/getUserWallet.getUserWallet
     events:
       - http:
-          path: /v1/user/get-key
+          path: /v1/user/wallet
           method: post
           cors: true
   setStoreValues:

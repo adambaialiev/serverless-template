@@ -8,7 +8,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 		const userWallet = await userService.getUserPolygonWallet(phoneNumber);
 		callback(null, {
 			statusCode: 201,
-			body: JSON.stringify({ key: userWallet.privateKey }),
+			body: JSON.stringify(userWallet),
 		});
 	} catch (error: unknown) {
 		console.log({ error });
@@ -21,4 +21,4 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	}
 };
 
-export const getKey = handler;
+export const getUserWallet = handler;
