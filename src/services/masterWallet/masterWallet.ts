@@ -2,8 +2,7 @@ import {
 	buildDecrementTransactionKey,
 	buildTransactionKey,
 	buildUserKey,
-	buildWithdrawalPendingKey,
-	buildWithdrawalSuccessKey,
+	buildWithdrawalToProcessKey,
 } from '@/common/dynamo/buildKey';
 import {
 	DecrementTransactionAttributes,
@@ -12,15 +11,27 @@ import {
 	MasterWalletItem,
 	TableKeys,
 	TransactionAttributes,
-	WithdrawalTransactionAttributes,
+	WithdrawalToProcessAttributes,
 	WithdrawalTransactionItem,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
-import CryptoEthersService, {
-	amountToRaw,
-} from '@/services/crypto/cryptoEthers';
 import PusherService from '@/services/pusher/pusher';
 import AWS from 'aws-sdk';
+import { v4 } from 'uuid';
+
+interface WithdrawToProcessProps {
+	amount: string;
+	phoneNumber: string;
+	address: string;
+}
+
+interface WithdrawSuccessProps {
+	transactionHash: string;
+	withdrawalToProcessId: string;
+	amount: string;
+	phoneNumber: string;
+	address: string;
+}
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -88,7 +99,11 @@ export default class MasterWallet {
 		return undefined;
 	}
 
-	async withdraw(address: string, amount: string, phoneNumber: string) {
+	async createWithdrawToProcess({
+		amount,
+		phoneNumber,
+		address,
+	}: WithdrawToProcessProps) {
 		console.log({ amount });
 		const userKey = buildUserKey(phoneNumber);
 		const userOutput = await dynamo
@@ -103,27 +118,11 @@ export default class MasterWallet {
 		if (!userOutput.Item) {
 			throw new Error(`user with phone number: ${phoneNumber} is not found`);
 		}
-		const crypto = new CryptoEthersService();
-
-		const masterWallet = await this.getMasterWallet();
-
-		if (!masterWallet) {
-			throw new Error('can not find master wallet');
-		}
-
-		const rawAmount = amountToRaw(Number(amount));
-
-		console.log({ rawAmount });
-
-		const transactionHash = await crypto.makePolygonUsdtTransaction(
-			masterWallet.privateKey,
-			address,
-			rawAmount
-		);
-
-		console.log({ transactionHash });
 
 		const date = Date.now().toString();
+
+		const withdrawalToProcessId = v4();
+		const transactionId = v4();
 
 		await dynamo
 			.transactWrite({
@@ -131,14 +130,16 @@ export default class MasterWallet {
 					{
 						Put: {
 							Item: {
-								[TableKeys.PK]: Entities.WITHDRAWAL_PENDING,
-								[TableKeys.SK]: buildTransactionKey(transactionHash),
-								[WithdrawalTransactionAttributes.AMOUNT]: amount,
-								[WithdrawalTransactionAttributes.CREATED_AT]:
-									Date.now().toString(),
-								[WithdrawalTransactionAttributes.ID]: transactionHash,
-								[WithdrawalTransactionAttributes.NETWORK]: 'polygon',
-								[WithdrawalTransactionAttributes.PHONE_NUMBER]: phoneNumber,
+								[TableKeys.PK]: Entities.WITHDRAWAL_TO_PROCESS,
+								[TableKeys.SK]: buildWithdrawalToProcessKey(
+									withdrawalToProcessId
+								),
+								[WithdrawalToProcessAttributes.AMOUNT]: amount,
+								[WithdrawalToProcessAttributes.CREATED_AT]: date,
+								[WithdrawalToProcessAttributes.ID]: withdrawalToProcessId,
+								[WithdrawalToProcessAttributes.NETWORK]: 'polygon',
+								[WithdrawalToProcessAttributes.PHONE_NUMBER]: phoneNumber,
+								[WithdrawalToProcessAttributes.ADDRESS]: address,
 							},
 							TableName,
 							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
@@ -148,13 +149,13 @@ export default class MasterWallet {
 						Put: {
 							Item: {
 								[TableKeys.PK]: userKey,
-								[TableKeys.SK]: buildTransactionKey(transactionHash),
+								[TableKeys.SK]: buildTransactionKey(transactionId),
 								[TransactionAttributes.AMOUNT]: amount,
 								[TransactionAttributes.CREATED_AT]: date,
-								[TransactionAttributes.ID]: transactionHash,
+								[TransactionAttributes.ID]: transactionId,
 								[TransactionAttributes.SOURCE]: phoneNumber,
 								[TransactionAttributes.STATUS]: 'pending',
-								[TransactionAttributes.TARGET]: transactionHash,
+								[TransactionAttributes.TARGET]: '',
 								[TransactionAttributes.TYPE]: 'withdraw',
 							},
 							TableName,
@@ -173,7 +174,7 @@ export default class MasterWallet {
 					'#pk': TableKeys.PK,
 				},
 				ExpressionAttributeValues: {
-					':pk': Entities.WITHDRAWAL_PENDING,
+					':pk': Entities.WITHDRAWAL_TO_PROCESS,
 				},
 			})
 			.promise();
@@ -186,11 +187,13 @@ export default class MasterWallet {
 		}
 	}
 
-	async withdrawSuccess(
-		transactionHash: string,
-		amount: string,
-		phoneNumber: string
-	) {
+	async withdrawSuccess({
+		transactionHash,
+		withdrawalToProcessId,
+		amount,
+		phoneNumber,
+		address,
+	}: WithdrawSuccessProps) {
 		const decrementTransactionOutput = await dynamo
 			.get({
 				TableName,
@@ -218,6 +221,7 @@ export default class MasterWallet {
 							[DecrementTransactionAttributes.ID]: transactionHash,
 							[DecrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
 							[DecrementTransactionAttributes.AMOUNT]: amount,
+							[DecrementTransactionAttributes.ADDRESS]: address,
 						},
 					},
 				},
@@ -241,25 +245,11 @@ export default class MasterWallet {
 					Delete: {
 						TableName,
 						Key: {
-							[TableKeys.PK]: Entities.WITHDRAWAL_PENDING,
-							[TableKeys.SK]: buildWithdrawalPendingKey(transactionHash),
+							[TableKeys.PK]: Entities.WITHDRAWAL_TO_PROCESS,
+							[TableKeys.SK]: buildWithdrawalToProcessKey(
+								withdrawalToProcessId
+							),
 						},
-					},
-				},
-				{
-					Put: {
-						TableName,
-						Item: {
-							[TableKeys.PK]: Entities.WITHDRAWAL_SUCCESS,
-							[TableKeys.SK]: buildWithdrawalSuccessKey(transactionHash),
-							[WithdrawalTransactionAttributes.AMOUNT]: amount,
-							[WithdrawalTransactionAttributes.CREATED_AT]:
-								Date.now().toString(),
-							[WithdrawalTransactionAttributes.ID]: transactionHash,
-							[WithdrawalTransactionAttributes.NETWORK]: 'polygon',
-							[WithdrawalTransactionAttributes.PHONE_NUMBER]: phoneNumber,
-						},
-						ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
 					},
 				},
 			],
@@ -273,7 +263,7 @@ export default class MasterWallet {
 					'#pk': TableKeys.PK,
 				},
 				ExpressionAttributeValues: {
-					':pk': Entities.WITHDRAWAL_PENDING,
+					':pk': Entities.WITHDRAWAL_TO_PROCESS,
 				},
 			})
 			.promise();

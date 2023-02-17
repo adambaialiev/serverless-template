@@ -18,8 +18,7 @@ export enum Entities {
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
 	DECREMENT_TRANSACTION = 'DECREMENT_TRANSACTION#',
-	WITHDRAWAL_PENDING = 'WITHDRAWAL_PENDING#',
-	WITHDRAWAL_SUCCESS = 'WITHDRAWAL_SUCCESS#',
+	WITHDRAWAL_TO_PROCESS = 'WITHDRAWAL_TO_PROCESS#',
 }
 
 export enum MasterWalletAttributes {
@@ -122,6 +121,7 @@ export enum IncrementTransactionAttributes {
 	PHONE_NUMBER = 'phoneNumber',
 	AMOUNT = 'amount',
 	CREATED_AT = 'createdAt',
+	ADDRESS = 'address',
 }
 
 export interface IncrementTransactionItem {
@@ -131,6 +131,7 @@ export interface IncrementTransactionItem {
 	[IncrementTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[IncrementTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
 	[IncrementTransactionAttributes.CREATED_AT]: DocumentClient.String;
+	[IncrementTransactionAttributes.ADDRESS]: DocumentClient.String;
 }
 
 export enum DecrementTransactionAttributes {
@@ -138,6 +139,7 @@ export enum DecrementTransactionAttributes {
 	PHONE_NUMBER = 'phoneNumber',
 	AMOUNT = 'amount',
 	CREATED_AT = 'createdAt',
+	ADDRESS = 'address',
 }
 
 export interface DecrementTransactionItem {
@@ -147,22 +149,25 @@ export interface DecrementTransactionItem {
 	[DecrementTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[DecrementTransactionAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
 	[DecrementTransactionAttributes.CREATED_AT]: DocumentClient.String;
+	[DecrementTransactionAttributes.ADDRESS]: DocumentClient.String;
 }
 
-export enum WithdrawalTransactionAttributes {
+export enum WithdrawalToProcessAttributes {
 	ID = 'id',
 	CREATED_AT = 'createdAt',
 	AMOUNT = 'amount',
 	NETWORK = 'network',
 	PHONE_NUMBER = 'phoneNumber',
+	ADDRESS = 'address',
 }
 
 export interface WithdrawalTransactionItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
-	[WithdrawalTransactionAttributes.ID]: DocumentClient.String;
-	[WithdrawalTransactionAttributes.CREATED_AT]: DocumentClient.String;
-	[WithdrawalTransactionAttributes.AMOUNT]: DocumentClient.String;
-	[WithdrawalTransactionAttributes.NETWORK]: DocumentClient.String;
-	[WithdrawalTransactionAttributes.PHONE_NUMBER]: DocumentClient.String;
+	[WithdrawalToProcessAttributes.ID]: DocumentClient.String;
+	[WithdrawalToProcessAttributes.CREATED_AT]: DocumentClient.String;
+	[WithdrawalToProcessAttributes.AMOUNT]: DocumentClient.String;
+	[WithdrawalToProcessAttributes.NETWORK]: DocumentClient.String;
+	[WithdrawalToProcessAttributes.PHONE_NUMBER]: DocumentClient.String;
+	[WithdrawalToProcessAttributes.ADDRESS]: DocumentClient.String;
 }

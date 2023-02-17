@@ -13,7 +13,11 @@ export const handler: APIGatewayProxyHandler = async (
 
 		const masterWalletService = new MasterWallet();
 
-		await masterWalletService.withdraw(address, amount, phoneNumber);
+		await masterWalletService.createWithdrawToProcess({
+			amount,
+			phoneNumber,
+			address,
+		});
 
 		callback(null, {
 			statusCode: 201,

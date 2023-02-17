@@ -14,8 +14,5 @@ export const buildIncrementTransactionKey = (hash: string) =>
 export const buildDecrementTransactionKey = (hash: string) =>
 	buildKey(Entities.DECREMENT_TRANSACTION, hash);
 
-export const buildWithdrawalPendingKey = (hash: string) =>
-	buildKey(Entities.WITHDRAWAL_PENDING, hash);
-
-export const buildWithdrawalSuccessKey = (hash: string) =>
-	buildKey(Entities.WITHDRAWAL_SUCCESS, hash);
+export const buildWithdrawalToProcessKey = (hash: string) =>
+	buildKey(Entities.WITHDRAWAL_TO_PROCESS, hash);

@@ -4,10 +4,10 @@ import { PushNotifications } from '@/services/pushNotifications/pushNotification
 
 const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	try {
-		const { phoneNumber, amount, transactionHash } = JSON.parse(
+		const { phoneNumber, amount, transactionHash, address } = JSON.parse(
 			event.body as string
 		);
-		console.log({ phoneNumber, amount, transactionHash });
+		console.log({ phoneNumber, amount, transactionHash, address });
 		if (!phoneNumber || !amount || !transactionHash) {
 			throw new Error('not enough parameters');
 		}
@@ -15,11 +15,12 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 
 		const pushNotificationService = new PushNotifications();
 
-		await balanceService.incrementBalance(
+		await balanceService.incrementBalance({
 			phoneNumber,
-			Number(amount),
-			transactionHash
-		);
+			amount: Number(amount),
+			hash: transactionHash,
+			address,
+		});
 
 		try {
 			await pushNotificationService.send(
