@@ -12,7 +12,6 @@ import {
 	TableKeys,
 	TransactionAttributes,
 	WithdrawalToProcessAttributes,
-	WithdrawalTransactionItem,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
 import PusherService from '@/services/pusher/pusher';
@@ -166,25 +165,14 @@ export default class MasterWallet {
 			})
 			.promise();
 
-		const output = await dynamo
-			.query({
-				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: '#pk = :pk',
-				ExpressionAttributeNames: {
-					'#pk': TableKeys.PK,
-				},
-				ExpressionAttributeValues: {
-					':pk': Entities.WITHDRAWAL_TO_PROCESS,
-				},
-			})
-			.promise();
-
-		if (output.Items) {
-			const pusherService = new PusherService();
-			await pusherService.triggerWithdrawalPendingTransactionsUpdated(
-				output.Items as WithdrawalTransactionItem[]
-			);
-		}
+		const pusherService = new PusherService();
+		await pusherService.triggerWithdrawalToProcess({
+			id: withdrawalToProcessId,
+			createdAt: date,
+			amount,
+			phoneNumber,
+			address,
+		});
 	}
 
 	async withdrawSuccess({
@@ -254,25 +242,5 @@ export default class MasterWallet {
 				},
 			],
 		});
-
-		const output = await dynamo
-			.query({
-				TableName: process.env.dynamo_table as string,
-				KeyConditionExpression: '#pk = :pk',
-				ExpressionAttributeNames: {
-					'#pk': TableKeys.PK,
-				},
-				ExpressionAttributeValues: {
-					':pk': Entities.WITHDRAWAL_TO_PROCESS,
-				},
-			})
-			.promise();
-
-		if (output.Items) {
-			const pusherService = new PusherService();
-			await pusherService.triggerWithdrawalPendingTransactionsUpdated(
-				output.Items as WithdrawalTransactionItem[]
-			);
-		}
 	}
 }
