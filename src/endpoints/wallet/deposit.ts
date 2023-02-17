@@ -1,8 +1,6 @@
 import BalanceService from '@/services/balance/balance';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { PushNotifications } from '@/services/pushNotifications/pushNotification';
-import MasterWallet from '@/services/masterWallet/masterWallet';
-import UserService from '@/services/user/user';
 
 const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	try {
@@ -14,7 +12,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			throw new Error('not enough parameters');
 		}
 		const balanceService = new BalanceService();
-		const masterWallet = new MasterWallet();
+
 		const pushNotificationService = new PushNotifications();
 
 		await balanceService.incrementBalance(
@@ -31,19 +29,6 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			);
 		} catch (error) {
 			console.log({ error });
-		}
-
-		const userService = new UserService();
-		const user = await userService.getUser(phoneNumber);
-		console.log({ user });
-
-		if (user.wallets && user.wallets.length) {
-			const wallet = user.wallets.find((w) => w.network === 'polygon');
-			console.log({ wallet });
-			if (wallet) {
-				await masterWallet.touchUserWallet(wallet.publicKey, phoneNumber);
-				console.log('after touch user wallet');
-			}
 		}
 
 		callback(null, {
