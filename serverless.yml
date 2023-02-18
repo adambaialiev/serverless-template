@@ -44,6 +44,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  init:
+    handler: build/src/endpoints/app/init.init
+    events:
+      - http:
+          path: /v1/app/init
+          method: post
+          cors: true
   getUserWallet:
     handler: build/src/endpoints/user/getUserWallet.getUserWallet
     events:
