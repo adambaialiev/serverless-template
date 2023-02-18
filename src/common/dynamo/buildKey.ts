@@ -8,6 +8,8 @@ export const buildUserKey = (phoneNumber: string) =>
 export const buildTransactionKey = (id: string) =>
 	buildKey(Entities.TRANSACTION, id);
 
+export const buildFeedbackKey = (id: string) => buildKey(Entities.FEEDBACK, id);
+
 export const buildIncrementTransactionKey = (hash: string) =>
 	buildKey(Entities.INCREMENT_TRANSACTION, hash);
 

@@ -58,6 +58,7 @@ export class AuthService {
 			[UserAttributes.UPDATED_AT]: '',
 			[UserAttributes.EMAIL]: '',
 			[UserAttributes.SESSION_ID]: v4(),
+			[UserAttributes.ID]: v4(),
 		};
 		await dynamo
 			.put({
