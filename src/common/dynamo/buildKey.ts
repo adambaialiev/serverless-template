@@ -15,21 +15,3 @@ export const buildIncrementTransactionKey = (hash: string) =>
 
 export const buildDecrementTransactionKey = (hash: string) =>
 	buildKey(Entities.DECREMENT_TRANSACTION, hash);
-
-export const buildTouchPendingKey = (hash: string) =>
-	buildKey(Entities.TOUCH_PENDING, hash);
-
-export const buildTouchSuccessKey = (hash: string) =>
-	buildKey(Entities.TOUCH_SUCCESS, hash);
-
-export const buildHomePendingKey = (hash: string) =>
-	buildKey(Entities.HOME_PENDING, hash);
-
-export const buildHomeSuccessKey = (hash: string) =>
-	buildKey(Entities.HOME_SUCCESS, hash);
-
-export const buildWithdrawalPendingKey = (hash: string) =>
-	buildKey(Entities.WITHDRAWAL_PENDING, hash);
-
-export const buildWithdrawalSuccessKey = (hash: string) =>
-	buildKey(Entities.WITHDRAWAL_SUCCESS, hash);

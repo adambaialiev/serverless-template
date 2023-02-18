@@ -25,8 +25,20 @@ export interface MakeTransactionProps {
 	targetId: string;
 }
 
+interface IncrementBalanceProps {
+	phoneNumber: string;
+	amount: number;
+	hash: string;
+	address: string;
+}
+
 export default class BalanceService {
-	async incrementBalance(phoneNumber: string, amount: number, hash: string) {
+	async incrementBalance({
+		phoneNumber,
+		amount,
+		hash,
+		address,
+	}: IncrementBalanceProps) {
 		const incrementTransactionOutput = await dynamo.getItem({
 			[TableKeys.PK]: Entities.INCREMENT_TRANSACTION,
 			[TableKeys.SK]: buildIncrementTransactionKey(hash),
@@ -51,6 +63,8 @@ export default class BalanceService {
 								[IncrementTransactionAttributes.ID]: hash,
 								[IncrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
 								[IncrementTransactionAttributes.AMOUNT]: amount,
+								[IncrementTransactionAttributes.CREATED_AT]: date,
+								[IncrementTransactionAttributes.ADDRESS]: address,
 							},
 							TableName: tableName,
 							ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
@@ -65,7 +79,7 @@ export default class BalanceService {
 								[TransactionAttributes.SOURCE]: phoneNumber,
 								[TransactionAttributes.TARGET]: phoneNumber,
 								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.CREATED_AT]: date,
 								[TransactionAttributes.STATUS]: 'success',
 								[TransactionAttributes.TYPE]: 'deposit',
 							},
@@ -133,7 +147,7 @@ export default class BalanceService {
 								[TransactionAttributes.SOURCE]: phoneNumber,
 								[TransactionAttributes.TARGET]: phoneNumber,
 								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.CREATED_AT]: date,
 								[TransactionAttributes.STATUS]: '',
 								[TransactionAttributes.TYPE]: 'withdraw',
 							},
@@ -235,7 +249,7 @@ export default class BalanceService {
 								[TransactionAttributes.TARGET]: target.phoneNumber,
 								[TransactionAttributes.COMMENT]: comment ?? '',
 								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.CREATED_AT]: date,
 								[TransactionAttributes.STATUS]: status,
 								[TransactionAttributes.TYPE]: 'out',
 							},
@@ -253,7 +267,7 @@ export default class BalanceService {
 								[TransactionAttributes.TARGET]: target.phoneNumber,
 								[TransactionAttributes.COMMENT]: comment ?? '',
 								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.DATE]: date,
+								[TransactionAttributes.CREATED_AT]: date,
 								[TransactionAttributes.STATUS]: status,
 								[TransactionAttributes.TYPE]: 'in',
 							},

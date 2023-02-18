@@ -44,8 +44,35 @@ custom:
     createRoute53Record: true
 
 functions:
+  getUserWallet:
+    handler: build/src/endpoints/user/getUserWallet.getUserWallet
+    events:
+      - http:
+          path: /v1/user/wallet
+          method: post
+          cors: true
+  setStoreValues:
+    handler: build/src/endpoints/store/setStoreValues.setStoreValues
+    events:
+      - http:
+          path: /v1/store/set-store-values
+          method: post
+          cors: true
+  getStoreValuesForAdmin:
+    handler: build/src/endpoints/store/getStoreValuesForAdmin.getStoreValuesForAdmin
+    events:
+      - http:
+          path: /v1/store/get-store-values-for-admin
+          method: post
+          cors: true
+  getUsersForAdmin:
+    handler: build/src/endpoints/user/getUsersForAdmin.getUsersForAdmin
+    events:
+      - http:
+          path: /v1/users/get-users-for-admin
+          method: post
+          cors: true
   debugUsdtTransactions:
-    timeout: 30
     handler: build/src/endpoints/wallet/debugUsdtTransactions.debugUsdtTransactions
     events:
       - http:
@@ -53,7 +80,6 @@ functions:
           method: post
           cors: true
   withdraw:
-    timeout: 30
     handler: build/src/endpoints/wallet/withdraw.withdraw
     events:
       - http:
@@ -62,7 +88,6 @@ functions:
           cors: true
 
   deposit:
-    timeout: 30
     handler: build/src/endpoints/wallet/deposit.deposit
     events:
       - http:
@@ -75,47 +100,6 @@ functions:
     events:
       - http:
           path: /v1/store/usersWalletAddresses
-          method: post
-          cors: true
-
-  touchPendingAll:
-    handler: build/src/endpoints/store/touchPendingAll.touchPendingAll
-    events:
-      - http:
-          path: /v1/store/touchPendingTransactions
-          method: post
-          cors: true
-
-  homePendingAll:
-    handler: build/src/endpoints/store/homePendingAll.homePendingAll
-    events:
-      - http:
-          path: /v1/store/homePendingTransactions
-          method: post
-          cors: true
-
-  withdrawPendingAll:
-    handler: build/src/endpoints/store/withdrawPendingAll.withdrawPendingAll
-    events:
-      - http:
-          path: /v1/store/withdrawPendingTransactions
-          method: post
-          cors: true
-
-  homeSuccess:
-    handler: build/src/endpoints/store/homeSuccess.homeSuccess
-    events:
-      - http:
-          path: /v1/store/homeSuccess
-          method: post
-          cors: true
-
-  touchSuccess:
-    timeout: 30
-    handler: build/src/endpoints/store/touchSuccess.touchSuccess
-    events:
-      - http:
-          path: /v1/store/touchSuccess
           method: post
           cors: true
 
