@@ -1,5 +1,11 @@
 import { buildUserKey } from '@/common/dynamo/buildKey';
-import { TableKeys, UserItem, UserAttributes } from '@/common/dynamo/schema';
+import {
+	Entities,
+	IndexNames,
+	TableKeys,
+	UserAttributes,
+	UserItem,
+} from '@/common/dynamo/schema';
 import {
 	IUpdateUserParams,
 	IWallet,
@@ -79,6 +85,25 @@ export default class UserService {
 		const user = await this.getUser(phoneNumber);
 		if (user) {
 			return user.wallets.find((w) => w.network === 'polygon');
+		}
+	}
+
+	async getUsersForAdmin(): Promise<User[] | undefined> {
+		const output = await dynamoDB
+			.query({
+				TableName: process.env.dynamo_table as string,
+				IndexName: IndexNames.GSI1,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.USER,
+				},
+			})
+			.promise();
+		if (output.Items) {
+			return output.Items.map((item) => unmarshallUser(item as UserItem));
 		}
 	}
 }

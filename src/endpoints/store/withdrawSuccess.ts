@@ -7,17 +7,35 @@ export const handler = async (
 	callback: APIGatewayProxyCallback
 ) => {
 	try {
-		const { phoneNumber, amount, transactionHash } = JSON.parse(
-			event.body as string
-		);
-		console.log({ phoneNumber, amount, transactionHash });
+		const { phoneNumber, amount, transactionHash, transactionId, address } =
+			JSON.parse(event.body as string);
+
+		console.log({
+			phoneNumber,
+			amount,
+			transactionHash,
+			transactionId,
+			address,
+		});
+
+		if (
+			!phoneNumber ||
+			!amount ||
+			!transactionHash ||
+			!transactionId ||
+			!address
+		) {
+			throw new Error('not enough parameters');
+		}
 
 		const masterWalletService = new MasterWallet();
-		await masterWalletService.withdrawSuccess(
+		await masterWalletService.withdrawSuccess({
 			transactionHash,
+			transactionId,
 			amount,
-			phoneNumber
-		);
+			phoneNumber,
+			address,
+		});
 
 		callback(null, {
 			statusCode: 201,

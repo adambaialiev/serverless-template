@@ -1,6 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { withAuthorization } from '@/middlewares/withAuthorization';
 import MasterWallet from '@/services/masterWallet/masterWallet';
 
 export const handler: APIGatewayProxyHandler = async (
@@ -9,15 +8,9 @@ export const handler: APIGatewayProxyHandler = async (
 	callback
 ) => {
 	try {
-		const { address, amount, phoneNumber } = JSON.parse(event.body);
-
 		const masterWalletService = new MasterWallet();
 
-		await masterWalletService.createWithdrawToProcess({
-			amount,
-			phoneNumber,
-			address,
-		});
+		await masterWalletService.createMasterWalletIfNeeded();
 
 		callback(null, {
 			statusCode: 201,
@@ -31,4 +24,4 @@ export const handler: APIGatewayProxyHandler = async (
 	}
 };
 
-export const withdraw = withAuthorization(handler);
+export const init = handler;

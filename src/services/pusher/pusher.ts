@@ -1,6 +1,13 @@
-import { MasterWalletInvolvedTransactionItem } from '@/common/dynamo/schema';
 import { getAllWalletsAddresses } from '@/services/user/getAllWalletsAddresses';
 import Pusher from 'pusher';
+
+export interface WithdrawalToProcess {
+	id: string;
+	createdAt: string;
+	amount: string;
+	phoneNumber: string;
+	address: string;
+}
 
 export default class PusherService {
 	constructor() {
@@ -20,33 +27,7 @@ export default class PusherService {
 		await this.pusher.trigger('mutations', 'usersWalletsUpdated', wallets);
 	}
 
-	async triggerTouchPendingTransactionsUpdated(
-		transactions: MasterWalletInvolvedTransactionItem[]
-	) {
-		await this.pusher.trigger(
-			'mutations',
-			'touchPendingTransactionsUpdated',
-			transactions
-		);
-	}
-
-	async triggerHomePendingTransactionsUpdated(
-		transactions: MasterWalletInvolvedTransactionItem[]
-	) {
-		await this.pusher.trigger(
-			'mutations',
-			'homePendingTransactionsUpdated',
-			transactions
-		);
-	}
-
-	async triggerWithdrawalPendingTransactionsUpdated(
-		transactions: MasterWalletInvolvedTransactionItem[]
-	) {
-		await this.pusher.trigger(
-			'mutations',
-			'withdrawalPendingTransactionsUpdated',
-			transactions
-		);
+	async triggerWithdrawalToProcess(withdrawal: WithdrawalToProcess) {
+		await this.pusher.trigger('mutations', 'withdrawalToProcess', withdrawal);
 	}
 }

@@ -3,7 +3,6 @@ import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import { TableKeys, UserItem } from '@/common/dynamo/schema';
 import { AuthService } from '@/services/auth/auth';
 import { CryptoService } from '@/services/crypto/crypto';
-import MasterWallet from '@/services/masterWallet/masterWallet';
 import UserService from '@/services/user/user';
 import { sendResponse } from '@/utils/makeResponse';
 import { APIGatewayEvent } from 'aws-lambda';
@@ -37,15 +36,13 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 			}
 
 			const cryptoService = new CryptoService();
-			const masterWallet = new MasterWallet();
 			const userService = new UserService();
 
-			await masterWallet.createMasterWalletIfNeeded();
-
-			const user = await userService.getUser(phoneNumber);
+			let user = await userService.getUser(phoneNumber);
 
 			if (!user.wallets || !user.wallets.length) {
 				await cryptoService.createCryptoWallet(phoneNumber);
+				user = await userService.getUser(phoneNumber);
 			}
 
 			return sendResponse(201, { ...authTokens, user });
