@@ -2,20 +2,18 @@ import {
 	withAuthorization,
 	CustomAPIGateway,
 } from '@/middlewares/withAuthorization';
-import BalanceService from '@/services/balance/balance';
 import { PushNotifications } from '@/services/pushNotifications/pushNotification';
+import { TransactionService } from '@/services/transaction/transactionService';
 import UserService from '@/services/user/user';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 
-const pushNotificationService = new PushNotifications();
-
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
+	const transactionsService = new TransactionService();
+	const userService = new UserService();
+	const pushNotificationService = new PushNotifications();
 	try {
 		const { to, amount, comment } = JSON.parse(event.body as string);
 		const from = event.user.phoneNumber;
-
-		const balanceService = new BalanceService();
-		const userService = new UserService();
 
 		const source = await userService.getSlug(from);
 		console.log('event', JSON.stringify(event, null, 2));
@@ -30,7 +28,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			if (from === target.phoneNumber) {
 				throw new Error('Source number and target number are the same');
 			}
-			const balanceServiceOutput = await balanceService.makeTransaction(
+			const balanceServiceOutput = await transactionsService.makeTransaction(
 				source,
 				target,
 				Number(amount),
@@ -39,8 +37,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			if (target.pushToken) {
 				await pushNotificationService.send(
 					target.pushToken,
-					'Shop wallet',
-					`You recieved ${amount} USDT`
+					`You received ${amount} USDT`
 				);
 			}
 			return {

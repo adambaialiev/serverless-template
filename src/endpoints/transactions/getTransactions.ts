@@ -1,26 +1,19 @@
-import { withAuthorization } from '@/middlewares/withAuthorization';
-import BalanceService from '@/services/balance/balance';
-import { APIGatewayEvent, Context, APIGatewayProxyCallback } from 'aws-lambda';
+import {
+	withAuthorization,
+	CustomAPIGateway,
+} from '@/middlewares/withAuthorization';
+import { TransactionService } from '@/services/transaction/transactionService';
+import { sendResponse } from '@/utils/makeResponse';
 
-const balanceService = new BalanceService();
+const transactionsService = new TransactionService();
 
-const handler = async (
-	event: APIGatewayEvent,
-	context: Context,
-	callback: APIGatewayProxyCallback
-) => {
+const handler = async (event: CustomAPIGateway) => {
 	try {
-		const { phoneNumber } = event.pathParameters;
-		console.log('event', JSON.stringify(event, null, 2));
+		const { phoneNumber } = event.user;
 
-		const response = await balanceService.getTransactions(phoneNumber);
+		const response = await transactionsService.getTransactions(phoneNumber);
 
-		console.log('transactionsResponse', response);
-
-		callback(null, {
-			statusCode: 201,
-			body: JSON.stringify(response.Items),
-		});
+		return sendResponse(200, response.Items);
 	} catch (error: unknown) {
 		if (error instanceof Error) {
 			console.log({ error });
