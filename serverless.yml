@@ -158,6 +158,28 @@ functions:
           path: /v1/transactions/room
           method: post
           cors: true
+  createTransactionRequest:
+    timeout: 10
+    handler: build/src/endpoints/transactions/createRequest.createRequest
+    events:
+      - http:
+          path: /v1/transactions/request
+          method: post
+          cors: true
+  acceptRequest:
+    handler: build/src/endpoints/transactions/acceptRequest.acceptRequest
+    events:
+      - http:
+          path: /v1/transactions/request/accept/{id}
+          method: put
+          cors: true
+  declineRequest:
+    handler: build/src/endpoints/transactions/declineRequest.declineRequest
+    events:
+      - http:
+          path: /v1/transactions/request/decline/{id}
+          method: put
+          cors: true
 
   getUser:
     handler: build/src/endpoints/user/getUser.getUser

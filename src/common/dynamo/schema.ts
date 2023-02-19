@@ -15,6 +15,7 @@ export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
 	USER = 'USER#',
 	FEEDBACK = 'FEEDBACK#',
+	TRANSACTION_REQUEST = 'TRANSACTION_REQUEST#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
 	DECREMENT_TRANSACTION = 'DECREMENT_TRANSACTION#',
@@ -92,6 +93,32 @@ export interface FeedbackItem {
 	[FeedbackAttributes.UPDATED_AT]: DocumentClient.String;
 	[FeedbackAttributes.RATING]: DocumentClient.NumberAttributeValue;
 	[FeedbackAttributes.USER]: DocumentClient.String;
+}
+
+export enum TransactionRequestAttributes {
+	ID = 'id',
+	CREATED_AT = 'createdAt',
+	UPDATED_AT = 'updatedAt',
+	COMMENT = 'comment',
+	AMOUNT = 'amount',
+	SOURCE = 'source',
+	STATUS = 'status',
+	TARGET = 'target',
+	TYPE = 'type',
+}
+
+export interface TransactionRequestItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[TransactionRequestAttributes.COMMENT]: DocumentClient.String;
+	[TransactionRequestAttributes.SOURCE]: DocumentClient.String;
+	[TransactionRequestAttributes.STATUS]: DocumentClient.String;
+	[TransactionRequestAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
+	[TransactionRequestAttributes.TARGET]: DocumentClient.String;
+	[TransactionRequestAttributes.CREATED_AT]: DocumentClient.String;
+	[TransactionRequestAttributes.UPDATED_AT]: DocumentClient.String;
+	[TransactionRequestAttributes.ID]: DocumentClient.String;
+	[TransactionRequestAttributes.TYPE]: DocumentClient.String;
 }
 
 export interface UserItem {

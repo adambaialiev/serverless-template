@@ -4,6 +4,11 @@ import { PushNotifications } from '@/services/pushNotifications/pushNotification
 import MasterWallet from '@/services/masterWallet/masterWallet';
 import UserService from '@/services/user/user';
 
+const userService = new UserService();
+const balanceService = new BalanceService();
+const masterWallet = new MasterWallet();
+const pushNotificationService = new PushNotifications();
+
 const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	try {
 		const { phoneNumber, amount, transactionHash } = JSON.parse(
@@ -13,27 +18,25 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 		if (!phoneNumber || !amount || !transactionHash) {
 			throw new Error('not enough parameters');
 		}
-		const balanceService = new BalanceService();
-		const masterWallet = new MasterWallet();
-		const pushNotificationService = new PushNotifications();
-
 		await balanceService.incrementBalance(
 			phoneNumber,
 			Number(amount),
 			transactionHash
 		);
 
+		const userOutput = await userService.getSlug(phoneNumber);
+
 		try {
-			await pushNotificationService.send(
-				phoneNumber,
-				'ShopWallet',
-				`You recieved ${amount} USDT`
-			);
+			if (userOutput.pushToken) {
+				await pushNotificationService.send(
+					userOutput.pushToken,
+					`You received ${amount} USDT`
+				);
+			}
 		} catch (error) {
 			console.log({ error });
 		}
 
-		const userService = new UserService();
 		const user = await userService.getUser(phoneNumber);
 		console.log({ user });
 

@@ -15,11 +15,10 @@ const TableName = process.env.dynamo_table as string;
 
 export default class UserService {
 	async getSlug(phoneNumber: string): Promise<UserSlug | undefined> {
-		const tableName = process.env.dynamo_table as string;
 		const userKey = buildUserKey(phoneNumber);
 		const userOutput = await dynamoDB
 			.get({
-				TableName: tableName,
+				TableName,
 				Key: {
 					[TableKeys.PK]: userKey,
 					[TableKeys.SK]: userKey,
@@ -34,11 +33,10 @@ export default class UserService {
 	}
 
 	async getUser(phoneNumber: string): Promise<User | undefined> {
-		const tableName = process.env.dynamo_table as string;
 		const userKey = buildUserKey(phoneNumber);
 		const userOutput = await dynamoDB
 			.get({
-				TableName: tableName,
+				TableName,
 				Key: {
 					[TableKeys.PK]: userKey,
 					[TableKeys.SK]: userKey,
