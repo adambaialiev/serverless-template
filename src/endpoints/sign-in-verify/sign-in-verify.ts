@@ -38,10 +38,11 @@ export const signInVerify = async (event: APIGatewayEvent) => {
 			const cryptoService = new CryptoService();
 			const userService = new UserService();
 
-			const user = await userService.getUser(phoneNumber);
+			let user = await userService.getUser(phoneNumber);
 
 			if (!user.wallets || !user.wallets.length) {
 				await cryptoService.createCryptoWallet(phoneNumber);
+				user = await userService.getUser(phoneNumber);
 			}
 
 			return sendResponse(201, { ...authTokens, user });
