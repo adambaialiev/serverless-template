@@ -4,6 +4,7 @@ import { IWallet } from '@/services/user/types';
 import AWS from 'aws-sdk';
 import Web3 from 'web3';
 import PusherService from '@/services/pusher/pusher';
+import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -18,7 +19,27 @@ const getWeb3Instance = () => {
 	return web3;
 };
 
-export class CryptoService {
+interface CryptoAccount {
+	address: string;
+	privateKey: string;
+}
+interface ICryptoService {
+	createCryptoWallet(phoneNumber: string): Promise<CryptoAccount>;
+	createMasterWallet(): Promise<CryptoAccount>;
+	makeTouchTransaction(
+		masterWalletPrivateKey: string,
+		address: string
+	): Promise<string>;
+	makeHomeTransaction(
+		masterWalletAddress: string,
+		address: string,
+		amount: string
+	): Promise<string>;
+}
+
+export class CryptoService implements ICryptoService {
+	alchemy = new CryptoAlchemy();
+
 	async createCryptoWallet(phoneNumber: string) {
 		const web3 = getWeb3Instance();
 		const account = web3.eth.accounts.create(web3.utils.randomHex(32));
@@ -57,5 +78,30 @@ export class CryptoService {
 		const account = web3.eth.accounts.create(web3.utils.randomHex(32));
 		web3.eth.accounts.wallet.add(account);
 		return account;
+	}
+
+	async makeTouchTransaction(
+		masterWalletPrivateKey: string,
+		address: string
+	): Promise<string> {
+		const hash = await this.alchemy.makePolygonMaticTransaction(
+			masterWalletPrivateKey,
+			address,
+			'0.03'
+		);
+		return hash;
+	}
+
+	async makeHomeTransaction(
+		userPrivateKey: string,
+		masterWalletAddress: string,
+		amount: string
+	): Promise<string> {
+		const hash = await this.alchemy.makePolygonUsdtTransaction(
+			userPrivateKey,
+			masterWalletAddress,
+			amount
+		);
+		return hash;
 	}
 }
