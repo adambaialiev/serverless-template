@@ -3,11 +3,11 @@ import {
 	TableKeys,
 	TransactionAttributes,
 	Entities,
+	ITransaction,
 } from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
 import { ITransactionCreateParams } from './transactions.types';
-import { ITransaction } from '../../common/dynamo/schema';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table as string;
