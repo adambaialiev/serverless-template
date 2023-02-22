@@ -178,6 +178,12 @@ functions:
       - http:
           path: /v1/users/registered
           method: post
+  updateIsReadTransaction:
+    handler: build/src/endpoints/transactions/updateReadState.updateReadState
+    events:
+      - http:
+          path: /v1/transactions/read/{id}
+          method: put
   updateUser:
     handler: build/src/endpoints/user/updateUser.updateUser
     events:

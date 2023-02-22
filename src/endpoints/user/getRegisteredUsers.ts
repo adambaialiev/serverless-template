@@ -1,34 +1,35 @@
 import AWS from 'aws-sdk';
 import { sendResponse } from '@/utils/makeResponse';
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { withAuthorization } from '@/middlewares/withAuthorization';
+import {
+	withAuthorization,
+	CustomAPIGateway,
+} from '@/middlewares/withAuthorization';
 import { removeAllSpaces } from '@/utils/removeAllSpaces';
 import { addCountryCodeToNumber } from '@/utils/addCountryCodeToNumber';
 import { batchRequestedItems } from '@/utils/batchRequestedItems';
+import { TransactionService } from '@/services/transaction/transactionService';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
+const transactionService = new TransactionService();
 const tableName = process.env.dynamo_table as string;
 
 export const handler: APIGatewayProxyHandler = async (
-	event,
-	context,
-	callback
+	event: CustomAPIGateway
 ) => {
 	try {
 		const { phoneNumbers, countryCode } = JSON.parse(event.body as string);
-		console.log('incomingPhoneNumbers>', JSON.stringify(phoneNumbers, null, 2));
-		console.log('countryCode>', JSON.stringify(countryCode, null, 2));
+
+		const sourceUsersPhoneNumber = event.user.phoneNumber;
 
 		const newPhoneNumbers = phoneNumbers
 			.map((number: string) => removeAllSpaces(number))
 			.map((el: string) => addCountryCodeToNumber(el, countryCode));
 
-		console.log('newPhoneNumbers>', JSON.stringify(newPhoneNumbers, null, 2));
 		const batches = batchRequestedItems(
 			Array.from(new Set([...newPhoneNumbers])),
 			100
 		);
-		console.log('batches>', JSON.stringify(batches, null, 2));
 		const results = [];
 
 		for (const keysBatch of batches) {
@@ -48,18 +49,28 @@ export const handler: APIGatewayProxyHandler = async (
 				Keys = response.UnprocessedKeys[tableName] ?? [];
 			} while (Keys.length > 0);
 		}
-		console.log('results>', JSON.stringify(results, null, 2));
 
 		const numbersDictionary: Record<string, any> = {};
-		console.log('results>', JSON.stringify(results, null, 2));
 
 		for (const number of phoneNumbers) {
 			const number1 = removeAllSpaces(number);
 			const number2 = addCountryCodeToNumber(number1, countryCode);
 			if (results.map((item) => item.phoneNumber).includes(number2)) {
+				const transactions = await transactionService.getTransactionsRoom(
+					sourceUsersPhoneNumber,
+					number2
+				);
+				const unreadTransactionsCount = transactions.filter(
+					(item) => item.isRead !== undefined && !item.isRead
+				);
+				console.log(
+					'unreadTransactionsCount>>',
+					JSON.stringify(unreadTransactionsCount, null, 2)
+				);
 				numbersDictionary[number] = {
 					registered: true,
 					internationalNumber: number2,
+					unreadTransactions: unreadTransactionsCount.length,
 				};
 			} else {
 				numbersDictionary[number] = {
@@ -69,16 +80,7 @@ export const handler: APIGatewayProxyHandler = async (
 			}
 		}
 
-		console.log(
-			'numbersDictionary>',
-			JSON.stringify(numbersDictionary, null, 2)
-		);
-		callback(null, {
-			statusCode: 200,
-			body: JSON.stringify({
-				items: numbersDictionary,
-			}),
-		});
+		return sendResponse(200, { items: numbersDictionary });
 	} catch (error) {
 		console.log(error);
 		const message = error.message ? error.message : 'Internal server error';

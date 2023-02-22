@@ -85,32 +85,6 @@ export interface FeedbackItem {
 	[FeedbackAttributes.USER]: DocumentClient.String;
 }
 
-export enum TransactionRequestAttributes {
-	ID = 'id',
-	CREATED_AT = 'createdAt',
-	UPDATED_AT = 'updatedAt',
-	COMMENT = 'comment',
-	AMOUNT = 'amount',
-	SOURCE = 'source',
-	STATUS = 'status',
-	TARGET = 'target',
-	TYPE = 'type',
-}
-
-export interface TransactionRequestItem {
-	[TableKeys.PK]: DocumentClient.String;
-	[TableKeys.SK]: DocumentClient.String;
-	[TransactionRequestAttributes.COMMENT]: DocumentClient.String;
-	[TransactionRequestAttributes.SOURCE]: DocumentClient.String;
-	[TransactionRequestAttributes.STATUS]: DocumentClient.String;
-	[TransactionRequestAttributes.AMOUNT]: DocumentClient.NumberAttributeValue;
-	[TransactionRequestAttributes.TARGET]: DocumentClient.String;
-	[TransactionRequestAttributes.CREATED_AT]: DocumentClient.String;
-	[TransactionRequestAttributes.UPDATED_AT]: DocumentClient.String;
-	[TransactionRequestAttributes.ID]: DocumentClient.String;
-	[TransactionRequestAttributes.TYPE]: DocumentClient.String;
-}
-
 export interface UserItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
@@ -136,9 +110,11 @@ export enum TransactionAttributes {
 	TARGET = 'target',
 	AMOUNT = 'amount',
 	CREATED_AT = 'createdAt',
+	UPDATED_AT = 'updatedAt',
 	STATUS = 'status',
 	TYPE = 'type',
 	COMMENT = 'comment',
+	IS_READ = 'isRead',
 }
 
 export interface TransactionItem {
@@ -147,7 +123,10 @@ export interface TransactionItem {
 	[TransactionAttributes.TARGET]: DocumentClient.String;
 	[TransactionAttributes.AMOUNT]: DocumentClient.String;
 	[TransactionAttributes.CREATED_AT]: DocumentClient.String;
+	[TransactionAttributes.UPDATED_AT]: DocumentClient.String;
 	[TransactionAttributes.STATUS]: DocumentClient.String;
+	[TransactionAttributes.IS_READ]: DocumentClient.BooleanAttributeValue;
+	[TransactionAttributes.COMMENT]: DocumentClient.BooleanAttributeValue;
 	[TransactionAttributes.TYPE]: DocumentClient.String;
 }
 
@@ -157,8 +136,11 @@ export interface ITransaction {
 	target: string;
 	amount: number;
 	createdAt: string;
-	status: 'pending' | 'success';
-	type: 'in' | 'out' | 'deposit' | 'withdraw';
+	updatedAt: string;
+	comment: string;
+	status: 'pending' | 'accepted' | 'declined';
+	type: 'request' | 'transaction' | 'deposit' | 'withdraw';
+	isRead: boolean;
 }
 
 export enum IncrementTransactionAttributes {

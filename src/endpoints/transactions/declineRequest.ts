@@ -4,11 +4,11 @@ import {
 } from '@/middlewares/withAuthorization';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { TransactionService } from '@/services/transaction/transactionService';
 import { PushNotifications } from '@/services/pushNotifications/pushNotification';
 import UserService from '@/services/user/user';
+import { TransactionRequestService } from '@/services/transactionRequest/transactionRequest';
 
-const transactionsService = new TransactionService();
+const requestService = new TransactionRequestService();
 const pushNotificationService = new PushNotifications();
 const userService = new UserService();
 
@@ -21,7 +21,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 
 		const userTarget = await userService.getSlug(phoneNumber);
 
-		const res = await transactionsService.declineRequest(
+		const res = await requestService.decline(
 			source.phoneNumber,
 			phoneNumber,
 			id

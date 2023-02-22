@@ -28,12 +28,12 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			if (from === target.phoneNumber) {
 				throw new Error('Source number and target number are the same');
 			}
-			const balanceServiceOutput = await transactionsService.makeTransaction(
-				source,
+			const balanceServiceOutput = await transactionsService.makeTransaction({
 				target,
-				Number(amount),
-				comment
-			);
+				source,
+				amount,
+				comment,
+			});
 			if (target.pushToken) {
 				await pushNotificationService.send(
 					target.pushToken,
