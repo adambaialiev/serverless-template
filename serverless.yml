@@ -6,7 +6,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   region: us-east-1
   profile: ${opt:stage, "dev"}
   environment:
@@ -44,6 +44,14 @@ custom:
     createRoute53Record: true
 
 functions:
+  crypto-webhook:
+    timeout: 30
+    handler: build/src/endpoints/crypto/webhook.webhook
+    events:
+      - http:
+          path: /v1/crypto/webhook
+          method: post
+          cors: true
   init:
     handler: build/src/endpoints/app/init.init
     events:
