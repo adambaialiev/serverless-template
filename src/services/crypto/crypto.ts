@@ -1,10 +1,14 @@
-import { UserAttributes } from '@/common/dynamo/schema';
+import {
+	TableKeys,
+	UserAttributes,
+	UserWalletAttributes,
+} from '@/common/dynamo/schema';
 import { getUserCompositeKey } from '@/services/auth/auth';
 import { IWallet } from '@/services/user/types';
 import AWS from 'aws-sdk';
 import Web3 from 'web3';
-import PusherService from '@/services/pusher/pusher';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
+import { buildUserWalletKey } from '@/common/dynamo/buildKey';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -53,23 +57,37 @@ export class CryptoService implements ICryptoService {
 			phoneNumber,
 		};
 
-		const params = {
-			TableName,
-			Key: getUserCompositeKey(phoneNumber),
-			UpdateExpression: `SET #wallets = :wallets`,
-			ExpressionAttributeNames: {
-				'#wallets': UserAttributes.WALLETS,
-			},
-			ExpressionAttributeValues: {
-				':wallets': [wallet],
-			},
-		};
+		await dynamo
+			.transactWrite({
+				TransactItems: [
+					{
+						Update: {
+							TableName,
+							Key: getUserCompositeKey(phoneNumber),
+							UpdateExpression: `SET #wallets = :wallets`,
+							ExpressionAttributeNames: {
+								'#wallets': UserAttributes.WALLETS,
+							},
+							ExpressionAttributeValues: {
+								':wallets': [wallet],
+							},
+						},
+					},
+					{
+						Put: {
+							TableName,
+							Item: {
+								[TableKeys.PK]: buildUserWalletKey(wallet.publicKey),
+								[TableKeys.SK]: buildUserWalletKey(wallet.publicKey),
+								[UserWalletAttributes.ADDRESS]: wallet.publicKey,
+								[UserWalletAttributes.PHONE_NUMBER]: phoneNumber,
+							},
+						},
+					},
+				],
+			})
+			.promise();
 
-		await dynamo.update(params).promise();
-
-		const pusherService = new PusherService();
-
-		await pusherService.triggerUsersWalletsUpdated();
 		return account;
 	}
 
@@ -87,8 +105,9 @@ export class CryptoService implements ICryptoService {
 		const hash = await this.alchemy.makePolygonMaticTransaction(
 			masterWalletPrivateKey,
 			address,
-			'0.03'
+			'0.01'
 		);
+		console.log({ touchTransactionHash: hash });
 		return hash;
 	}
 

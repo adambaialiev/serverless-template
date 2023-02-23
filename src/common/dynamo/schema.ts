@@ -15,6 +15,7 @@ export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
 	STORE = 'STORE',
 	USER = 'USER#',
+	USER_WALLET = 'USER_WALLET#',
 	FEEDBACK = 'FEEDBACK#',
 	TRANSACTION_REQUEST = 'TRANSACTION_REQUEST#',
 	TRANSACTION = 'TRANSACTION#',
@@ -65,6 +66,18 @@ export enum UserAttributes {
 	REFRESH_TOKEN = 'refreshToken',
 	WALLETS = 'wallets',
 	PUSH_TOKEN = 'pushToken',
+}
+
+export enum UserWalletAttributes {
+	ADDRESS = 'address',
+	PHONE_NUMBER = 'phoneNumber',
+}
+
+export interface UserWalletItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[UserWalletAttributes.ADDRESS]: DocumentClient.String;
+	[UserWalletAttributes.PHONE_NUMBER]: DocumentClient.String;
 }
 export enum FeedbackAttributes {
 	ID = 'id',
