@@ -70,6 +70,7 @@ export enum UserAttributes {
 
 export enum UserWalletAttributes {
 	ADDRESS = 'address',
+	PRIVATE_KEY = 'privateKey',
 	PHONE_NUMBER = 'phoneNumber',
 }
 
@@ -77,6 +78,7 @@ export interface UserWalletItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
 	[UserWalletAttributes.ADDRESS]: DocumentClient.String;
+	[UserWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
 	[UserWalletAttributes.PHONE_NUMBER]: DocumentClient.String;
 }
 export enum FeedbackAttributes {

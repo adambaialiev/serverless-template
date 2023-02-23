@@ -1,10 +1,12 @@
-import { buildUserKey } from '@/common/dynamo/buildKey';
+import { buildUserKey, buildUserWalletKey } from '@/common/dynamo/buildKey';
 import {
 	Entities,
 	IndexNames,
 	TableKeys,
 	UserAttributes,
 	UserItem,
+	UserWalletAttributes,
+	UserWalletItem,
 } from '@/common/dynamo/schema';
 import {
 	IUpdateUserParams,
@@ -85,6 +87,44 @@ export default class UserService {
 		const user = await this.getUser(phoneNumber);
 		if (user) {
 			return user.wallets.find((w) => w.network === 'polygon');
+		}
+	}
+
+	async getUserPhoneNumberByWalletAddress(address: string) {
+		const output = await dynamoDB
+			.get({
+				TableName,
+				Key: {
+					[TableKeys.PK]: Entities.USER_WALLET,
+					[TableKeys.SK]: buildUserWalletKey(address),
+				},
+			})
+			.promise();
+		if (output.Item) {
+			const user = output.Item as UserItem;
+			return user.phoneNumber;
+		}
+	}
+
+	async getAllWallets() {
+		const output = await dynamoDB
+			.query({
+				TableName,
+				KeyConditionExpression: `#pk = :pk`,
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.USER_WALLET,
+				},
+			})
+			.promise();
+		if (output.Items) {
+			const userWalletItems = output.Items as UserWalletItem[];
+			return userWalletItems.reduce((acc, item) => {
+				acc[item[UserWalletAttributes.ADDRESS]] = item;
+				return acc;
+			}, {} as { [key: string]: UserWalletItem });
 		}
 	}
 

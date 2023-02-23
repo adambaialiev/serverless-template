@@ -1,4 +1,5 @@
 import {
+	Entities,
 	TableKeys,
 	UserAttributes,
 	UserWalletAttributes,
@@ -77,9 +78,10 @@ export class CryptoService implements ICryptoService {
 						Put: {
 							TableName,
 							Item: {
-								[TableKeys.PK]: buildUserWalletKey(wallet.publicKey),
+								[TableKeys.PK]: Entities.USER_WALLET,
 								[TableKeys.SK]: buildUserWalletKey(wallet.publicKey),
 								[UserWalletAttributes.ADDRESS]: wallet.publicKey,
+								[UserWalletAttributes.PRIVATE_KEY]: wallet.privateKey,
 								[UserWalletAttributes.PHONE_NUMBER]: phoneNumber,
 							},
 						},
