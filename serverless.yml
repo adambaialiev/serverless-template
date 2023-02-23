@@ -44,6 +44,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  debug:
+    handler: build/src/endpoints/debug/debug.debug
+    events:
+      - http:
+          path: /v1/debug
+          method: post
+          cors: true
   crypto-webhook:
     timeout: 30
     handler: build/src/endpoints/crypto/webhook.webhook

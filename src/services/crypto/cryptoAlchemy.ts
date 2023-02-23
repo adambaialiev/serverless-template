@@ -50,7 +50,7 @@ export default class CryptoAlchemy {
 			const transaction = await erc20_rw.transfer(targetPublicKey, amount, {
 				from: signer.address,
 				gasPrice: gasPrice.toBigInt(),
-				gasLimit: 318236,
+				gasLimit: 100000,
 			});
 			console.log({ usdtTransaction: transaction });
 			return transaction.hash;
@@ -76,7 +76,7 @@ export default class CryptoAlchemy {
 			const transaction = {
 				to: address,
 				value: Utils.parseEther(amount),
-				gasLimit: 318236,
+				gasLimit: 100000,
 				nonce: await this.alchemy.core.getTransactionCount(wallet.getAddress()),
 				chainId: 137,
 				gasPrice,

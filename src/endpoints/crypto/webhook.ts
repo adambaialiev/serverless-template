@@ -1,4 +1,3 @@
-import { UserWalletAttributes } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
 import CryptoEthersService from '@/services/crypto/cryptoEthers';
 import MasterWallet from '@/services/masterWallet/masterWallet';
@@ -39,26 +38,28 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 		) as WebHookAlchemyResponse;
 		console.log({ alchemyResponse, event: alchemyResponse.event });
 		const allWallets = await userService.getAllWallets();
+		console.log({ allWallets });
 		if (!allWallets) {
 			return;
 		}
-		alchemyResponse.event.activity.forEach((activity) =>
-			console.log({ activity })
-		);
+
 		const masterWallet = await masterWalletService.getMasterWallet();
 		console.log({ masterWallet });
-		for (const activity of alchemyResponse.event.activity) {
+		for (let i = 0; i < alchemyResponse.event.activity.length; i++) {
+			const activity = alchemyResponse.event.activity[i];
+			console.log({ activity });
 			if (activity.asset === 'USDT' && allWallets[activity.toAddress]) {
-				await crypto.makeTouchTransaction(
+				const touchTransactionHash = await crypto.makeTouchTransaction(
 					masterWallet.privateKey,
 					activity.toAddress
 				);
+				console.log({ touchTransactionHash });
 			}
 			if (activity.asset === 'MATIC' && allWallets[activity.toAddress]) {
 				const userWallet = allWallets[activity.toAddress];
 
 				const balance = await cryptoEthers.getBalanceOfAddress(
-					userWallet[UserWalletAttributes.ADDRESS]
+					activity.toAddress
 				);
 				const homeTransactionHash = await crypto.makeHomeTransaction(
 					userWallet.privateKey,

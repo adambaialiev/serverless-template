@@ -107,7 +107,7 @@ export class CryptoService implements ICryptoService {
 		const hash = await this.alchemy.makePolygonMaticTransaction(
 			masterWalletPrivateKey,
 			address,
-			'0.01'
+			'0.03'
 		);
 		console.log({ touchTransactionHash: hash });
 		return hash;

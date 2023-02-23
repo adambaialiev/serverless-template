@@ -122,7 +122,7 @@ export default class UserService {
 		if (output.Items) {
 			const userWalletItems = output.Items as UserWalletItem[];
 			return userWalletItems.reduce((acc, item) => {
-				acc[item[UserWalletAttributes.ADDRESS]] = item;
+				acc[item[UserWalletAttributes.ADDRESS].toLowerCase()] = item;
 				return acc;
 			}, {} as { [key: string]: UserWalletItem });
 		}
