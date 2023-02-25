@@ -1,18 +1,13 @@
-import {
-	buildTransactionKey,
-	buildUserKey,
-	buildTransactionRequestKey,
-} from '@/common/dynamo/buildKey';
+import { buildTransactionKey, buildUserKey } from '@/common/dynamo/buildKey';
 import {
 	TableKeys,
 	TransactionAttributes,
-	TransactionRequestAttributes,
-	TransactionRequestItem,
 	Entities,
+	ITransaction,
 } from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
-import { UserSlug } from '../user/types';
+import { ITransactionCreateParams } from './transactions.types';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table as string;
@@ -39,6 +34,25 @@ export class TransactionService {
 
 		return dynamoDB.query(params).promise();
 	}
+	async updateIsReadState(phoneNumber: string, transactionId: string) {
+		const params = {
+			TableName,
+			Key: {
+				[TableKeys.PK]: buildUserKey(phoneNumber),
+				[TableKeys.SK]: buildTransactionKey(transactionId),
+			},
+			UpdateExpression: 'SET #isRead = :isRead',
+			ExpressionAttributeNames: {
+				'#isRead': 'isRead',
+			},
+			ExpressionAttributeValues: {
+				':isRead': true,
+			},
+			ReturnValues: 'ALL_NEW',
+		};
+
+		return dynamoDB.update(params).promise();
+	}
 	async getTransactionsRoom(source: string, target: string) {
 		const userKey = buildUserKey(source);
 
@@ -60,14 +74,14 @@ export class TransactionService {
 			ScanIndexForward: false,
 		};
 
-		return dynamoDB.query(params).promise();
+		return (await dynamoDB.query(params).promise()).Items as ITransaction[];
 	}
-	async makeTransaction(
-		source: UserSlug,
-		target: UserSlug,
-		amount: number,
-		comment?: string
-	) {
+	async makeTransaction({
+		source,
+		target,
+		amount,
+		comment,
+	}: ITransactionCreateParams) {
 		const sourceUserKey = buildUserKey(source.phoneNumber);
 		const targetUserKey = buildUserKey(target.phoneNumber);
 
@@ -78,7 +92,6 @@ export class TransactionService {
 		const targetTransactionKey = buildTransactionKey(targetTransactionId);
 
 		const date = Date.now().toString();
-		const status = '';
 
 		await dynamoDB
 			.transactWrite({
@@ -94,8 +107,7 @@ export class TransactionService {
 								[TransactionAttributes.COMMENT]: comment ?? '',
 								[TransactionAttributes.AMOUNT]: amount,
 								[TransactionAttributes.CREATED_AT]: date,
-								[TransactionAttributes.STATUS]: status,
-								[TransactionAttributes.TYPE]: 'out',
+								[TransactionAttributes.TYPE]: 'transaction',
 							},
 							TableName,
 							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
@@ -111,9 +123,9 @@ export class TransactionService {
 								[TransactionAttributes.TARGET]: target.phoneNumber,
 								[TransactionAttributes.COMMENT]: comment ?? '',
 								[TransactionAttributes.AMOUNT]: amount,
+								[TransactionAttributes.IS_READ]: false,
 								[TransactionAttributes.CREATED_AT]: date,
-								[TransactionAttributes.STATUS]: status,
-								[TransactionAttributes.TYPE]: 'in',
+								[TransactionAttributes.TYPE]: 'transaction',
 							},
 							TableName,
 							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
@@ -154,180 +166,7 @@ export class TransactionService {
 				],
 			})
 			.promise();
+
 		return true;
-	}
-	async request(
-		source: string,
-		target: string,
-		amount: number,
-		comment: string
-	) {
-		const transactionRequestId = v4();
-
-		await dynamoDB
-			.transactWrite({
-				TransactItems: [
-					{
-						Put: {
-							TableName,
-							Item: {
-								[TableKeys.PK]: buildUserKey(source),
-								[TableKeys.SK]:
-									buildTransactionRequestKey(transactionRequestId),
-								[TransactionRequestAttributes.AMOUNT]: amount,
-								[TransactionRequestAttributes.COMMENT]: comment ?? '',
-								[TransactionRequestAttributes.SOURCE]: source,
-								[TransactionRequestAttributes.TARGET]: target,
-								[TransactionRequestAttributes.ID]: v4(),
-								[TransactionRequestAttributes.CREATED_AT]:
-									Date.now().toString(),
-								[TransactionRequestAttributes.STATUS]: 'pending',
-								[TransactionRequestAttributes.TYPE]: 'sender',
-								[TransactionRequestAttributes.UPDATED_AT]: '',
-							},
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-					{
-						Put: {
-							TableName,
-							Item: {
-								[TableKeys.PK]: buildUserKey(target),
-								[TableKeys.SK]:
-									buildTransactionRequestKey(transactionRequestId),
-								[TransactionRequestAttributes.AMOUNT]: amount,
-								[TransactionRequestAttributes.COMMENT]: comment ?? '',
-								[TransactionRequestAttributes.SOURCE]: source,
-								[TransactionRequestAttributes.TARGET]: target,
-								[TransactionRequestAttributes.ID]: v4(),
-								[TransactionRequestAttributes.CREATED_AT]:
-									Date.now().toString(),
-								[TransactionRequestAttributes.STATUS]: 'pending',
-								[TransactionRequestAttributes.TYPE]: 'receiver',
-								[TransactionRequestAttributes.UPDATED_AT]: '',
-							},
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-				],
-			})
-			.promise();
-		return 'Success';
-	}
-
-	async acceptRequest(source: string, target: string, id: string) {
-		await dynamoDB
-			.transactWrite({
-				TransactItems: [
-					{
-						Update: {
-							TableName,
-							Key: {
-								[TableKeys.PK]: buildUserKey(source),
-								[TableKeys.SK]: buildTransactionRequestKey(id),
-							},
-							UpdateExpression:
-								'SET #status = :accepted, #updatedAt = :updatedAt',
-							ConditionExpression: 'contains(#status, :pending)',
-							ExpressionAttributeNames: {
-								'#status': 'status',
-								'#updatedAt': TransactionRequestAttributes.UPDATED_AT,
-							},
-							ExpressionAttributeValues: {
-								':accepted': 'accepted',
-								':pending': 'pending',
-								':updatedAt': Date.now().toString(),
-							},
-						},
-					},
-					{
-						Update: {
-							TableName,
-							Key: {
-								[TableKeys.PK]: buildUserKey(target),
-								[TableKeys.SK]: buildTransactionRequestKey(id),
-							},
-							UpdateExpression:
-								'SET #status = :accepted, #updatedAt = :updatedAt',
-							ConditionExpression: 'contains(#status, :pending)',
-							ExpressionAttributeNames: {
-								'#status': 'status',
-								'#updatedAt': TransactionRequestAttributes.UPDATED_AT,
-							},
-							ExpressionAttributeValues: {
-								':accepted': 'accepted',
-								':pending': 'pending',
-								':updatedAt': Date.now().toString(),
-							},
-						},
-					},
-				],
-			})
-			.promise();
-		return 'Success';
-	}
-	async declineRequest(source: string, target: string, id: string) {
-		await dynamoDB
-			.transactWrite({
-				TransactItems: [
-					{
-						Update: {
-							TableName,
-							Key: {
-								[TableKeys.PK]: buildUserKey(source),
-								[TableKeys.SK]: buildTransactionRequestKey(id),
-							},
-							UpdateExpression:
-								'SET #status = :declined, #updatedAt = :updatedAt',
-							ConditionExpression: 'contains(#status, :pending)',
-							ExpressionAttributeNames: {
-								'#status': 'status',
-								'#updatedAt': TransactionRequestAttributes.UPDATED_AT,
-							},
-							ExpressionAttributeValues: {
-								':declined': 'declined',
-								':pending': 'pending',
-								':updatedAt': Date.now().toString(),
-							},
-						},
-					},
-					{
-						Update: {
-							TableName,
-							Key: {
-								[TableKeys.PK]: buildUserKey(target),
-								[TableKeys.SK]: buildTransactionRequestKey(id),
-							},
-							UpdateExpression:
-								'SET #status = :declined, #updatedAt = :updatedAt',
-							ConditionExpression: 'contains(#status, :pending)',
-							ExpressionAttributeNames: {
-								'#status': 'status',
-								'#updatedAt': TransactionRequestAttributes.UPDATED_AT,
-							},
-							ExpressionAttributeValues: {
-								':declined': 'declined',
-								':pending': 'pending',
-								':updatedAt': Date.now().toString(),
-							},
-						},
-					},
-				],
-			})
-			.promise();
-		return 'Success';
-	}
-	async getRequest(phoneNumber: string) {
-		return (
-			await dynamoDB
-				.get({
-					TableName,
-					Key: {
-						[TableKeys.PK]: buildUserKey(phoneNumber),
-						[TableKeys.SK]: buildTransactionRequestKey(phoneNumber),
-					},
-				})
-				.promise()
-		).Item as TransactionRequestItem;
 	}
 }

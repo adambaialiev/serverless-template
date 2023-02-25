@@ -24,7 +24,7 @@ export const handler: APIGatewayProxyHandler = async (
 
 		return {
 			statusCode: 200,
-			body: JSON.stringify(response.Items),
+			body: JSON.stringify(response),
 		};
 	} catch (error: unknown) {
 		if (error instanceof Error) {

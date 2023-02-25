@@ -4,9 +4,9 @@ import {
 } from '@/middlewares/withAuthorization';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { TransactionService } from '@/services/transaction/transactionService';
+import { TransactionRequestService } from '@/services/transactionRequest/transactionRequest';
 
-const transactionsService = new TransactionService();
+const requestService = new TransactionRequestService();
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
@@ -15,7 +15,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 
 		const source = event.user;
 
-		const res = await transactionsService.acceptRequest(
+		const res = await requestService.accept(
 			source.phoneNumber,
 			phoneNumber,
 			id

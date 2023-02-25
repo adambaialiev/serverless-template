@@ -4,11 +4,11 @@ import {
 } from '@/middlewares/withAuthorization';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { TransactionService } from '@/services/transaction/transactionService';
 import { PushNotifications } from '@/services/pushNotifications/pushNotification';
 import UserService from '@/services/user/user';
+import { TransactionRequestService } from '@/services/transactionRequest/transactionRequest';
 
-const transactionsService = new TransactionService();
+const requestService = new TransactionRequestService();
 const pushNotificationService = new PushNotifications();
 const userService = new UserService();
 
@@ -18,15 +18,19 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 
 		const from = event.user.phoneNumber;
 
-		const targetUser = await userService.getSlug(to);
-		console.log('targetUser>>', JSON.stringify(targetUser, null, 2));
+		const target = await userService.getSlug(to);
 
-		if (targetUser.phoneNumber !== from) {
-			const res = await transactionsService.request(from, to, amount, comment);
+		if (target.phoneNumber !== from) {
+			const res = await requestService.request({
+				amount: Number(amount),
+				source: from,
+				target: target.phoneNumber,
+				comment,
+			});
 
-			if (targetUser.pushToken) {
+			if (target.pushToken) {
 				await pushNotificationService.send(
-					targetUser.pushToken,
+					target.pushToken,
 					`User ${from} requested ${amount} USDT`
 				);
 			}
