@@ -1,7 +1,6 @@
 import { ethers } from 'ethers';
 import { contractAbi } from '@/services/crypto/usdt-erc20-contractAbi';
-
-const USDT_CONTRACT_IN_POLYON = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
+import { USDT_CONTRACT_IN_POLYON } from '@/services/crypto/constants';
 
 export const amountToRaw = (amount: number) =>
 	amount.toFixed(6).replace(/\./g, '');
@@ -18,9 +17,7 @@ export const rawAmountToRealAmount = (value: string) => {
 
 export default class CryptoEthersService {
 	constructor() {
-		this.provider = new ethers.JsonRpcProvider(
-			'https://nd-552-463-930.p2pify.com/14b83362eb8642f9ebc4922235a55a15'
-		);
+		this.provider = new ethers.JsonRpcProvider(process.env.NODE_PROVIDER);
 	}
 
 	provider: ethers.JsonRpcProvider;

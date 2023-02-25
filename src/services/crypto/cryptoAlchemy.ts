@@ -1,10 +1,10 @@
+import { USDT_CONTRACT_IN_POLYON } from '@/services/crypto/constants';
 import { contractAbi } from '@/services/crypto/usdt-erc20-contractAbi';
 import { Network, Alchemy, Wallet, Utils } from 'alchemy-sdk';
 import { ethers } from 'ethers';
 
-const apiKey = 'kSqC0m_L3pCxI2TWd59ouGUEcz3Sfbj6';
-
-const USDT_CONTRACT_IN_POLYON = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F';
+const apiKey = process.env.ALCHEMY_API_KEY;
+const webhookId = process.env.WEBHOOK_ID;
 
 const settings = {
 	apiKey,
@@ -24,7 +24,7 @@ export default class CryptoAlchemy {
 	}
 
 	async addAddress(address: string) {
-		await this.alchemy.notify.updateWebhook('wh_wk1qy5gvubj10dcc', {
+		await this.alchemy.notify.updateWebhook(webhookId, {
 			addAddresses: [address],
 		});
 	}

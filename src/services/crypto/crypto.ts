@@ -17,9 +17,7 @@ const TableName = process.env.dynamo_table as string;
 
 const getWeb3Instance = () => {
 	const web3 = new Web3(
-		new Web3.providers.HttpProvider(
-			'https://nd-552-463-930.p2pify.com/14b83362eb8642f9ebc4922235a55a15'
-		)
+		new Web3.providers.HttpProvider(process.env.NODE_PROVIDER)
 	);
 	return web3;
 };

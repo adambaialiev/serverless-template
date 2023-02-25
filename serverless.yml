@@ -4,6 +4,8 @@ service: shop-wallet-serverless
 
 frameworkVersion: '3'
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs18.x
@@ -13,6 +15,10 @@ provider:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
+    WEBHOOK_ID: ${env:WEBHOOK_ID}
+    ALCHEMY_API_KEY: ${env:ALCHEMY_API_KEY}
+    NODE_PROVIDER: ${env:NODE_PROVIDER}
+
   iamRoleStatements:
     - Effect: Allow
       Action:
