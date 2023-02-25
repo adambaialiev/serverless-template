@@ -13,7 +13,6 @@ export enum IndexNames {
 
 export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
-	STORE = 'STORE',
 	USER = 'USER#',
 	USER_WALLET = 'USER_WALLET#',
 	FEEDBACK = 'FEEDBACK#',

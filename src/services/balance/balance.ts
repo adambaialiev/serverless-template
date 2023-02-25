@@ -11,6 +11,8 @@ import {
 	TableKeys,
 	TransactionAttributes,
 	Entities,
+	IncrementTransactionItem,
+	DecrementTransactionItem,
 } from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
@@ -32,6 +34,46 @@ interface IncrementBalanceProps {
 }
 
 export default class BalanceService {
+	async getIncrementTransactions() {
+		const output = await dynamoDB
+			.query({
+				TableName: process.env.dynamo_table,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.INCREMENT_TRANSACTION,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			const items = output.Items as IncrementTransactionItem[];
+			return items;
+		}
+	}
+
+	async getDecrementTransactions() {
+		const output = await dynamoDB
+			.query({
+				TableName: process.env.dynamo_table,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.DECREMENT_TRANSACTION,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			const items = output.Items as DecrementTransactionItem[];
+			return items;
+		}
+	}
+
 	async incrementBalance({
 		phoneNumber,
 		amount,
@@ -47,9 +89,6 @@ export default class BalanceService {
 			throw new Error(`Increment transaction with hash ${hash} already exist`);
 		}
 		const userKey = buildUserKey(phoneNumber);
-		const transactionId = v4();
-		const transactionKey = buildTransactionKey(transactionId);
-		const transactionHashKey = buildIncrementTransactionKey(hash);
 		const date = Date.now().toString();
 		await dynamoDB
 			.transactWrite({
@@ -58,7 +97,7 @@ export default class BalanceService {
 						Put: {
 							Item: {
 								[TableKeys.PK]: Entities.INCREMENT_TRANSACTION,
-								[TableKeys.SK]: transactionHashKey,
+								[TableKeys.SK]: buildIncrementTransactionKey(hash),
 								[IncrementTransactionAttributes.ID]: hash,
 								[IncrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
 								[IncrementTransactionAttributes.AMOUNT]: amount,
@@ -73,8 +112,8 @@ export default class BalanceService {
 						Put: {
 							Item: {
 								[TableKeys.PK]: userKey,
-								[TableKeys.SK]: transactionKey,
-								[TransactionAttributes.ID]: transactionId,
+								[TableKeys.SK]: buildTransactionKey(hash),
+								[TransactionAttributes.ID]: hash,
 								[TransactionAttributes.SOURCE]: phoneNumber,
 								[TransactionAttributes.TARGET]: phoneNumber,
 								[TransactionAttributes.AMOUNT]: amount,
@@ -147,7 +186,7 @@ export default class BalanceService {
 								[TransactionAttributes.TARGET]: phoneNumber,
 								[TransactionAttributes.AMOUNT]: amount,
 								[TransactionAttributes.CREATED_AT]: date,
-								[TransactionAttributes.STATUS]: '',
+								[TransactionAttributes.STATUS]: 'success',
 								[TransactionAttributes.TYPE]: 'withdraw',
 							},
 							TableName: tableName,
@@ -161,12 +200,12 @@ export default class BalanceService {
 								[TableKeys.PK]: userKey,
 								[TableKeys.SK]: userKey,
 							},
-							UpdateExpression: `SET #balance = #balance + :increase`,
+							UpdateExpression: `SET #balance = #balance - :decrease`,
 							ExpressionAttributeNames: {
 								'#balance': 'balance',
 							},
 							ExpressionAttributeValues: {
-								':increase': amount,
+								':decrease': amount,
 							},
 						},
 					},

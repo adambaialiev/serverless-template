@@ -3,6 +3,7 @@ import { sendResponse } from '@/utils/makeResponse';
 import UserService from '@/services/user/user';
 import CryptoEthersService from '@/services/crypto/cryptoEthers';
 import MasterWallet from '@/services/masterWallet/masterWallet';
+import BalanceService from '@/services/balance/balance';
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -15,6 +16,7 @@ export const handler: APIGatewayProxyHandler = async (
 
 		const allWallets = await userService.getAllWallets();
 		const masterWalletService = new MasterWallet();
+		const balanceService = new BalanceService();
 
 		const allWalletsWithBalance = {} as { [key: string]: string };
 
@@ -34,11 +36,19 @@ export const handler: APIGatewayProxyHandler = async (
 		const { poolBalance, usersList } =
 			await userService.getPoolBalanceAndUsersList();
 
+		const incrementTransactions =
+			await balanceService.getIncrementTransactions();
+
+		const decrementTransactions =
+			await balanceService.getDecrementTransactions();
+
 		const result = {
 			allWallets: allWalletsWithBalance,
 			masterWalletBalance,
 			poolBalance,
 			usersList,
+			incrementTransactions,
+			decrementTransactions,
 		};
 
 		callback(null, {
