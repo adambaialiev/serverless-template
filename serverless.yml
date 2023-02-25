@@ -50,6 +50,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  summary:
+    handler: build/src/endpoints/app/summary.summary
+    events:
+      - http:
+          path: /v1/app/summary
+          method: post
+          cors: true
   debug:
     handler: build/src/endpoints/debug/debug.debug
     events:

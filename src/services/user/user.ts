@@ -106,6 +106,40 @@ export default class UserService {
 		}
 	}
 
+	async getPoolBalanceAndUsersList() {
+		const output = await dynamoDB
+			.query({
+				TableName: process.env.dynamo_table as string,
+				KeyConditionExpression: '#pk = :pk',
+				IndexName: IndexNames.GSI1,
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.GSI1PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.USER,
+				},
+			})
+			.promise();
+		if (output.Items) {
+			const users = output.Items as UserItem[];
+			let poolBalance = 0;
+			const usersList: {
+				phoneNumber: string;
+				balance: string;
+				createdAt: string;
+			}[] = [];
+			for (const user of users) {
+				poolBalance += Number(user.balance);
+				usersList.push({
+					phoneNumber: user.phoneNumber,
+					balance: user.balance,
+					createdAt: user.createdAt,
+				});
+			}
+			return { poolBalance, usersList };
+		}
+	}
+
 	async getAllWallets() {
 		const output = await dynamoDB
 			.query({

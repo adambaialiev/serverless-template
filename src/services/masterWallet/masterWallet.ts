@@ -38,6 +38,7 @@ export interface IMasterWallet {
 	publicAddress: string;
 	privateKey: string;
 	network: string;
+	phoneNumber: string;
 }
 
 export default class MasterWallet {
@@ -91,6 +92,7 @@ export default class MasterWallet {
 				privateKey: masterWallet.privateKey,
 				publicAddress: masterWallet.publicAddress,
 				network: masterWallet.network,
+				phoneNumber: '',
 			};
 		}
 		return undefined;

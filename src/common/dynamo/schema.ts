@@ -28,6 +28,7 @@ export enum MasterWalletAttributes {
 	PRIVATE_KEY = 'privateKey',
 	NETWORK = 'network',
 	CREATED_AT = 'createdAt',
+	PHONE_NUMBER = 'phoneNumber',
 }
 
 export interface MasterWalletItem {
