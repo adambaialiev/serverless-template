@@ -23,6 +23,12 @@ export default class CryptoAlchemy {
 		);
 	}
 
+	async addAddress(address: string) {
+		await this.alchemy.notify.updateWebhook('wh_wk1qy5gvubj10dcc', {
+			addAddresses: [address],
+		});
+	}
+
 	async makePolygonUsdtTransaction(
 		privateKey: string,
 		targetPublicKey: string,

@@ -58,6 +58,8 @@ export class CryptoService implements ICryptoService {
 			phoneNumber,
 		};
 
+		await this.alchemy.addAddress(wallet.publicKey);
+
 		await dynamo
 			.transactWrite({
 				TransactItems: [
