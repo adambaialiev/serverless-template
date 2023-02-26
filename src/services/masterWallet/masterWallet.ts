@@ -207,6 +207,15 @@ export default class MasterWallet {
 					},
 				},
 				{
+					Delete: {
+						TableName,
+						Key: {
+							[TableKeys.PK]: Entities.WITHDRAW_TO_PROCESS,
+							[TableKeys.SK]: buildWithdrawToProcessKey(transactionHash),
+						},
+					},
+				},
+				{
 					Update: {
 						TableName,
 						Key: {
