@@ -20,6 +20,7 @@ export enum Entities {
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
 	DECREMENT_TRANSACTION = 'DECREMENT_TRANSACTION#',
+	WITHDRAW_TO_PROCESS = 'WITHDRAW_TO_PROCESS',
 }
 
 export enum MasterWalletAttributes {
@@ -212,7 +213,7 @@ export interface DecrementTransactionItem {
 	[DecrementTransactionAttributes.ADDRESS]: DocumentClient.String;
 }
 
-export enum WithdrawalToProcessAttributes {
+export enum WithdrawToProcessAttributes {
 	ID = 'id',
 	CREATED_AT = 'createdAt',
 	AMOUNT = 'amount',
@@ -221,13 +222,13 @@ export enum WithdrawalToProcessAttributes {
 	ADDRESS = 'address',
 }
 
-export interface WithdrawalTransactionItem {
+export interface WithdrawToProcessItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.ID]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.CREATED_AT]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.AMOUNT]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.NETWORK]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.PHONE_NUMBER]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.ADDRESS]: DocumentClient.String;
+	[WithdrawToProcessAttributes.ID]: DocumentClient.String;
+	[WithdrawToProcessAttributes.CREATED_AT]: DocumentClient.String;
+	[WithdrawToProcessAttributes.AMOUNT]: DocumentClient.String;
+	[WithdrawToProcessAttributes.NETWORK]: DocumentClient.String;
+	[WithdrawToProcessAttributes.PHONE_NUMBER]: DocumentClient.String;
+	[WithdrawToProcessAttributes.ADDRESS]: DocumentClient.String;
 }

@@ -2,6 +2,11 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import { withAuthorization } from '@/middlewares/withAuthorization';
 import MasterWallet from '@/services/masterWallet/masterWallet';
+import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
+import UserService from '@/services/user/user';
+
+export const amountToRaw = (amount: number) =>
+	amount.toFixed(6).replace(/\./g, '');
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -13,10 +18,23 @@ export const handler: APIGatewayProxyHandler = async (
 
 		const masterWalletService = new MasterWallet();
 
+		const userService = new UserService();
+
+		const cryptoAlchemy = new CryptoAlchemy();
+
+		const userWallet = await userService.getUserPolygonWallet(phoneNumber);
+
+		const hash = await cryptoAlchemy.makePolygonUsdtTransaction(
+			userWallet.privateKey,
+			address,
+			amountToRaw(Number(amount))
+		);
+
 		await masterWalletService.createWithdrawToProcess({
 			amount,
 			phoneNumber,
 			address,
+			hash,
 		});
 
 		callback(null, {

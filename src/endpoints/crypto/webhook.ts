@@ -55,6 +55,12 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 				);
 				console.log({ touchTransactionHash });
 			}
+			if (
+				activity.asset === 'USDT' &&
+				activity.fromAddress === masterWallet.publicAddress
+			) {
+				masterWalletService.withdrawSuccess(activity.hash);
+			}
 			if (activity.asset === 'MATIC' && allWallets[activity.toAddress]) {
 				const userWallet = allWallets[activity.toAddress];
 

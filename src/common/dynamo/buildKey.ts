@@ -20,3 +20,6 @@ export const buildIncrementTransactionKey = (hash: string) =>
 
 export const buildDecrementTransactionKey = (hash: string) =>
 	buildKey(Entities.DECREMENT_TRANSACTION, hash);
+
+export const buildWithdrawToProcessKey = (hash: string) =>
+	buildKey(Entities.WITHDRAW_TO_PROCESS, hash);
