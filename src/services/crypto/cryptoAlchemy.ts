@@ -3,19 +3,17 @@ import { contractAbi } from '@/services/crypto/usdt-erc20-contractAbi';
 import { Network, Alchemy, Wallet, Utils } from 'alchemy-sdk';
 import { ethers } from 'ethers';
 
-const apiKey = process.env.ALCHEMY_API_KEY;
-const webhookId = process.env.WEBHOOK_ID;
-
-const settings = {
-	apiKey,
-	network: Network.MATIC_MAINNET,
-};
-
 export default class CryptoAlchemy {
 	alchemy: Alchemy;
 	alchemyProvider: ethers.AlchemyProvider;
 
 	constructor() {
+		const apiKey = process.env.ALCHEMY_API_KEY;
+		const settings = {
+			apiKey,
+			network: Network.MATIC_MAINNET,
+		};
+		console.log({ apiKey });
 		this.alchemy = new Alchemy(settings);
 		this.alchemyProvider = new ethers.AlchemyProvider(
 			{ chainId: 137, name: 'matic' },
@@ -24,6 +22,8 @@ export default class CryptoAlchemy {
 	}
 
 	async addAddress(address: string) {
+		const webhookId = process.env.WEBHOOK_ID;
+		console.log({ webhookId });
 		await this.alchemy.notify.updateWebhook(webhookId, {
 			addAddresses: [address],
 		});
