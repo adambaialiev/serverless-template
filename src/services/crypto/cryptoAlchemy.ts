@@ -9,11 +9,13 @@ export default class CryptoAlchemy {
 
 	constructor() {
 		const apiKey = process.env.ALCHEMY_API_KEY;
+		const authToken = process.env.ALCHEMY_NOTIFY_AUTH_TOKEN;
 		const settings = {
 			apiKey,
 			network: Network.MATIC_MAINNET,
+			authToken,
 		};
-		console.log({ apiKey });
+		console.log({ apiKey, authToken });
 		this.alchemy = new Alchemy(settings);
 		this.alchemyProvider = new ethers.AlchemyProvider(
 			{ chainId: 137, name: 'matic' },
