@@ -193,64 +193,66 @@ export default class MasterWallet {
 		const { amount, address, phoneNumber } = withdrawToProcess;
 		const userKey = buildUserKey(phoneNumber);
 		console.log({ userKey });
-		await dynamo.transactWrite({
-			TransactItems: [
-				{
-					Put: {
-						TableName,
-						Item: {
-							[TableKeys.PK]: Entities.DECREMENT_TRANSACTION,
-							[TableKeys.SK]: buildDecrementTransactionKey(transactionHash),
-							[DecrementTransactionAttributes.ID]: transactionHash,
-							[DecrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
-							[DecrementTransactionAttributes.AMOUNT]: amount,
-							[DecrementTransactionAttributes.ADDRESS]: address,
+		await dynamo
+			.transactWrite({
+				TransactItems: [
+					{
+						Put: {
+							TableName,
+							Item: {
+								[TableKeys.PK]: Entities.DECREMENT_TRANSACTION,
+								[TableKeys.SK]: buildDecrementTransactionKey(transactionHash),
+								[DecrementTransactionAttributes.ID]: transactionHash,
+								[DecrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
+								[DecrementTransactionAttributes.AMOUNT]: amount,
+								[DecrementTransactionAttributes.ADDRESS]: address,
+							},
 						},
 					},
-				},
-				{
-					Delete: {
-						TableName,
-						Key: {
-							[TableKeys.PK]: Entities.WITHDRAW_TO_PROCESS,
-							[TableKeys.SK]: buildWithdrawToProcessKey(transactionHash),
+					{
+						Delete: {
+							TableName,
+							Key: {
+								[TableKeys.PK]: Entities.WITHDRAW_TO_PROCESS,
+								[TableKeys.SK]: buildWithdrawToProcessKey(transactionHash),
+							},
 						},
 					},
-				},
-				{
-					Update: {
-						TableName,
-						Key: {
-							[TableKeys.PK]: userKey,
-							[TableKeys.SK]: userKey,
-						},
-						UpdateExpression: `SET #balance = #balance - :decrease`,
-						ExpressionAttributeNames: {
-							'#balance': 'balance',
-						},
-						ExpressionAttributeValues: {
-							':decrease': amount,
-						},
-					},
-				},
-				{
-					Update: {
-						TableName,
-						Key: {
-							[TableKeys.PK]: userKey,
-							[TableKeys.SK]: buildTransactionKey(transactionHash),
-						},
-						UpdateExpression: `SET #status = :status`,
-						ExpressionAttributeNames: {
-							'#status': 'status',
-						},
-						ExpressionAttributeValues: {
-							':status': 'success',
+					{
+						Update: {
+							TableName,
+							Key: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: userKey,
+							},
+							UpdateExpression: `SET #balance = #balance - :decrease`,
+							ExpressionAttributeNames: {
+								'#balance': 'balance',
+							},
+							ExpressionAttributeValues: {
+								':decrease': amount,
+							},
 						},
 					},
-				},
-			],
-		});
+					{
+						Update: {
+							TableName,
+							Key: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: buildTransactionKey(transactionHash),
+							},
+							UpdateExpression: `SET #status = :status`,
+							ExpressionAttributeNames: {
+								'#status': 'status',
+							},
+							ExpressionAttributeValues: {
+								':status': 'success',
+							},
+						},
+					},
+				],
+			})
+			.promise();
 
 		const userService = new UserService();
 		const pushNotificationService = new PushNotifications();
