@@ -88,7 +88,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			// detect successful withdraw
 			if (
 				activity.asset === 'USDT' &&
-				activity.fromAddress === masterWallet.publicAddress
+				activity.fromAddress === masterWallet.publicAddress.toLowerCase()
 			) {
 				await masterWalletService.withdrawSuccess(activity.hash);
 			}
