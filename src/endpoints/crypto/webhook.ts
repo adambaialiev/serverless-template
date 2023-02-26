@@ -88,8 +88,10 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			// detect successful withdraw
 			if (
 				activity.asset === 'USDT' &&
-				activity.fromAddress === masterWallet.publicAddress.toLowerCase()
+				activity.fromAddress.toLowerCase() ===
+					masterWallet.publicAddress.toLowerCase()
 			) {
+				console.log('successful withdraw detected');
 				await masterWalletService.withdrawSuccess(activity.hash);
 			}
 			// detect touch transaction

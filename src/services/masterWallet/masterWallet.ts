@@ -189,8 +189,10 @@ export default class MasterWallet {
 		}
 		const withdrawToProcess =
 			withdrawToProcessOutput.Item as WithdrawToProcessItem;
+		console.log({ withdrawToProcess });
 		const { amount, address, phoneNumber } = withdrawToProcess;
 		const userKey = buildUserKey(phoneNumber);
+		console.log({ userKey });
 		await dynamo.transactWrite({
 			TransactItems: [
 				{
