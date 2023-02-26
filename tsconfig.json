@@ -1,13 +1,14 @@
 {
 	"compilerOptions": {
-		"module": "CommonJS",
+		"module": "commonjs",
 		"rootDir": "./",
-		"target": "ES2015",
-		"lib": ["es2018"],
+		"target": "es5",
+		"allowJs": true,
+		"lib": ["es6"],
 		"noImplicitAny": true,
-		"moduleResolution": "node16",
 		"outDir": "./build",
 		"esModuleInterop": true,
+		"skipLibCheck": true,
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["src/*"]

@@ -13,13 +13,15 @@ export enum IndexNames {
 
 export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
-	STORE = 'STORE',
 	USER = 'USER#',
+	USER_WALLET = 'USER_WALLET#',
 	FEEDBACK = 'FEEDBACK#',
 	TRANSACTION_REQUEST = 'TRANSACTION_REQUEST#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
 	DECREMENT_TRANSACTION = 'DECREMENT_TRANSACTION#',
+	WITHDRAW_TO_PROCESS = 'WITHDRAW_TO_PROCESS#',
+	HOME_TRANSACTION = 'HOME_TRANSACTION#',
 }
 
 export enum MasterWalletAttributes {
@@ -27,6 +29,7 @@ export enum MasterWalletAttributes {
 	PRIVATE_KEY = 'privateKey',
 	NETWORK = 'network',
 	CREATED_AT = 'createdAt',
+	PHONE_NUMBER = 'phoneNumber',
 }
 
 export interface MasterWalletItem {
@@ -65,6 +68,20 @@ export enum UserAttributes {
 	REFRESH_TOKEN = 'refreshToken',
 	WALLETS = 'wallets',
 	PUSH_TOKEN = 'pushToken',
+}
+
+export enum UserWalletAttributes {
+	ADDRESS = 'address',
+	PRIVATE_KEY = 'privateKey',
+	PHONE_NUMBER = 'phoneNumber',
+}
+
+export interface UserWalletItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[UserWalletAttributes.ADDRESS]: DocumentClient.String;
+	[UserWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
+	[UserWalletAttributes.PHONE_NUMBER]: DocumentClient.String;
 }
 export enum FeedbackAttributes {
 	ID = 'id',
@@ -179,7 +196,7 @@ export interface DecrementTransactionItem {
 	[DecrementTransactionAttributes.ADDRESS]: DocumentClient.String;
 }
 
-export enum WithdrawalToProcessAttributes {
+export enum WithdrawToProcessAttributes {
 	ID = 'id',
 	CREATED_AT = 'createdAt',
 	AMOUNT = 'amount',
@@ -188,13 +205,13 @@ export enum WithdrawalToProcessAttributes {
 	ADDRESS = 'address',
 }
 
-export interface WithdrawalTransactionItem {
+export interface WithdrawToProcessItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.ID]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.CREATED_AT]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.AMOUNT]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.NETWORK]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.PHONE_NUMBER]: DocumentClient.String;
-	[WithdrawalToProcessAttributes.ADDRESS]: DocumentClient.String;
+	[WithdrawToProcessAttributes.ID]: DocumentClient.String;
+	[WithdrawToProcessAttributes.CREATED_AT]: DocumentClient.String;
+	[WithdrawToProcessAttributes.AMOUNT]: DocumentClient.String;
+	[WithdrawToProcessAttributes.NETWORK]: DocumentClient.String;
+	[WithdrawToProcessAttributes.PHONE_NUMBER]: DocumentClient.String;
+	[WithdrawToProcessAttributes.ADDRESS]: DocumentClient.String;
 }

@@ -1,10 +1,12 @@
-import { buildUserKey } from '@/common/dynamo/buildKey';
+import { buildUserKey, buildUserWalletKey } from '@/common/dynamo/buildKey';
 import {
 	Entities,
 	IndexNames,
 	TableKeys,
 	UserAttributes,
 	UserItem,
+	UserWalletAttributes,
+	UserWalletItem,
 } from '@/common/dynamo/schema';
 import {
 	IUpdateUserParams,
@@ -85,6 +87,78 @@ export default class UserService {
 		const user = await this.getUser(phoneNumber);
 		if (user) {
 			return user.wallets.find((w) => w.network === 'polygon');
+		}
+	}
+
+	async getUserPhoneNumberByWalletAddress(address: string) {
+		const output = await dynamoDB
+			.get({
+				TableName,
+				Key: {
+					[TableKeys.PK]: Entities.USER_WALLET,
+					[TableKeys.SK]: buildUserWalletKey(address),
+				},
+			})
+			.promise();
+		if (output.Item) {
+			const user = output.Item as UserItem;
+			return user.phoneNumber;
+		}
+	}
+
+	async getPoolBalanceAndUsersList() {
+		const output = await dynamoDB
+			.query({
+				TableName: process.env.dynamo_table as string,
+				KeyConditionExpression: '#pk = :pk',
+				IndexName: IndexNames.GSI1,
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.GSI1PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.USER,
+				},
+			})
+			.promise();
+		if (output.Items) {
+			const users = output.Items as UserItem[];
+			let poolBalance = 0;
+			const usersList: {
+				phoneNumber: string;
+				balance: string;
+				createdAt: string;
+			}[] = [];
+			for (const user of users) {
+				poolBalance += Number(user.balance);
+				usersList.push({
+					phoneNumber: user.phoneNumber,
+					balance: user.balance,
+					createdAt: user.createdAt,
+				});
+			}
+			return { poolBalance, usersList };
+		}
+	}
+
+	async getAllWallets() {
+		const output = await dynamoDB
+			.query({
+				TableName,
+				KeyConditionExpression: `#pk = :pk`,
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.USER_WALLET,
+				},
+			})
+			.promise();
+		if (output.Items) {
+			const userWalletItems = output.Items as UserWalletItem[];
+			return userWalletItems.reduce((acc, item) => {
+				acc[item[UserWalletAttributes.ADDRESS].toLowerCase()] = item;
+				return acc;
+			}, {} as { [key: string]: UserWalletItem });
 		}
 	}
 

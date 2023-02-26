@@ -6,3 +6,5 @@ jspm_packages
 .serverless
 build
 .idea
+.env.wallet-adam-dev
+.env

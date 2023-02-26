@@ -2,6 +2,7 @@ import {
 	buildDecrementTransactionKey,
 	buildTransactionKey,
 	buildUserKey,
+	buildWithdrawToProcessKey,
 } from '@/common/dynamo/buildKey';
 import {
 	DecrementTransactionAttributes,
@@ -10,24 +11,19 @@ import {
 	MasterWalletItem,
 	TableKeys,
 	TransactionAttributes,
+	WithdrawToProcessAttributes,
+	WithdrawToProcessItem,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
-import PusherService from '@/services/pusher/pusher';
+import { PushNotifications } from '@/services/pushNotifications/pushNotification';
+import UserService from '@/services/user/user';
 import AWS from 'aws-sdk';
-import { v4 } from 'uuid';
 
 interface WithdrawToProcessProps {
 	amount: string;
 	phoneNumber: string;
 	address: string;
-}
-
-interface WithdrawSuccessProps {
-	transactionHash: string;
-	transactionId: string;
-	amount: string;
-	phoneNumber: string;
-	address: string;
+	hash: string;
 }
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
@@ -38,6 +34,7 @@ export interface IMasterWallet {
 	publicAddress: string;
 	privateKey: string;
 	network: string;
+	phoneNumber: string;
 }
 
 export default class MasterWallet {
@@ -60,7 +57,7 @@ export default class MasterWallet {
 				[TableKeys.PK]: Entities.MASTER_WALLET,
 				[TableKeys.SK]: Entities.MASTER_WALLET,
 				[MasterWalletAttributes.PRIVATE_KEY]: wallet.privateKey,
-				[MasterWalletAttributes.PUBLIC_ADDRESS]: wallet.address,
+				[MasterWalletAttributes.PUBLIC_ADDRESS]: wallet.address.toLowerCase(),
 				[MasterWalletAttributes.NETWORK]: 'polygon',
 			};
 
@@ -91,6 +88,7 @@ export default class MasterWallet {
 				privateKey: masterWallet.privateKey,
 				publicAddress: masterWallet.publicAddress,
 				network: masterWallet.network,
+				phoneNumber: '',
 			};
 		}
 		return undefined;
@@ -100,8 +98,9 @@ export default class MasterWallet {
 		amount,
 		phoneNumber,
 		address,
+		hash,
 	}: WithdrawToProcessProps) {
-		console.log({ amount });
+		console.log({ amount, phoneNumber, address, hash });
 		const userKey = buildUserKey(phoneNumber);
 		const userOutput = await dynamo
 			.get({
@@ -118,8 +117,6 @@ export default class MasterWallet {
 
 		const date = Date.now().toString();
 
-		const transactionId = v4();
-
 		await dynamo
 			.transactWrite({
 				TransactItems: [
@@ -127,10 +124,10 @@ export default class MasterWallet {
 						Put: {
 							Item: {
 								[TableKeys.PK]: userKey,
-								[TableKeys.SK]: buildTransactionKey(transactionId),
+								[TableKeys.SK]: buildTransactionKey(hash),
 								[TransactionAttributes.AMOUNT]: amount,
 								[TransactionAttributes.CREATED_AT]: date,
-								[TransactionAttributes.ID]: transactionId,
+								[TransactionAttributes.ID]: hash,
 								[TransactionAttributes.SOURCE]: phoneNumber,
 								[TransactionAttributes.STATUS]: 'pending',
 								[TransactionAttributes.TARGET]: '',
@@ -140,27 +137,28 @@ export default class MasterWallet {
 							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
 						},
 					},
+					{
+						Put: {
+							Item: {
+								[TableKeys.PK]: buildWithdrawToProcessKey(hash),
+								[TableKeys.SK]: buildWithdrawToProcessKey(hash),
+								[WithdrawToProcessAttributes.ADDRESS]: address,
+								[WithdrawToProcessAttributes.AMOUNT]: amount,
+								[WithdrawToProcessAttributes.CREATED_AT]: date,
+								[WithdrawToProcessAttributes.ID]: hash,
+								[WithdrawToProcessAttributes.NETWORK]: 'polygon',
+								[WithdrawToProcessAttributes.PHONE_NUMBER]: phoneNumber,
+							},
+							TableName,
+							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
 				],
 			})
 			.promise();
-
-		const pusherService = new PusherService();
-		await pusherService.triggerWithdrawalToProcess({
-			id: transactionId,
-			createdAt: date,
-			amount,
-			phoneNumber,
-			address,
-		});
 	}
 
-	async withdrawSuccess({
-		transactionHash,
-		transactionId,
-		amount,
-		phoneNumber,
-		address,
-	}: WithdrawSuccessProps) {
+	async withdrawSuccess(transactionHash: string) {
 		const decrementTransactionOutput = await dynamo
 			.get({
 				TableName,
@@ -176,6 +174,22 @@ export default class MasterWallet {
 				`Decrement transaction with hash ${transactionHash} already exist`
 			);
 		}
+		const withdrawToProcessOutput = await dynamo
+			.get({
+				TableName,
+				Key: {
+					[TableKeys.PK]: buildWithdrawToProcessKey(transactionHash),
+					[TableKeys.SK]: buildWithdrawToProcessKey(transactionHash),
+				},
+			})
+			.promise();
+
+		if (!withdrawToProcessOutput.Item) {
+			throw new Error('No withdraw to process item found');
+		}
+		const withdrawToProcess =
+			withdrawToProcessOutput.Item as WithdrawToProcessItem;
+		const { amount, address, phoneNumber } = withdrawToProcess;
 		const userKey = buildUserKey(phoneNumber);
 		await dynamo.transactWrite({
 			TransactItems: [
@@ -189,6 +203,15 @@ export default class MasterWallet {
 							[DecrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
 							[DecrementTransactionAttributes.AMOUNT]: amount,
 							[DecrementTransactionAttributes.ADDRESS]: address,
+						},
+					},
+				},
+				{
+					Delete: {
+						TableName,
+						Key: {
+							[TableKeys.PK]: Entities.WITHDRAW_TO_PROCESS,
+							[TableKeys.SK]: buildWithdrawToProcessKey(transactionHash),
 						},
 					},
 				},
@@ -213,7 +236,7 @@ export default class MasterWallet {
 						TableName,
 						Key: {
 							[TableKeys.PK]: userKey,
-							[TableKeys.SK]: buildTransactionKey(transactionId),
+							[TableKeys.SK]: buildTransactionKey(transactionHash),
 						},
 						UpdateExpression: `SET #status = :status`,
 						ExpressionAttributeNames: {
@@ -226,5 +249,21 @@ export default class MasterWallet {
 				},
 			],
 		});
+
+		const userService = new UserService();
+		const pushNotificationService = new PushNotifications();
+
+		const userOutput = await userService.getSlug(phoneNumber);
+
+		try {
+			if (userOutput.pushToken) {
+				await pushNotificationService.send(
+					userOutput.pushToken,
+					`Withdrawal successful: ${amount} USDT`
+				);
+			}
+		} catch (error) {
+			console.log({ error });
+		}
 	}
 }

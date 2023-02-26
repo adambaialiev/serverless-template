@@ -4,15 +4,22 @@ service: shop-wallet-serverless
 
 frameworkVersion: '3'
 
+useDotenv: true
+
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   region: us-east-1
   profile: ${opt:stage, "dev"}
   environment:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
+    WEBHOOK_ID: ${env:WEBHOOK_ID}
+    ALCHEMY_API_KEY: ${env:ALCHEMY_API_KEY}
+    ALCHEMY_NOTIFY_AUTH_TOKEN: ${env:ALCHEMY_NOTIFY_AUTH_TOKEN}
+    NODE_PROVIDER: ${env:NODE_PROVIDER}
+
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -44,6 +51,28 @@ custom:
     createRoute53Record: true
 
 functions:
+  summary:
+    handler: build/src/endpoints/app/summary.summary
+    events:
+      - http:
+          path: /v1/app/summary
+          method: post
+          cors: true
+  debug:
+    handler: build/src/endpoints/debug/debug.debug
+    events:
+      - http:
+          path: /v1/debug
+          method: post
+          cors: true
+  crypto-webhook:
+    timeout: 30
+    handler: build/src/endpoints/crypto/webhook.webhook
+    events:
+      - http:
+          path: /v1/crypto/webhook
+          method: post
+          cors: true
   init:
     handler: build/src/endpoints/app/init.init
     events:
@@ -58,20 +87,7 @@ functions:
           path: /v1/user/wallet
           method: post
           cors: true
-  setStoreValues:
-    handler: build/src/endpoints/store/setStoreValues.setStoreValues
-    events:
-      - http:
-          path: /v1/store/set-store-values
-          method: post
-          cors: true
-  getStoreValuesForAdmin:
-    handler: build/src/endpoints/store/getStoreValuesForAdmin.getStoreValuesForAdmin
-    events:
-      - http:
-          path: /v1/store/get-store-values-for-admin
-          method: post
-          cors: true
+
   getUsersForAdmin:
     handler: build/src/endpoints/user/getUsersForAdmin.getUsersForAdmin
     events:
@@ -92,22 +108,6 @@ functions:
     events:
       - http:
           path: /v1/wallet/deposit
-          method: post
-          cors: true
-
-  usersWalletAddresses:
-    handler: build/src/endpoints/store/usersWalletAddresses.usersWalletAddresses
-    events:
-      - http:
-          path: /v1/store/usersWalletAddresses
-          method: post
-          cors: true
-
-  withdrawSuccess:
-    handler: build/src/endpoints/store/withdrawSuccess.withdrawSuccess
-    events:
-      - http:
-          path: /v1/store/withdrawSuccess
           method: post
           cors: true
 
