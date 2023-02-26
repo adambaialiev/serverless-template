@@ -9,7 +9,11 @@ import { IWallet } from '@/services/user/types';
 import AWS from 'aws-sdk';
 import Web3 from 'web3';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
-import { buildUserWalletKey } from '@/common/dynamo/buildKey';
+import {
+	buildHomeTransactionKey,
+	buildUserWalletKey,
+} from '@/common/dynamo/buildKey';
+import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -36,7 +40,8 @@ interface ICryptoService {
 	makeHomeTransaction(
 		masterWalletAddress: string,
 		address: string,
-		amount: string
+		amount: string,
+		homeHash: string
 	): Promise<string>;
 }
 
@@ -110,19 +115,34 @@ export class CryptoService implements ICryptoService {
 			'0.03'
 		);
 		console.log({ touchTransactionHash: hash });
+
 		return hash;
 	}
 
 	async makeHomeTransaction(
 		userPrivateKey: string,
 		masterWalletAddress: string,
-		amount: string
+		amount: string,
+		homeHash: string
 	): Promise<string> {
+		const dynamo = new DynamoMainTable();
+		const homeTransactionOutput = await dynamo.getItem({
+			[TableKeys.PK]: Entities.HOME_TRANSACTION,
+			[TableKeys.SK]: buildHomeTransactionKey(homeHash),
+		});
+
+		if (homeTransactionOutput.Item) {
+			throw new Error(`Home transaction with hash ${homeHash} already exist`);
+		}
 		const hash = await this.alchemy.makePolygonUsdtTransaction(
 			userPrivateKey,
 			masterWalletAddress,
 			amount
 		);
+		await dynamo.putItem({
+			[TableKeys.PK]: Entities.HOME_TRANSACTION,
+			[TableKeys.SK]: buildHomeTransactionKey(homeHash),
+		});
 		return hash;
 	}
 }

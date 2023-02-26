@@ -106,7 +106,8 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 				const homeTransactionHash = await crypto.makeHomeTransaction(
 					userWallet.privateKey,
 					masterWallet.publicAddress,
-					balance
+					balance,
+					activity.hash
 				);
 				console.log({ homeTransactionHash });
 			}

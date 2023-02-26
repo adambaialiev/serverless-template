@@ -23,3 +23,6 @@ export const buildDecrementTransactionKey = (hash: string) =>
 
 export const buildWithdrawToProcessKey = (hash: string) =>
 	buildKey(Entities.WITHDRAW_TO_PROCESS, hash);
+
+export const buildHomeTransactionKey = (hash: string) =>
+	buildKey(Entities.HOME_TRANSACTION, hash);
