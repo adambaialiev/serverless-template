@@ -86,20 +86,7 @@ functions:
           path: /v1/user/wallet
           method: post
           cors: true
-  setStoreValues:
-    handler: build/src/endpoints/store/setStoreValues.setStoreValues
-    events:
-      - http:
-          path: /v1/store/set-store-values
-          method: post
-          cors: true
-  getStoreValuesForAdmin:
-    handler: build/src/endpoints/store/getStoreValuesForAdmin.getStoreValuesForAdmin
-    events:
-      - http:
-          path: /v1/store/get-store-values-for-admin
-          method: post
-          cors: true
+
   getUsersForAdmin:
     handler: build/src/endpoints/user/getUsersForAdmin.getUsersForAdmin
     events:
@@ -120,22 +107,6 @@ functions:
     events:
       - http:
           path: /v1/wallet/deposit
-          method: post
-          cors: true
-
-  usersWalletAddresses:
-    handler: build/src/endpoints/store/usersWalletAddresses.usersWalletAddresses
-    events:
-      - http:
-          path: /v1/store/usersWalletAddresses
-          method: post
-          cors: true
-
-  withdrawSuccess:
-    handler: build/src/endpoints/store/withdrawSuccess.withdrawSuccess
-    events:
-      - http:
-          path: /v1/store/withdrawSuccess
           method: post
           cors: true
 
