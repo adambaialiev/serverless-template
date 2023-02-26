@@ -53,8 +53,7 @@ export default class CryptoAlchemy {
 				signer
 			);
 			console.log({ gasPrice });
-			const converted = Utils.formatEther(gasPrice);
-			console.log({ converted });
+
 			const transaction = await erc20_rw.transfer(targetPublicKey, amount, {
 				from: signer.address,
 				gasPrice: gasPrice.toBigInt(),
