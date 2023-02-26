@@ -1,6 +1,8 @@
+import BalanceService from '@/services/balance/balance';
 import { CryptoService } from '@/services/crypto/crypto';
 import CryptoEthersService from '@/services/crypto/cryptoEthers';
 import MasterWallet from '@/services/masterWallet/masterWallet';
+import { PushNotifications } from '@/services/pushNotifications/pushNotification';
 import UserService from '@/services/user/user';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 
@@ -48,25 +50,59 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 		for (let i = 0; i < alchemyResponse.event.activity.length; i++) {
 			const activity = alchemyResponse.event.activity[i];
 			console.log({ activity });
+			// detect deposit transaction
 			if (activity.asset === 'USDT' && allWallets[activity.toAddress]) {
+				const balanceService = new BalanceService();
+
+				const pushNotificationService = new PushNotifications();
+
+				const { phoneNumber } = allWallets[activity.toAddress];
+
+				const amount = Number(activity.value);
+
+				await balanceService.incrementBalance({
+					phoneNumber,
+					amount,
+					hash: activity.hash,
+					address: activity.toAddress,
+				});
+
+				const userOutput = await userService.getSlug(phoneNumber);
+
+				try {
+					if (userOutput.pushToken) {
+						await pushNotificationService.send(
+							userOutput.pushToken,
+							`You received ${amount} USDT`
+						);
+					}
+				} catch (error) {
+					console.log({ error });
+				}
 				const touchTransactionHash = await crypto.makeTouchTransaction(
 					masterWallet.privateKey,
 					activity.toAddress
 				);
 				console.log({ touchTransactionHash });
 			}
+			// detect successful withdraw
 			if (
 				activity.asset === 'USDT' &&
 				activity.fromAddress === masterWallet.publicAddress
 			) {
-				masterWalletService.withdrawSuccess(activity.hash);
+				await masterWalletService.withdrawSuccess(activity.hash);
 			}
+			// detect touch transaction
 			if (activity.asset === 'MATIC' && allWallets[activity.toAddress]) {
 				const userWallet = allWallets[activity.toAddress];
 
 				const balance = await cryptoEthers.getBalanceOfAddress(
 					activity.toAddress
 				);
+				console.log({ balance });
+				if (Number(balance) === 0) {
+					return;
+				}
 				const homeTransactionHash = await crypto.makeHomeTransaction(
 					userWallet.privateKey,
 					masterWallet.publicAddress,

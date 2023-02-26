@@ -50,7 +50,7 @@ export class CryptoService implements ICryptoService {
 
 		const wallet: IWallet = {
 			privateKey: account.privateKey,
-			publicKey: account.address,
+			publicKey: account.address.toLowerCase(),
 			chain: 'mainnet',
 			network: 'polygon',
 			phoneNumber,

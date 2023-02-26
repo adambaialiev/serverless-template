@@ -15,6 +15,8 @@ import {
 	WithdrawToProcessItem,
 } from '@/common/dynamo/schema';
 import { CryptoService } from '@/services/crypto/crypto';
+import { PushNotifications } from '@/services/pushNotifications/pushNotification';
+import UserService from '@/services/user/user';
 import AWS from 'aws-sdk';
 
 interface WithdrawToProcessProps {
@@ -55,7 +57,7 @@ export default class MasterWallet {
 				[TableKeys.PK]: Entities.MASTER_WALLET,
 				[TableKeys.SK]: Entities.MASTER_WALLET,
 				[MasterWalletAttributes.PRIVATE_KEY]: wallet.privateKey,
-				[MasterWalletAttributes.PUBLIC_ADDRESS]: wallet.address,
+				[MasterWalletAttributes.PUBLIC_ADDRESS]: wallet.address.toLowerCase(),
 				[MasterWalletAttributes.NETWORK]: 'polygon',
 			};
 
@@ -238,5 +240,21 @@ export default class MasterWallet {
 				},
 			],
 		});
+
+		const userService = new UserService();
+		const pushNotificationService = new PushNotifications();
+
+		const userOutput = await userService.getSlug(phoneNumber);
+
+		try {
+			if (userOutput.pushToken) {
+				await pushNotificationService.send(
+					userOutput.pushToken,
+					`Withdrawal successful: ${amount} USDT`
+				);
+			}
+		} catch (error) {
+			console.log({ error });
+		}
 	}
 }
