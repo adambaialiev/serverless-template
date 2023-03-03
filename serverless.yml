@@ -118,6 +118,13 @@ functions:
           path: /v1/users/pushToken
           method: post
           cors: true
+  decrementBadgeCount:
+    handler: build/src/endpoints/notifications/decrementBadgeCount.decrementBadgeCount
+    events:
+      - http:
+          path: /v1/notifications/badge/decrement
+          method: put
+          cors: true
 
   makeTransaction:
     handler: build/src/endpoints/transactions/makeTransaction.makeTransaction

@@ -29,9 +29,13 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			});
 
 			if (target.pushToken) {
+				const updatedUser = await pushNotificationService.incrementBadgeCount(
+					target.phoneNumber
+				);
 				await pushNotificationService.send(
 					target.pushToken,
-					`User ${from} requested ${amount} USDT`
+					`User ${from} requested ${amount} USDT`,
+					Number(updatedUser.unreadNotifications)
 				);
 			}
 			return {

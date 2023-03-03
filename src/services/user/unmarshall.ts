@@ -8,6 +8,7 @@ export const unmarshallUserSlug = (userItem: UserItem): UserSlug => ({
 	id: userItem.id,
 	balance: userItem.balance,
 	pushToken: userItem.pushToken,
+	unreadNotifications: Number(userItem.unreadNotifications),
 });
 
 export const unmarshallUser = (userItem: UserItem): User => ({

@@ -68,6 +68,7 @@ export enum UserAttributes {
 	REFRESH_TOKEN = 'refreshToken',
 	WALLETS = 'wallets',
 	PUSH_TOKEN = 'pushToken',
+	UNREAD_NOTIFICATIONS = 'unreadNotifications',
 }
 
 export enum UserWalletAttributes {
@@ -119,6 +120,7 @@ export interface UserItem {
 	[UserAttributes.REFRESH_TOKEN]: DocumentClient.String;
 	[UserAttributes.WALLETS]: DocumentClient.ListAttributeValue;
 	[UserAttributes.PUSH_TOKEN]: DocumentClient.String;
+	[UserAttributes.UNREAD_NOTIFICATIONS]: DocumentClient.NumberAttributeValue;
 }
 
 export enum TransactionAttributes {

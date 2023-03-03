@@ -263,7 +263,8 @@ export default class MasterWallet {
 			if (userOutput.pushToken) {
 				await pushNotificationService.send(
 					userOutput.pushToken,
-					`Withdrawal successful: ${amount} USDT`
+					`Withdrawal successful: ${amount} USDT`,
+					userOutput.unreadNotifications
 				);
 			}
 		} catch (error) {

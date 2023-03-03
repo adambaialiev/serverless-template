@@ -73,7 +73,8 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 					if (userOutput.pushToken) {
 						await pushNotificationService.send(
 							userOutput.pushToken,
-							`You received ${amount} USDT`
+							`You received ${amount} USDT`,
+							userOutput.unreadNotifications
 						);
 					}
 				} catch (error) {

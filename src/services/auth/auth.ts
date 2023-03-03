@@ -53,6 +53,7 @@ export class AuthService {
 			[UserAttributes.FIRST_NAME]: '',
 			[UserAttributes.LAST_NAME]: '',
 			[UserAttributes.BALANCE]: 0,
+			[UserAttributes.UNREAD_NOTIFICATIONS]: 0,
 			[UserAttributes.PHONE_NUMBER]: phoneNumber,
 			[UserAttributes.CREATED_AT]: Date.now().toString(),
 			[UserAttributes.UPDATED_AT]: '',

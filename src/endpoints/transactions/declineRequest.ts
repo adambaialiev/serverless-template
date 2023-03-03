@@ -30,7 +30,8 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 		if (userTarget.pushToken) {
 			await pushNotificationService.send(
 				userTarget.pushToken,
-				`User ${source.phoneNumber} declined your request`
+				`User ${source.phoneNumber} declined your request`,
+				userTarget.unreadNotifications
 			);
 		}
 

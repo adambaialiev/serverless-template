@@ -23,6 +23,7 @@ export interface UserSlug {
 	id: string;
 	balance: string;
 	pushToken: string;
+	unreadNotifications: number;
 }
 
 export interface IUpdateUserParams {
