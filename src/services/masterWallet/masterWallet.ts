@@ -1,11 +1,14 @@
 import {
 	buildDecrementTransactionKey,
+	buildDepositToValidateKey,
 	buildTransactionKey,
 	buildUserKey,
 	buildWithdrawToProcessKey,
 } from '@/common/dynamo/buildKey';
 import {
 	DecrementTransactionAttributes,
+	DepositToValidateAttributes,
+	DepositToValidateItem,
 	Entities,
 	MasterWalletAttributes,
 	MasterWalletItem,
@@ -19,7 +22,7 @@ import { PushNotifications } from '@/services/pushNotifications/pushNotification
 import UserService from '@/services/user/user';
 import AWS from 'aws-sdk';
 
-interface WithdrawToProcessProps {
+interface TransactionToProcessProps {
 	amount: string;
 	phoneNumber: string;
 	address: string;
@@ -94,12 +97,122 @@ export default class MasterWallet {
 		return undefined;
 	}
 
+	async updateDepositValidationValue(
+		phoneNumber: string,
+		hash: string,
+		validationNumber: string
+	) {
+		await dynamo
+			.update({
+				TableName,
+				Key: {
+					[TableKeys.PK]: buildUserKey(phoneNumber),
+					[TableKeys.SK]: buildTransactionKey(hash),
+				},
+				UpdateExpression: `SET #validationNumber = :validationNumber`,
+				ExpressionAttributeNames: {
+					'#validationNumber': 'validationNumber',
+				},
+				ExpressionAttributeValues: {
+					':validationNumber': validationNumber,
+				},
+			})
+			.promise();
+	}
+
+	async createDepositToValidate({
+		amount,
+		phoneNumber,
+		address,
+		hash,
+	}: TransactionToProcessProps) {
+		console.log({ amount, phoneNumber, address, hash });
+		const depositToValidateOutput = await dynamo
+			.get({
+				TableName,
+				Key: {
+					[TableKeys.PK]: Entities.DEPOSIT_TO_VALIDATE,
+					[TableKeys.SK]: buildDepositToValidateKey(hash),
+				},
+			})
+			.promise();
+
+		if (depositToValidateOutput.Item) {
+			throw new Error(`Deposit to validate with hash ${hash} already exist`);
+		}
+
+		const date = Date.now().toString();
+
+		const userKey = buildUserKey(phoneNumber);
+
+		await dynamo
+			.transactWrite({
+				TransactItems: [
+					{
+						Put: {
+							Item: {
+								[TableKeys.PK]: Entities.DEPOSIT_TO_VALIDATE,
+								[TableKeys.SK]: buildDepositToValidateKey(hash),
+								[DepositToValidateAttributes.ADDRESS]: address,
+								[DepositToValidateAttributes.AMOUNT]: amount,
+								[DepositToValidateAttributes.CREATED_AT]: date,
+								[DepositToValidateAttributes.ID]: hash,
+								[DepositToValidateAttributes.NETWORK]: 'polygon',
+								[DepositToValidateAttributes.PHONE_NUMBER]: phoneNumber,
+							},
+							TableName,
+							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
+					{
+						Put: {
+							Item: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: buildTransactionKey(hash),
+								[TransactionAttributes.ID]: hash,
+								[TransactionAttributes.SOURCE]: phoneNumber,
+								[TransactionAttributes.TARGET]: phoneNumber,
+								[TransactionAttributes.AMOUNT]: amount,
+								[TransactionAttributes.CREATED_AT]: date,
+								[TransactionAttributes.STATUS]: 'validating',
+								[TransactionAttributes.TYPE]: 'deposit',
+								[TransactionAttributes.VALIDATION_NUMBER]: '1/128',
+							},
+							TableName,
+							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+						},
+					},
+				],
+			})
+			.promise();
+	}
+
+	async getDepositsToValidate(): Promise<DepositToValidateItem[] | undefined> {
+		const output = await dynamo
+			.query({
+				TableName: process.env.dynamo_table,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': Entities.DEPOSIT_TO_VALIDATE,
+				},
+			})
+			.promise();
+
+		if (output.Items) {
+			return output.Items as DepositToValidateItem[];
+		}
+		return undefined;
+	}
+
 	async createWithdrawToProcess({
 		amount,
 		phoneNumber,
 		address,
 		hash,
-	}: WithdrawToProcessProps) {
+	}: TransactionToProcessProps) {
 		console.log({ amount, phoneNumber, address, hash });
 		const userKey = buildUserKey(phoneNumber);
 		const userOutput = await dynamo

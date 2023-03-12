@@ -51,6 +51,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  clear:
+    handler: build/src/endpoints/app/validateDeposits.validateDeposits
+    events:
+      - http:
+          path: /v1/app/clear
+          method: post
+          cors: true
   summary:
     handler: build/src/endpoints/app/summary.summary
     events:

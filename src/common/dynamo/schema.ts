@@ -16,12 +16,12 @@ export enum Entities {
 	USER = 'USER#',
 	USER_WALLET = 'USER_WALLET#',
 	FEEDBACK = 'FEEDBACK#',
-	TRANSACTION_REQUEST = 'TRANSACTION_REQUEST#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
 	DECREMENT_TRANSACTION = 'DECREMENT_TRANSACTION#',
 	WITHDRAW_TO_PROCESS = 'WITHDRAW_TO_PROCESS#',
 	HOME_TRANSACTION = 'HOME_TRANSACTION#',
+	DEPOSIT_TO_VALIDATE = 'DEPOSITS_TO_VALIDATE#',
 }
 
 export enum MasterWalletAttributes {
@@ -134,6 +134,7 @@ export enum TransactionAttributes {
 	TYPE = 'type',
 	COMMENT = 'comment',
 	IS_READ = 'isRead',
+	VALIDATION_NUMBER = 'validationNumber',
 }
 
 export interface TransactionItem {
@@ -147,6 +148,7 @@ export interface TransactionItem {
 	[TransactionAttributes.IS_READ]: DocumentClient.BooleanAttributeValue;
 	[TransactionAttributes.COMMENT]: DocumentClient.BooleanAttributeValue;
 	[TransactionAttributes.TYPE]: DocumentClient.String;
+	[TransactionAttributes.VALIDATION_NUMBER]: DocumentClient.String;
 }
 
 export interface ITransaction {
@@ -216,4 +218,24 @@ export interface WithdrawToProcessItem {
 	[WithdrawToProcessAttributes.NETWORK]: DocumentClient.String;
 	[WithdrawToProcessAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[WithdrawToProcessAttributes.ADDRESS]: DocumentClient.String;
+}
+
+export enum DepositToValidateAttributes {
+	ID = 'id',
+	CREATED_AT = 'createdAt',
+	AMOUNT = 'amount',
+	NETWORK = 'network',
+	PHONE_NUMBER = 'phoneNumber',
+	ADDRESS = 'address',
+}
+
+export interface DepositToValidateItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[DepositToValidateAttributes.ID]: DocumentClient.String;
+	[DepositToValidateAttributes.CREATED_AT]: DocumentClient.String;
+	[DepositToValidateAttributes.AMOUNT]: DocumentClient.String;
+	[DepositToValidateAttributes.NETWORK]: DocumentClient.String;
+	[DepositToValidateAttributes.PHONE_NUMBER]: DocumentClient.String;
+	[DepositToValidateAttributes.ADDRESS]: DocumentClient.String;
 }

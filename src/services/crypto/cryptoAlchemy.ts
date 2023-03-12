@@ -23,6 +23,14 @@ export default class CryptoAlchemy {
 		);
 	}
 
+	async getValidatedBlocks(hash: string) {
+		const latestBlock = await this.alchemy.core.getBlockNumber();
+		console.log({ latestBlock });
+		const targetBlock = await this.alchemy.core.getBlock(hash);
+		const { number } = targetBlock;
+		return latestBlock - number;
+	}
+
 	async addAddress(address: string) {
 		const webhookId = process.env.WEBHOOK_ID;
 		console.log({ webhookId });
