@@ -15,6 +15,8 @@ provider:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
+    S3_BUCKET:
+      Ref: ShopWalletBucket
     WEBHOOK_ID: ${env:WEBHOOK_ID}
     ALCHEMY_API_KEY: ${env:ALCHEMY_API_KEY}
     ALCHEMY_NOTIFY_AUTH_TOKEN: ${env:ALCHEMY_NOTIFY_AUTH_TOKEN}
@@ -32,6 +34,7 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:RemoveItem
         - dynamodb:DeleteItem
+        - s3:*
         - sns:*
       Resource: '*'
 
@@ -179,6 +182,20 @@ functions:
           path: /v1/users/{phoneNumber}
           method: get
           cors: true
+  getAlienPackAvatars:
+    handler: build/src/endpoints/avatarPacks/getAlienPacks.getAlienPacks
+    events:
+      - http:
+          path: /v1/avatars/alien-pack
+          method: get
+          cors: true
+  getMonsterPackAvatars:
+    handler: build/src/endpoints/avatarPacks/getMonsterPacks.getMonsterPacks
+    events:
+      - http:
+          path: /v1/avatars/monster-pack
+          method: get
+          cors: true
   getRegisteredUsers:
     handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
     events:
@@ -233,6 +250,20 @@ functions:
 
 resources:
   Resources:
+    ShopWalletBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: shop-wallet-images
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - PUT
+                - POST
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
     MainTable:
       Type: AWS::DynamoDB::Table
       Properties:

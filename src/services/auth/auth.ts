@@ -8,6 +8,7 @@ import {
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
 import jwt from 'jsonwebtoken';
+import { alienPackUrls, monsterPackUrls } from '@/constants';
 
 export const JWT_SECRET_KEY = "PK3q@Zek4Jb!nzS3]LY4a/bwmD7'!fy.";
 const SNS = new AWS.SNS();
@@ -45,6 +46,7 @@ export const getUserCompositeKey = (phoneNumber: string) => {
 
 export class AuthService {
 	async signUp(phoneNumber: string) {
+		const avatars = [...alienPackUrls, ...monsterPackUrls];
 		const userKey = buildUserKey(phoneNumber);
 		const Item = {
 			[TableKeys.PK]: userKey,
@@ -58,6 +60,8 @@ export class AuthService {
 			[UserAttributes.PHONE_NUMBER]: phoneNumber,
 			[UserAttributes.CREATED_AT]: Date.now().toString(),
 			[UserAttributes.UPDATED_AT]: '',
+			[UserAttributes.AVATAR]:
+				avatars[Math.floor(Math.random() * avatars.length)],
 			[UserAttributes.EMAIL]: '',
 			[UserAttributes.SESSION_ID]: v4(),
 			[UserAttributes.ID]: v4(),

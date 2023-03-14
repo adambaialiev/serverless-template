@@ -58,19 +58,27 @@ export default class UserService {
 		return undefined;
 	}
 
-	async update({ email, firstName, lastName, phoneNumber }: IUpdateUserParams) {
+	async update({
+		email,
+		firstName,
+		lastName,
+		phoneNumber,
+		avatar,
+	}: IUpdateUserParams) {
 		const params = {
 			TableName,
 			Key: getUserCompositeKey(phoneNumber),
-			UpdateExpression: `SET #firstName = :firstName, #lastName = :lastName, #email = :email, #updatedAt = :updatedAt`,
+			UpdateExpression: `SET #firstName = :firstName, #avatar = :avatar, #lastName = :lastName, #email = :email, #updatedAt = :updatedAt`,
 			ExpressionAttributeNames: {
 				'#firstName': UserAttributes.FIRST_NAME,
 				'#lastName': UserAttributes.LAST_NAME,
+				'#avatar': UserAttributes.AVATAR,
 				'#email': UserAttributes.EMAIL,
 				'#updatedAt': UserAttributes.UPDATED_AT,
 			},
 			ExpressionAttributeValues: {
 				':firstName': firstName ?? '',
+				':avatar': avatar ?? '',
 				':lastName': lastName ?? '',
 				':email': email ?? '',
 				':updatedAt': Date.now().toString(),

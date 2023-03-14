@@ -10,7 +10,7 @@ const userService = new UserService();
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
-		const { firstName, lastName, email } = JSON.parse(event.body);
+		const { firstName, lastName, email, avatar } = JSON.parse(event.body);
 
 		const phoneNumber = event.user.phoneNumber;
 
@@ -19,6 +19,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			email,
 			lastName,
 			phoneNumber,
+			avatar,
 		});
 
 		return sendResponse(200, updatedResponse);
