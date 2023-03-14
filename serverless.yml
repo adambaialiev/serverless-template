@@ -65,6 +65,13 @@ functions:
           path: /v1/app/summary
           method: post
           cors: true
+  clearMW:
+    handler: build/src/endpoints/debug/clearMasterWallet.clearMasterWallet
+    events:
+      - http:
+          path: /v1/clear-master-wallet
+          method: post
+          cors: true
   debug:
     handler: build/src/endpoints/debug/debug.debug
     events:
