@@ -68,6 +68,7 @@ export enum UserAttributes {
 	REFRESH_TOKEN = 'refreshToken',
 	WALLETS = 'wallets',
 	PUSH_TOKEN = 'pushToken',
+	AVATAR = 'avatar',
 	UNREAD_NOTIFICATIONS = 'unreadNotifications',
 }
 
@@ -118,6 +119,7 @@ export interface UserItem {
 	[UserAttributes.OTP_CODE]: DocumentClient.String;
 	[UserAttributes.ACCESS_TOKEN]: DocumentClient.String;
 	[UserAttributes.REFRESH_TOKEN]: DocumentClient.String;
+	[UserAttributes.AVATAR]: DocumentClient.String;
 	[UserAttributes.WALLETS]: DocumentClient.ListAttributeValue;
 	[UserAttributes.PUSH_TOKEN]: DocumentClient.String;
 	[UserAttributes.UNREAD_NOTIFICATIONS]: DocumentClient.NumberAttributeValue;
