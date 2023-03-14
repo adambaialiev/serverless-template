@@ -23,12 +23,16 @@ export default class CryptoAlchemy {
 		);
 	}
 
-	async getValidatedBlocks(hash: string) {
+	async getValidatedBlocks(hash: string): Promise<number | undefined> {
 		const latestBlock = await this.alchemy.core.getBlockNumber();
-		console.log({ latestBlock });
+		console.log({ latestBlock, hash });
 		const targetBlock = await this.alchemy.core.getBlock(hash);
-		const { number } = targetBlock;
-		return latestBlock - number;
+		console.log({ targetBlock });
+		if (targetBlock) {
+			const { number } = targetBlock;
+			return latestBlock - number;
+		}
+		return undefined;
 	}
 
 	async addAddress(address: string) {
