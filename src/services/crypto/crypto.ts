@@ -70,8 +70,6 @@ export class CryptoService implements ICryptoService {
 			console.log({ error });
 		}
 
-		await this.alchemy.addAddress(wallet.publicKey);
-
 		await dynamo
 			.transactWrite({
 				TransactItems: [
