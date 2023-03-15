@@ -50,11 +50,11 @@ export const handler: APIGatewayProxyHandler = async (
 
 					try {
 						if (userOutput.pushToken) {
-							await pushNotificationService.send(
-								userOutput.pushToken,
-								`Deposit is validated. You received ${amount} USDT`,
-								userOutput.unreadNotifications
-							);
+							await pushNotificationService.send({
+								pushToken: userOutput.pushToken,
+								body: `Deposit is validated. You received ${amount} USDT`,
+								badgeCount: userOutput.unreadNotifications,
+							});
 						}
 					} catch (error) {
 						console.log({ error });
