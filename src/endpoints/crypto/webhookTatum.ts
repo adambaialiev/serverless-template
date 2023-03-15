@@ -11,7 +11,7 @@ interface WebHookTatumResponse {
 	amount: string;
 	asset: string;
 	blockNumber: number;
-	counterAddress: string;
+	counterAddress?: string;
 	txId: string;
 }
 
@@ -39,6 +39,13 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 		console.log({ masterWallet });
 		const { asset, counterAddress, amount, txId, blockNumber, address } =
 			tatumResponse;
+		if (!counterAddress) {
+			callback(null, {
+				statusCode: 201,
+				body: JSON.stringify(true),
+			});
+			return;
+		}
 		const toAddress = counterAddress.toLowerCase();
 		// detect deposit transaction
 		if (asset === USDT_ASSET && allWallets[toAddress]) {
@@ -80,10 +87,10 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			await masterWalletService.withdrawSuccess(txId);
 		}
 		// detect touch transaction
-		if (asset === 'MATIC' && allWallets[toAddress]) {
-			const userWallet = allWallets[toAddress];
+		if (asset === 'MATIC' && allWallets[address]) {
+			const userWallet = allWallets[address];
 
-			const balance = await cryptoEthers.getBalanceOfAddress(toAddress);
+			const balance = await cryptoEthers.getBalanceOfAddress(address);
 			console.log({ balance });
 			if (Number(balance) === 0) {
 				return;
