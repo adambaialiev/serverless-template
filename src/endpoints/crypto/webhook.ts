@@ -66,11 +66,11 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 				try {
 					const userOutput = await userService.getSlug(phoneNumber);
 					if (userOutput.pushToken) {
-						await pushNotificationService.send(
-							userOutput.pushToken,
-							`Deposit is detected. You're going to receive ${activity.value} USDT`,
-							userOutput.unreadNotifications
-						);
+						await pushNotificationService.send({
+							pushToken: userOutput.pushToken,
+							body: `Deposit is detected. You're going to receive ${activity.value} USDT`,
+							badgeCount: userOutput.unreadNotifications,
+						});
 					}
 				} catch (error) {
 					console.log({ error });
