@@ -1,5 +1,6 @@
 import {
 	buildDecrementTransactionKey,
+	buildDepositToValidateKey,
 	buildIncrementTransactionKey,
 	buildTransactionKey,
 	buildUserKey,
@@ -109,23 +110,6 @@ export default class BalanceService {
 						},
 					},
 					{
-						Put: {
-							Item: {
-								[TableKeys.PK]: userKey,
-								[TableKeys.SK]: buildTransactionKey(hash),
-								[TransactionAttributes.ID]: hash,
-								[TransactionAttributes.SOURCE]: phoneNumber,
-								[TransactionAttributes.TARGET]: phoneNumber,
-								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.CREATED_AT]: date,
-								[TransactionAttributes.STATUS]: 'success',
-								[TransactionAttributes.TYPE]: 'deposit',
-							},
-							TableName: tableName,
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-					{
 						Update: {
 							TableName: tableName,
 							Key: {
@@ -138,6 +122,33 @@ export default class BalanceService {
 							},
 							ExpressionAttributeValues: {
 								':increase': amount,
+							},
+						},
+					},
+					{
+						Update: {
+							TableName: tableName,
+							Key: {
+								[TableKeys.PK]: userKey,
+								[TableKeys.SK]: buildTransactionKey(hash),
+							},
+							UpdateExpression: `SET #status = :status, #validationNumber = :validationNumber`,
+							ExpressionAttributeNames: {
+								'#status': 'status',
+								'#validationNumber': 'validationNumber',
+							},
+							ExpressionAttributeValues: {
+								':status': 'success',
+								':validationNumber': '128/128',
+							},
+						},
+					},
+					{
+						Delete: {
+							TableName: tableName,
+							Key: {
+								[TableKeys.PK]: Entities.DEPOSIT_TO_VALIDATE,
+								[TableKeys.SK]: buildDepositToValidateKey(hash),
 							},
 						},
 					},

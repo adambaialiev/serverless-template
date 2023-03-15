@@ -19,6 +19,8 @@ provider:
     ALCHEMY_API_KEY: ${env:ALCHEMY_API_KEY}
     ALCHEMY_NOTIFY_AUTH_TOKEN: ${env:ALCHEMY_NOTIFY_AUTH_TOKEN}
     NODE_PROVIDER: ${env:NODE_PROVIDER}
+    TATUM_WEBHOOK_URL: ${env:TATUM_WEBHOOK_URL}
+    TATUM_API_KEY: ${env:TATUM_API_KEY}
 
   iamRoleStatements:
     - Effect: Allow
@@ -51,11 +53,26 @@ custom:
     createRoute53Record: true
 
 functions:
+  clear:
+    timeout: 30
+    handler: build/src/endpoints/app/validateDeposits.validateDeposits
+    events:
+      - http:
+          path: /v1/app/clear
+          method: post
+          cors: true
   summary:
     handler: build/src/endpoints/app/summary.summary
     events:
       - http:
           path: /v1/app/summary
+          method: post
+          cors: true
+  clearMW:
+    handler: build/src/endpoints/debug/clearMasterWallet.clearMasterWallet
+    events:
+      - http:
+          path: /v1/clear-master-wallet
           method: post
           cors: true
   debug:
@@ -71,6 +88,14 @@ functions:
     events:
       - http:
           path: /v1/crypto/webhook
+          method: post
+          cors: true
+  crypto-webhook-t:
+    timeout: 30
+    handler: build/src/endpoints/crypto/webhookTatum.webhook
+    events:
+      - http:
+          path: /v1/crypto/webhook-tatum
           method: post
           cors: true
   init:

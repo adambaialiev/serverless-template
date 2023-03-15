@@ -1,4 +1,3 @@
-import BalanceService from '@/services/balance/balance';
 import { CryptoService } from '@/services/crypto/crypto';
 import CryptoEthersService from '@/services/crypto/cryptoEthers';
 import MasterWallet from '@/services/masterWallet/masterWallet';
@@ -34,6 +33,8 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 	const cryptoEthers = new CryptoEthersService();
 	const masterWalletService = new MasterWallet();
 	const userService = new UserService();
+	const pushNotificationService = new PushNotifications();
+
 	try {
 		const alchemyResponse = JSON.parse(
 			event.body as string
@@ -52,34 +53,29 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 			console.log({ activity });
 			// detect deposit transaction
 			if (activity.asset === 'USDT' && allWallets[activity.toAddress]) {
-				const balanceService = new BalanceService();
-
-				const pushNotificationService = new PushNotifications();
-
 				const { phoneNumber } = allWallets[activity.toAddress];
 
-				const amount = Number(activity.value);
-
-				await balanceService.incrementBalance({
+				await masterWalletService.createDepositToValidate({
+					amount: activity.value,
 					phoneNumber,
-					amount,
-					hash: activity.hash,
 					address: activity.toAddress,
+					hash: activity.hash,
+					blockNum: activity.blockNum,
 				});
 
-				const userOutput = await userService.getSlug(phoneNumber);
-
 				try {
+					const userOutput = await userService.getSlug(phoneNumber);
 					if (userOutput.pushToken) {
-						await pushNotificationService.send({
-							pushToken: userOutput.pushToken,
-							body: `You received ${amount} USDT`,
-							badgeCount: userOutput.unreadNotifications,
-						});
+						await pushNotificationService.send(
+							userOutput.pushToken,
+							`Deposit is detected. You're going to receive ${activity.value} USDT`,
+							userOutput.unreadNotifications
+						);
 					}
 				} catch (error) {
 					console.log({ error });
 				}
+
 				const touchTransactionHash = await crypto.makeTouchTransaction(
 					masterWallet.privateKey,
 					activity.toAddress

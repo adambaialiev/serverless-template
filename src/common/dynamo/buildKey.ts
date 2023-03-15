@@ -12,8 +12,6 @@ export const buildTransactionKey = (id: string) =>
 	buildKey(Entities.TRANSACTION, id);
 
 export const buildFeedbackKey = (id: string) => buildKey(Entities.FEEDBACK, id);
-export const buildTransactionRequestKey = (id: string) =>
-	buildKey(Entities.TRANSACTION_REQUEST, id);
 
 export const buildIncrementTransactionKey = (hash: string) =>
 	buildKey(Entities.INCREMENT_TRANSACTION, hash);
@@ -26,3 +24,6 @@ export const buildWithdrawToProcessKey = (hash: string) =>
 
 export const buildHomeTransactionKey = (hash: string) =>
 	buildKey(Entities.HOME_TRANSACTION, hash);
+
+export const buildDepositToValidateKey = (hash: string) =>
+	buildKey(Entities.DEPOSIT_TO_VALIDATE, hash);

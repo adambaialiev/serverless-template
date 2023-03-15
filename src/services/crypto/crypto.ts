@@ -14,6 +14,7 @@ import {
 	buildUserWalletKey,
 } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
+import CryptoTatum from '@/services/crypto/cryptoTatum';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -61,7 +62,13 @@ export class CryptoService implements ICryptoService {
 			phoneNumber,
 		};
 
-		await this.alchemy.addAddress(wallet.publicKey);
+		const cryptoTatum = new CryptoTatum();
+
+		try {
+			await cryptoTatum.createSubscription(wallet.publicKey);
+		} catch (error) {
+			console.log({ error });
+		}
 
 		await dynamo
 			.transactWrite({
