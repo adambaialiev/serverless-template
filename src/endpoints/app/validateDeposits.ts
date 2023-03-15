@@ -31,16 +31,14 @@ export const handler: APIGatewayProxyHandler = async (
 				const d = depositsToValidate[i];
 				const hash = d[DepositToValidateAttributes.ID];
 				const blockNum = d.blockNum;
-				const validationNumber = await alchemy.getValidatedBlocks(
-					hash,
-					blockNum
-				);
+				const validationNumber =
+					await alchemy.getValidatedBlocksWithReadyBlockNum(hash, blockNum);
 				const { phoneNumber, amount, address } = d;
 				console.log({ validationNumber, hash, d });
 				if (typeof validationNumber === 'undefined') {
 					continue;
 				}
-				if (validationNumber > 128) {
+				if (validationNumber >= 128) {
 					await balanceService.incrementBalance({
 						phoneNumber,
 						amount: Number(amount),

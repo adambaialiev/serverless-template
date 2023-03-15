@@ -52,6 +52,7 @@ custom:
 
 functions:
   clear:
+    timeout: 30
     handler: build/src/endpoints/app/validateDeposits.validateDeposits
     events:
       - http:
@@ -85,6 +86,14 @@ functions:
     events:
       - http:
           path: /v1/crypto/webhook
+          method: post
+          cors: true
+  crypto-webhook-t:
+    timeout: 30
+    handler: build/src/endpoints/crypto/webhookTatum.webhook
+    events:
+      - http:
+          path: /v1/crypto/webhook-tatum
           method: post
           cors: true
   init:

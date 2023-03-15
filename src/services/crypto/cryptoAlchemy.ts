@@ -39,9 +39,20 @@ export default class CryptoAlchemy {
 		return undefined;
 	}
 
+	async getValidatedBlocksWithReadyBlockNum(
+		hash: string,
+		blockNum: string
+	): Promise<number | undefined> {
+		const latestBlock = await this.alchemy.core.getBlockNumber();
+		console.log({ latestBlock, hash, blockNum });
+		const targetBlock = Number(blockNum);
+		console.log({ targetBlock });
+		return latestBlock - targetBlock;
+	}
+
 	async addAddress(address: string) {
 		const webhookId = process.env.WEBHOOK_ID;
-		console.log({ webhookId });
+		console.log({ webhookId, address });
 		await this.alchemy.notify.updateWebhook(webhookId, {
 			addAddresses: [address],
 		});
