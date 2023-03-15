@@ -253,7 +253,7 @@ export default class MasterWallet {
 								[TransactionAttributes.ID]: hash,
 								[TransactionAttributes.SOURCE]: phoneNumber,
 								[TransactionAttributes.STATUS]: 'pending',
-								[TransactionAttributes.TARGET]: '',
+								[TransactionAttributes.TARGET]: address,
 								[TransactionAttributes.TYPE]: 'withdraw',
 							},
 							TableName,
