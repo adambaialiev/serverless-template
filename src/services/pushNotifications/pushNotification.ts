@@ -6,6 +6,13 @@ import { UserAttributes, UserItem } from '@/common/dynamo/schema';
 const dynamo = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table;
 
+interface ISendNotificationParams {
+	pushToken: string;
+	body: string;
+	badgeCount: number;
+	from?: string;
+}
+
 export class PushNotifications {
 	async incrementBadgeCount(phoneNumber: string) {
 		return (
@@ -25,7 +32,7 @@ export class PushNotifications {
 				.promise()
 		).Attributes as UserItem;
 	}
-	async send(pushToken: string, body: string, badgeCount: number) {
+	async send({ pushToken, body, badgeCount, from }: ISendNotificationParams) {
 		await axios.post(
 			'https://exp.host/--/api/v2/push/send',
 			{
@@ -34,6 +41,9 @@ export class PushNotifications {
 				sound: 'default',
 				body,
 				badge: badgeCount,
+				data: {
+					from,
+				},
 			},
 			{
 				headers: {

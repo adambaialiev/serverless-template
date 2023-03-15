@@ -204,6 +204,20 @@ functions:
           path: /v1/users/{phoneNumber}
           method: get
           cors: true
+  getAlienPackAvatars:
+    handler: build/src/endpoints/avatarPacks/getAlienPacks.getAlienPacks
+    events:
+      - http:
+          path: /v1/avatars/alien-pack
+          method: get
+          cors: true
+  getMonsterPackAvatars:
+    handler: build/src/endpoints/avatarPacks/getMonsterPacks.getMonsterPacks
+    events:
+      - http:
+          path: /v1/avatars/monster-pack
+          method: get
+          cors: true
   getRegisteredUsers:
     handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
     events:

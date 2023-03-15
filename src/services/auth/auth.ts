@@ -8,8 +8,10 @@ import {
 import AWS from 'aws-sdk';
 import { v4 } from 'uuid';
 import jwt from 'jsonwebtoken';
+import { alienPackUrls, monsterPackUrls } from '@/constants';
 
 export const JWT_SECRET_KEY = "PK3q@Zek4Jb!nzS3]LY4a/bwmD7'!fy.";
+const SNS = new AWS.SNS();
 
 const ACCESS_TOKEN_EXPIRATION = '1d';
 const REFRESH_TOKEN_EXPIRATION = '14d';
@@ -44,6 +46,7 @@ export const getUserCompositeKey = (phoneNumber: string) => {
 
 export class AuthService {
 	async signUp(phoneNumber: string) {
+		const avatars = [...alienPackUrls, ...monsterPackUrls];
 		const userKey = buildUserKey(phoneNumber);
 		const Item = {
 			[TableKeys.PK]: userKey,
@@ -57,6 +60,8 @@ export class AuthService {
 			[UserAttributes.PHONE_NUMBER]: phoneNumber,
 			[UserAttributes.CREATED_AT]: Date.now().toString(),
 			[UserAttributes.UPDATED_AT]: '',
+			[UserAttributes.AVATAR]:
+				avatars[Math.floor(Math.random() * avatars.length)],
 			[UserAttributes.EMAIL]: '',
 			[UserAttributes.SESSION_ID]: v4(),
 			[UserAttributes.ID]: v4(),
@@ -72,7 +77,12 @@ export class AuthService {
 
 	async signIn(phoneNumber: string): Promise<SignInResponse> {
 		const sessionId = v4();
-		const otpCode = '555666';
+		const otpCode = Math.floor(Math.random() * (100000 - 999999 + 1)) + 999999;
+		const SNSParams = {
+			Message: `Your ShopWallet login verification code: ${otpCode}. Do not share this code with anyone`,
+			PhoneNumber: phoneNumber,
+		};
+		await SNS.publish(SNSParams).promise();
 
 		await dynamo
 			.update({
@@ -85,7 +95,7 @@ export class AuthService {
 				},
 				ExpressionAttributeValues: {
 					[`:${UserAttributes.SESSION_ID}`]: sessionId,
-					[`:${UserAttributes.OTP_CODE}`]: otpCode,
+					[`:${UserAttributes.OTP_CODE}`]: String(otpCode),
 				},
 			})
 			.promise();
@@ -100,7 +110,6 @@ export class AuthService {
 		user,
 	}: VerifySignInProps): Promise<AuthTokens | undefined | string> {
 		const verified = user.sessionId === sessionId && user.otpCode === otpCode;
-
 		if (verified) {
 			const accessToken = jwt.sign({ phoneNumber }, JWT_SECRET_KEY, {
 				expiresIn: ACCESS_TOKEN_EXPIRATION,

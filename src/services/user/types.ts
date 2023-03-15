@@ -13,6 +13,7 @@ export interface User {
 	createdAt: string;
 	updatedAt: string;
 	balance: number;
+	avatar: string;
 	wallets: IWallet[];
 }
 
@@ -31,4 +32,5 @@ export interface IUpdateUserParams {
 	lastName: string;
 	email: string;
 	phoneNumber: string;
+	avatar: string;
 }
