@@ -12,6 +12,8 @@ jobs:
       ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       ALCHEMY_NOTIFY_AUTH_TOKEN: ${{ secrets.ALCHEMY_NOTIFY_AUTH_TOKEN }}
       NODE_PROVIDER: ${{ secrets.NODE_PROVIDER }}
+      TATUM_WEBHOOK_URL: ${{ secrets.TATUM_WEBHOOK_URL }}
+      TATUM_API_KEY: ${{ secrets.TATUM_API_KEY }}
     steps:
       - uses: actions/setup-node@v3
         with:
