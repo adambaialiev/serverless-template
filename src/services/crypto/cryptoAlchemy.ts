@@ -23,10 +23,14 @@ export default class CryptoAlchemy {
 		);
 	}
 
-	async getValidatedBlocks(hash: string): Promise<number | undefined> {
+	async getValidatedBlocks(
+		hash: string,
+		blockNum: string
+	): Promise<number | undefined> {
 		const latestBlock = await this.alchemy.core.getBlockNumber();
-		console.log({ latestBlock, hash });
-		const targetBlock = await this.alchemy.core.getBlock(hash);
+		console.log({ latestBlock, hash, blockNum });
+		const targetBlock = await this.alchemy.core.getBlock(blockNum);
+
 		console.log({ targetBlock });
 		if (targetBlock) {
 			const { number } = targetBlock;

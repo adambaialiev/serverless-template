@@ -227,6 +227,7 @@ export enum DepositToValidateAttributes {
 	NETWORK = 'network',
 	PHONE_NUMBER = 'phoneNumber',
 	ADDRESS = 'address',
+	BLOCK_NUMBER = 'blockNum',
 }
 
 export interface DepositToValidateItem {
@@ -238,4 +239,5 @@ export interface DepositToValidateItem {
 	[DepositToValidateAttributes.NETWORK]: DocumentClient.String;
 	[DepositToValidateAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[DepositToValidateAttributes.ADDRESS]: DocumentClient.String;
+	[DepositToValidateAttributes.BLOCK_NUMBER]: DocumentClient.String;
 }

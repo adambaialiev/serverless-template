@@ -60,6 +60,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 					phoneNumber,
 					address: activity.toAddress,
 					hash: activity.hash,
+					blockNum: activity.blockNum,
 				});
 
 				try {

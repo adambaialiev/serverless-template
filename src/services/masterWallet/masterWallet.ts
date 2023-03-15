@@ -29,6 +29,14 @@ interface TransactionToProcessProps {
 	hash: string;
 }
 
+interface DepositToValidateProps {
+	amount: string;
+	phoneNumber: string;
+	address: string;
+	hash: string;
+	blockNum: string;
+}
+
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
@@ -125,8 +133,9 @@ export default class MasterWallet {
 		phoneNumber,
 		address,
 		hash,
-	}: TransactionToProcessProps) {
-		console.log({ amount, phoneNumber, address, hash });
+		blockNum,
+	}: DepositToValidateProps) {
+		console.log({ amount, phoneNumber, address, hash, blockNum });
 		const depositToValidateOutput = await dynamo
 			.get({
 				TableName,
@@ -159,6 +168,7 @@ export default class MasterWallet {
 								[DepositToValidateAttributes.ID]: hash,
 								[DepositToValidateAttributes.NETWORK]: 'polygon',
 								[DepositToValidateAttributes.PHONE_NUMBER]: phoneNumber,
+								[DepositToValidateAttributes.BLOCK_NUMBER]: blockNum,
 							},
 							TableName,
 							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
@@ -343,7 +353,7 @@ export default class MasterWallet {
 								'#balance': 'balance',
 							},
 							ExpressionAttributeValues: {
-								':decrease': amount,
+								':decrease': Number(amount),
 							},
 						},
 					},
