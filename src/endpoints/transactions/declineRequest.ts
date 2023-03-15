@@ -28,11 +28,12 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 		);
 
 		if (userTarget.pushToken) {
-			await pushNotificationService.send(
-				userTarget.pushToken,
-				`User ${source.phoneNumber} declined your request`,
-				userTarget.unreadNotifications
-			);
+			await pushNotificationService.send({
+				pushToken: userTarget.pushToken,
+				body: `User ${source.phoneNumber} declined your request`,
+				badgeCount: userTarget.unreadNotifications,
+				from: source.phoneNumber,
+			});
 		}
 
 		return sendResponse(200, res);

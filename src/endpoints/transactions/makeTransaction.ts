@@ -38,11 +38,12 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 				const updatedUser = await pushNotificationService.incrementBadgeCount(
 					target.phoneNumber
 				);
-				await pushNotificationService.send(
-					target.pushToken,
-					`You received ${amount} USDT`,
-					Number(updatedUser.unreadNotifications)
-				);
+				await pushNotificationService.send({
+					pushToken: target.pushToken,
+					body: `You received ${amount} USDT`,
+					badgeCount: Number(updatedUser.unreadNotifications),
+					from,
+				});
 			}
 			return {
 				statusCode: 201,

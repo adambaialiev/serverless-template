@@ -261,11 +261,11 @@ export default class MasterWallet {
 
 		try {
 			if (userOutput.pushToken) {
-				await pushNotificationService.send(
-					userOutput.pushToken,
-					`Withdrawal successful: ${amount} USDT`,
-					userOutput.unreadNotifications
-				);
+				await pushNotificationService.send({
+					pushToken: userOutput.pushToken,
+					body: `Withdrawal successful: ${amount} USDT`,
+					badgeCount: userOutput.unreadNotifications,
+				});
 			}
 		} catch (error) {
 			console.log({ error });
