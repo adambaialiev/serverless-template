@@ -1,5 +1,4 @@
 import {
-	buildDecrementTransactionKey,
 	buildDepositToValidateKey,
 	buildIncrementTransactionKey,
 	buildTransactionKey,
@@ -7,16 +6,13 @@ import {
 } from '@/common/dynamo/buildKey';
 import { DynamoMainTable } from '@/common/dynamo/DynamoMainTable';
 import {
-	DecrementTransactionAttributes,
 	IncrementTransactionAttributes,
 	TableKeys,
-	TransactionAttributes,
 	Entities,
 	IncrementTransactionItem,
 	DecrementTransactionItem,
 } from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
-import { v4 } from 'uuid';
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const dynamo = new DynamoMainTable();
@@ -149,74 +145,6 @@ export default class BalanceService {
 							Key: {
 								[TableKeys.PK]: Entities.DEPOSIT_TO_VALIDATE,
 								[TableKeys.SK]: buildDepositToValidateKey(hash),
-							},
-						},
-					},
-				],
-			})
-			.promise();
-	}
-
-	async decrementBalance(phoneNumber: string, amount: number, hash: string) {
-		const decrementTransactionOutput = await dynamo.getItem({
-			[TableKeys.PK]: Entities.DECREMENT_TRANSACTION,
-			[TableKeys.SK]: buildDecrementTransactionKey(hash),
-		});
-
-		if (decrementTransactionOutput.Item) {
-			throw new Error(`Decrement transaction with hash ${hash} already exist`);
-		}
-
-		const userKey = buildUserKey(phoneNumber);
-		const transactionId = v4();
-		const transactionKey = buildTransactionKey(transactionId);
-		const date = Date.now().toString();
-		await dynamoDB
-			.transactWrite({
-				TransactItems: [
-					{
-						Put: {
-							Item: {
-								[TableKeys.PK]: Entities.DECREMENT_TRANSACTION,
-								[TableKeys.SK]: buildDecrementTransactionKey(hash),
-								[DecrementTransactionAttributes.ID]: hash,
-								[DecrementTransactionAttributes.PHONE_NUMBER]: phoneNumber,
-								[DecrementTransactionAttributes.AMOUNT]: amount,
-							},
-							TableName: tableName,
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-					{
-						Put: {
-							Item: {
-								[TableKeys.PK]: userKey,
-								[TableKeys.SK]: transactionKey,
-								[TransactionAttributes.ID]: transactionId,
-								[TransactionAttributes.SOURCE]: phoneNumber,
-								[TransactionAttributes.TARGET]: phoneNumber,
-								[TransactionAttributes.AMOUNT]: amount,
-								[TransactionAttributes.CREATED_AT]: date,
-								[TransactionAttributes.STATUS]: 'success',
-								[TransactionAttributes.TYPE]: 'withdraw',
-							},
-							TableName: tableName,
-							ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-						},
-					},
-					{
-						Update: {
-							TableName: tableName,
-							Key: {
-								[TableKeys.PK]: userKey,
-								[TableKeys.SK]: userKey,
-							},
-							UpdateExpression: `SET #balance = #balance - :decrease`,
-							ExpressionAttributeNames: {
-								'#balance': 'balance',
-							},
-							ExpressionAttributeValues: {
-								':decrease': amount,
 							},
 						},
 					},
