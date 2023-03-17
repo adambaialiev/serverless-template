@@ -16,6 +16,10 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
 		const { amount, to, comment } = JSON.parse(event.body);
 
+		if (amount === 0) {
+			throw new Error('Amount must be at least 1');
+		}
+
 		const from = event.user.phoneNumber;
 
 		const target = await userService.getSlug(to);

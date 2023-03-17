@@ -63,14 +63,12 @@ export const handler: APIGatewayProxyHandler = async (
 				const unreadTransactionsCount = transactions.filter(
 					(item) => item.isRead !== undefined && !item.isRead
 				);
-				console.log(
-					'unreadTransactionsCount>>',
-					JSON.stringify(unreadTransactionsCount, null, 2)
-				);
+				const targetUser = results.find((item) => item.phoneNumber === number2);
 				numbersDictionary[number] = {
 					registered: true,
 					internationalNumber: number2,
 					unreadTransactions: unreadTransactionsCount.length,
+					avatar: targetUser.avatar,
 				};
 			} else {
 				numbersDictionary[number] = {
