@@ -15,9 +15,7 @@ provider:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
-    WEBHOOK_ID: ${env:WEBHOOK_ID}
     ALCHEMY_API_KEY: ${env:ALCHEMY_API_KEY}
-    ALCHEMY_NOTIFY_AUTH_TOKEN: ${env:ALCHEMY_NOTIFY_AUTH_TOKEN}
     NODE_PROVIDER: ${env:NODE_PROVIDER}
     TATUM_WEBHOOK_URL: ${env:TATUM_WEBHOOK_URL}
     TATUM_API_KEY: ${env:TATUM_API_KEY}

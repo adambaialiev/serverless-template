@@ -9,13 +9,11 @@ export default class CryptoAlchemy {
 
 	constructor() {
 		const apiKey = process.env.ALCHEMY_API_KEY;
-		const authToken = process.env.ALCHEMY_NOTIFY_AUTH_TOKEN;
 		const settings = {
 			apiKey,
 			network: Network.MATIC_MAINNET,
-			authToken,
 		};
-		console.log({ apiKey, authToken });
+		console.log({ apiKey });
 		this.alchemy = new Alchemy(settings);
 		this.alchemyProvider = new ethers.AlchemyProvider(
 			{ chainId: 137, name: 'matic' },
@@ -48,14 +46,6 @@ export default class CryptoAlchemy {
 		const targetBlock = Number(blockNum);
 		console.log({ targetBlock });
 		return latestBlock - targetBlock;
-	}
-
-	async addAddress(address: string) {
-		const webhookId = process.env.WEBHOOK_ID;
-		console.log({ webhookId, address });
-		await this.alchemy.notify.updateWebhook(webhookId, {
-			addAddresses: [address],
-		});
 	}
 
 	async makePolygonUsdtTransaction(
