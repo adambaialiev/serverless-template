@@ -64,7 +64,7 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 				if (userOutput.pushToken) {
 					await pushNotificationService.send({
 						pushToken: userOutput.pushToken,
-						body: `Deposit is detected. You're going to receive ${amount} USDT`,
+						body: `Deposit is detected. You're going to receive ${amount} USDT after 128 validations.`,
 						badgeCount: userOutput.unreadNotifications,
 					});
 				}
