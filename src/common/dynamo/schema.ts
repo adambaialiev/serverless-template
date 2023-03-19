@@ -137,6 +137,7 @@ export enum TransactionAttributes {
 	COMMENT = 'comment',
 	IS_READ = 'isRead',
 	VALIDATION_NUMBER = 'validationNumber',
+	ADDRESS = 'address',
 }
 
 export interface TransactionItem {
