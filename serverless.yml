@@ -126,14 +126,6 @@ functions:
           method: post
           cors: true
 
-  deposit:
-    handler: build/src/endpoints/wallet/deposit.deposit
-    events:
-      - http:
-          path: /v1/wallet/deposit
-          method: post
-          cors: true
-
   savePushTokenToUser:
     handler: build/src/endpoints/savePushTokenToUser/savePushTokenToUser.savePushTokenToUser
     events:
