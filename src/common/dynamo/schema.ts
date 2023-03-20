@@ -70,6 +70,7 @@ export enum UserAttributes {
 	PUSH_TOKEN = 'pushToken',
 	AVATAR = 'avatar',
 	UNREAD_NOTIFICATIONS = 'unreadNotifications',
+	WITHDRAWAL_ADDRESSES = 'withdrawalAddresses',
 }
 
 export enum UserWalletAttributes {
@@ -92,6 +93,13 @@ export enum FeedbackAttributes {
 	COMMENT = 'comment',
 	RATING = 'rating',
 	USER = 'user',
+}
+
+export interface IWithdrawalAddress {
+	name: string;
+	address: string;
+	network: 'polygon';
+	id: string;
 }
 
 export interface FeedbackItem {
@@ -121,6 +129,7 @@ export interface UserItem {
 	[UserAttributes.REFRESH_TOKEN]: DocumentClient.String;
 	[UserAttributes.AVATAR]: DocumentClient.String;
 	[UserAttributes.WALLETS]: DocumentClient.ListAttributeValue;
+	[UserAttributes.WITHDRAWAL_ADDRESSES]: DocumentClient.ListAttributeValue;
 	[UserAttributes.PUSH_TOKEN]: DocumentClient.String;
 	[UserAttributes.UNREAD_NOTIFICATIONS]: DocumentClient.NumberAttributeValue;
 }
