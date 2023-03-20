@@ -20,4 +20,5 @@ export const unmarshallUser = (userItem: UserItem): User => ({
 	balance: Number(userItem.balance),
 	wallets: userItem.wallets,
 	avatar: userItem.avatar,
+	withdrawalAddresses: userItem.withdrawalAddresses,
 });

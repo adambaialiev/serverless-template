@@ -125,7 +125,13 @@ functions:
           path: /v1/wallet/withdraw
           method: post
           cors: true
-
+  addWithdrawalAddress:
+    handler: build/src/endpoints/wallet/addWithdrawalAddress.addWithdrawalAddress
+    events:
+      - http:
+          path: /v1/wallet/withdraw/add-address
+          method: post
+          cors: true
   savePushTokenToUser:
     handler: build/src/endpoints/savePushTokenToUser/savePushTokenToUser.savePushTokenToUser
     events:
@@ -148,7 +154,6 @@ functions:
           path: /v1/transaction
           method: post
           cors: true
-
   getTransactions:
     handler: build/src/endpoints/transactions/getTransactions.getTransactions
     events:

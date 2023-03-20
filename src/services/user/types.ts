@@ -1,3 +1,5 @@
+import { IWithdrawalAddress } from '@/common/dynamo/schema';
+
 export interface IWallet {
 	publicKey: string;
 	privateKey: string;
@@ -15,6 +17,7 @@ export interface User {
 	balance: number;
 	avatar: string;
 	wallets: IWallet[];
+	withdrawalAddresses: IWithdrawalAddress[];
 }
 
 export interface UserSlug {
