@@ -48,7 +48,7 @@ export const getUserCompositeKey = (phoneNumber: string) => {
 export class AuthService {
 	async signUp(phoneNumber: string) {
 		const avatars = [...alienPackUrls, ...monsterPackUrls];
-		const arr: IWithdrawalAddress[] = [];
+		const withdrawalAddresses: IWithdrawalAddress[] = [];
 		const userKey = buildUserKey(phoneNumber);
 		const Item = {
 			[TableKeys.PK]: userKey,
@@ -59,7 +59,7 @@ export class AuthService {
 			[UserAttributes.LAST_NAME]: '',
 			[UserAttributes.BALANCE]: 0,
 			[UserAttributes.UNREAD_NOTIFICATIONS]: 0,
-			[UserAttributes.WITHDRAWAL_ADDRESSES]: arr,
+			[UserAttributes.WITHDRAWAL_ADDRESSES]: withdrawalAddresses,
 			[UserAttributes.PHONE_NUMBER]: phoneNumber,
 			[UserAttributes.CREATED_AT]: Date.now().toString(),
 			[UserAttributes.UPDATED_AT]: '',
