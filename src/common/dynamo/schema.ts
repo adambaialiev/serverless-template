@@ -16,6 +16,7 @@ export enum Entities {
 	USER = 'USER#',
 	USER_WALLET = 'USER_WALLET#',
 	FEEDBACK = 'FEEDBACK#',
+	SUPPORT_TICKET = 'SUPPORT_TICKET#',
 	TRANSACTION = 'TRANSACTION#',
 	INCREMENT_TRANSACTION = 'INCREMENT_TRANSACTION#',
 	DECREMENT_TRANSACTION = 'DECREMENT_TRANSACTION#',
@@ -95,6 +96,15 @@ export enum FeedbackAttributes {
 	USER = 'user',
 }
 
+export enum SupportTicketAttributes {
+	ID = 'id',
+	CREATED_AT = 'createdAt',
+	UPDATED_AT = 'updatedAt',
+	DESCRIPTION = 'description',
+	EMAIL = 'email',
+	IS_RESOLVED = 'isResolved',
+}
+
 export interface IWithdrawalAddress {
 	name: string;
 	address: string;
@@ -105,11 +115,23 @@ export interface IWithdrawalAddress {
 export interface FeedbackItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
+	[FeedbackAttributes.ID]: DocumentClient.String;
 	[FeedbackAttributes.COMMENT]: DocumentClient.String;
 	[FeedbackAttributes.CREATED_AT]: DocumentClient.String;
 	[FeedbackAttributes.UPDATED_AT]: DocumentClient.String;
 	[FeedbackAttributes.RATING]: DocumentClient.NumberAttributeValue;
 	[FeedbackAttributes.USER]: DocumentClient.String;
+}
+
+export interface SupportTicketItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[SupportTicketAttributes.ID]: DocumentClient.String;
+	[SupportTicketAttributes.CREATED_AT]: DocumentClient.String;
+	[SupportTicketAttributes.UPDATED_AT]: DocumentClient.String;
+	[SupportTicketAttributes.DESCRIPTION]: DocumentClient.String;
+	[SupportTicketAttributes.EMAIL]: DocumentClient.String;
+	[SupportTicketAttributes.IS_RESOLVED]: DocumentClient.BooleanAttributeValue;
 }
 
 export interface UserItem {

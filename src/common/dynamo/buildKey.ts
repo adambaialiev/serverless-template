@@ -13,6 +13,9 @@ export const buildTransactionKey = (id: string) =>
 
 export const buildFeedbackKey = (id: string) => buildKey(Entities.FEEDBACK, id);
 
+export const buildSupportTicketKey = (id: string) =>
+	buildKey(Entities.SUPPORT_TICKET, id);
+
 export const buildIncrementTransactionKey = (hash: string) =>
 	buildKey(Entities.INCREMENT_TRANSACTION, hash);
 

@@ -11,6 +11,7 @@ provider:
   runtime: nodejs18.x
   region: us-east-1
   profile: ${opt:stage, "dev"}
+  versionFunctions: false
   environment:
     stage: ${opt:stage}
     dynamo_table:
@@ -264,6 +265,21 @@ functions:
           method: post
           cors: true
 
+  deleteAccount:
+    handler: build/src/endpoints/delete-account/deleteAccount.deleteAccount
+    events:
+      - http:
+          path: /v1/auth/delete
+          method: post
+          cors: true
+
+  createSupportTicket:
+    handler: build/src/endpoints/support/createSupportTicket.createSupportTicket
+    events:
+      - http:
+          path: /v1/support
+          method: post
+          cors: true
   createFeedback:
     handler: build/src/endpoints/feedback/createFeedback.createFeedback
     events:
