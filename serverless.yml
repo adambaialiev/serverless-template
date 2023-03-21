@@ -132,6 +132,13 @@ functions:
           path: /v1/wallet/withdraw/add-address
           method: post
           cors: true
+  removeWithdrawalAddress:
+    handler: build/src/endpoints/wallet/removeWithdrawalAddress.removeWithdrawalAddress
+    events:
+      - http:
+          path: /v1/wallet/withdraw/remove-address/{id}
+          method: delete
+          cors: true
   savePushTokenToUser:
     handler: build/src/endpoints/savePushTokenToUser/savePushTokenToUser.savePushTokenToUser
     events:
