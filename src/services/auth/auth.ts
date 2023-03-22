@@ -17,6 +17,9 @@ const SNS = new AWS.SNS();
 const ACCESS_TOKEN_EXPIRATION = '1d';
 const REFRESH_TOKEN_EXPIRATION = '14d';
 
+const DEMO_ACCOUNTS = ['+13020000000', '+13850000000'];
+const OTP_CODE_FOR_DEMO_ACCOUNT = '555666';
+
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
@@ -36,6 +39,10 @@ interface AuthTokens {
 	accessToken: string;
 	refreshToken: string;
 }
+
+const getRandomOtpCode = () => {
+	return Math.floor(Math.random() * (100000 - 999999 + 1)) + 999999;
+};
 
 export const getUserCompositeKey = (phoneNumber: string) => {
 	const userKey = buildUserKey(phoneNumber);
@@ -79,13 +86,21 @@ export class AuthService {
 	}
 
 	async signIn(phoneNumber: string): Promise<SignInResponse> {
+		const isDemoAccount = DEMO_ACCOUNTS.includes(phoneNumber);
+
+		const otpCode = isDemoAccount
+			? OTP_CODE_FOR_DEMO_ACCOUNT
+			: getRandomOtpCode();
+
+		if (!isDemoAccount) {
+			const SNSParams = {
+				Message: `Your ShopWallet login verification code: ${otpCode}. Do not share this code with anyone`,
+				PhoneNumber: phoneNumber,
+			};
+			await SNS.publish(SNSParams).promise();
+		}
+
 		const sessionId = v4();
-		const otpCode = Math.floor(Math.random() * (100000 - 999999 + 1)) + 999999;
-		const SNSParams = {
-			Message: `Your ShopWallet login verification code: ${otpCode}. Do not share this code with anyone`,
-			PhoneNumber: phoneNumber,
-		};
-		await SNS.publish(SNSParams).promise();
 
 		await dynamo
 			.update({
