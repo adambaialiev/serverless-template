@@ -37,7 +37,7 @@ export class PushNotifications {
 			'https://exp.host/--/api/v2/push/send',
 			{
 				to: pushToken,
-				title: 'Shop Wallet',
+				title: 'ShopWallet',
 				sound: 'default',
 				body,
 				badge: badgeCount,
