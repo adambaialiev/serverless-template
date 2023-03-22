@@ -11,6 +11,7 @@ const dynamoDB = new DynamoMainTable();
 export const signIn = async (event: APIGatewayEvent) => {
 	try {
 		const { phoneNumber } = JSON.parse(event.body as string);
+		console.log({ phoneNumber });
 		const userKey = buildUserKey(phoneNumber);
 
 		const userOutput = await dynamoDB.getItem({
