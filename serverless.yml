@@ -52,6 +52,14 @@ custom:
     createRoute53Record: true
 
 functions:
+  createWallet:
+    timeout: 30
+    handler: build/src/endpoints/app/createWallet.createWallet
+    events:
+      - http:
+          path: /v1/crypto/create-wallet
+          method: post
+          cors: true
   clear:
     timeout: 30
     handler: build/src/endpoints/app/validateDeposits.validateDeposits
