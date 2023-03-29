@@ -10,11 +10,11 @@ export const handler: APIGatewayProxyHandler = async (
 	try {
 		const hdWalletService = new HDWallet();
 
-		hdWalletService.generateMnemonic();
+		const mnemonic = hdWalletService.generateMnemonic();
 
 		callback(null, {
 			statusCode: 201,
-			body: JSON.stringify(true),
+			body: JSON.stringify(mnemonic),
 		});
 	} catch (error: unknown) {
 		if (error instanceof Error) {
@@ -24,4 +24,4 @@ export const handler: APIGatewayProxyHandler = async (
 	}
 };
 
-export const debug = handler;
+export const createWallet = handler;

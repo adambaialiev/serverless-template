@@ -54,7 +54,7 @@ custom:
 functions:
   createWallet:
     timeout: 30
-    handler: build/src/endpoints/app/createWallet.createWallet
+    handler: build/src/endpoints/crypto/createWallet.createWallet
     events:
       - http:
           path: /v1/crypto/create-wallet
