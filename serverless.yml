@@ -52,6 +52,14 @@ custom:
     createRoute53Record: true
 
 functions:
+  getAddressesFromM:
+    timeout: 30
+    handler: build/src/endpoints/crypto/getAddressesFromMnemonic.getAddressesFromMnemonic
+    events:
+      - http:
+          path: /v1/crypto/get-addresses-from-mnemonic
+          method: post
+          cors: true
   createWallet:
     timeout: 30
     handler: build/src/endpoints/crypto/createWallet.createWallet
