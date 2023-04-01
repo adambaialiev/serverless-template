@@ -24,6 +24,8 @@ export default class CryptoTransactions {
 				address,
 				action: 'txlist',
 				apikey,
+				module: 'account',
+				sort: 'desc',
 			},
 		});
 		if (response.data && response.data.result) {

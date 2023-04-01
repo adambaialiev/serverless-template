@@ -4,7 +4,7 @@ import HDWallet from '@/services/crypto/hdWallet';
 import CryptoEthersService, { CoinPack } from '@/services/crypto/cryptoEthers';
 import { withAuthorization } from '@/middlewares/withAuthorization';
 
-type CoinPackWithBalance = CoinPack & { balance: string };
+type CoinPackWithBalance = CoinPack & { balance: string; address: string };
 
 type Balances = CoinPackWithBalance[];
 
@@ -32,7 +32,12 @@ export const handler: APIGatewayProxyHandler = async (
 		);
 
 		const balancesPack: Balances = [
-			{ coin: 'USDT', network: 'MATIC', balance: usdtPolygonBalance },
+			{
+				coin: 'USDT',
+				network: 'MATIC',
+				balance: usdtPolygonBalance,
+				address: ethPack.address,
+			},
 		];
 
 		callback(null, {
