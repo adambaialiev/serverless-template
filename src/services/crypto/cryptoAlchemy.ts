@@ -10,6 +10,16 @@ import {
 } from 'alchemy-sdk';
 import { ethers } from 'ethers';
 
+interface TransactionHistoryItem {
+	hash: string;
+	from: string;
+	to: string;
+	asset: 'USDT' | 'ETH' | 'MATIC';
+	metadata: {
+		blockTimestamp: string;
+	};
+}
+
 export default class CryptoAlchemy {
 	alchemy: Alchemy;
 	alchemyProvider: ethers.AlchemyProvider;
@@ -28,15 +38,19 @@ export default class CryptoAlchemy {
 		);
 	}
 
-	async getTransactionsHistory(address: string) {
+	async getTransactionsHistory(
+		address: string
+	): Promise<TransactionHistoryItem[] | undefined> {
 		const response = await this.alchemy.core.getAssetTransfers({
 			toAddress: address,
 			category: [AssetTransfersCategory.EXTERNAL, AssetTransfersCategory.ERC20],
 			order: SortingOrder.DESCENDING,
 			withMetadata: true,
 		});
-		console.log({ response });
-		return response.transfers;
+		if (response.transfers) {
+			return response.transfers as TransactionHistoryItem[];
+		}
+		return undefined;
 	}
 
 	async getValidatedBlocks(
