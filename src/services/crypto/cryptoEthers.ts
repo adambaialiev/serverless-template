@@ -1,6 +1,9 @@
 import { ethers } from 'ethers';
 import { contractAbi } from '@/services/crypto/usdt-erc20-contractAbi';
-import { USDT_CONTRACT_IN_POLYON } from '@/services/crypto/constants';
+import {
+	USDT_CONTRACT_IN_ETH,
+	USDT_CONTRACT_IN_POLYON,
+} from '@/services/crypto/constants';
 
 export const amountToRaw = (amount: number) =>
 	amount.toFixed(6).replace(/\./g, '');
@@ -24,6 +27,10 @@ export type CoinPack = {
 	network?: CoinNetwork;
 };
 
+const networkToUSDTContractAddress = {
+	MATIC: USDT_CONTRACT_IN_POLYON,
+	ETH: USDT_CONTRACT_IN_ETH,
+};
 export default class CryptoEthersService {
 	constructor() {
 		this.provider = new ethers.JsonRpcProvider(process.env.CHAINSTACK_NODE);
@@ -35,9 +42,9 @@ export default class CryptoEthersService {
 		address: string,
 		{ coin, network }: CoinPack
 	): Promise<string | undefined> {
-		if (coin === 'USDT' && network === 'MATIC') {
+		if (coin === 'USDT') {
 			const erc20_r = new ethers.Contract(
-				USDT_CONTRACT_IN_POLYON,
+				networkToUSDTContractAddress[network],
 				contractAbi,
 				this.provider
 			);

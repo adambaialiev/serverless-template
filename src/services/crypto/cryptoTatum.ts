@@ -18,4 +18,19 @@ export default class CryptoTatum {
 			headers,
 		});
 	}
+
+	async getBalanceOfAddress(
+		address: string,
+		chain: 'ethereum' | 'polygon' | 'bsc'
+	) {
+		const response = await axios.get('https://api.tatum.io/v3/data/balances', {
+			params: {
+				chain,
+				addresses: address,
+			},
+		});
+		if (response.data) {
+			return response.data.results;
+		}
+	}
 }

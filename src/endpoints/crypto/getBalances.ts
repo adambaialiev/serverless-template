@@ -1,12 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import HDWallet from '@/services/crypto/hdWallet';
-import CryptoEthersService, { CoinPack } from '@/services/crypto/cryptoEthers';
 import { withAuthorization } from '@/middlewares/withAuthorization';
-
-type CoinPackWithBalance = CoinPack & { balance: string; address: string };
-
-type Balances = CoinPackWithBalance[];
+import CryptoTatum from '@/services/crypto/cryptoTatum';
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -19,30 +15,20 @@ export const handler: APIGatewayProxyHandler = async (
 			return sendResponse(400, { message: 'Mnemonic is required' });
 		}
 		const hdWalletService = new HDWallet();
-
-		const ethersService = new CryptoEthersService();
+		const tatum = new CryptoTatum();
 
 		const ethPack = hdWalletService.getEthAddressFromMnemonic(mnemonic, {
 			isPublic: true,
 		});
 
-		const usdtPolygonBalance = await ethersService.getBalanceOfAddress(
+		const balances = await tatum.getBalanceOfAddress(
 			ethPack.address,
-			{ coin: 'USDT', network: 'MATIC' }
+			'ethereum'
 		);
-
-		const balancesPack: Balances = [
-			{
-				coin: 'USDT',
-				network: 'MATIC',
-				balance: usdtPolygonBalance,
-				address: ethPack.address,
-			},
-		];
 
 		callback(null, {
 			statusCode: 200,
-			body: JSON.stringify(balancesPack),
+			body: JSON.stringify(balances),
 		});
 	} catch (error: unknown) {
 		if (error instanceof Error) {
