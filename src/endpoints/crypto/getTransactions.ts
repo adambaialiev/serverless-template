@@ -1,8 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import { withAuthorization } from '@/middlewares/withAuthorization';
-import CryptoTransactions from '@/services/crypto/cryptoTransactions';
 import { Coin } from '@/services/crypto/cryptoEthers';
+import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -19,13 +19,12 @@ export const handler: APIGatewayProxyHandler = async (
 			return sendResponse(400, { message: 'Not enough params' });
 		}
 
-		const cryptoTransactionsService = new CryptoTransactions();
+		const cryptoTransactionsService = new CryptoAlchemy();
 
 		let transactions: any = [];
 
 		if (!network) {
-			transactions = await cryptoTransactionsService.getNativeCoinTransactions(
-				coin,
+			transactions = await cryptoTransactionsService.getTransactionsHistory(
 				address
 			);
 		}

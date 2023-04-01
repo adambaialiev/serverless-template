@@ -1,6 +1,13 @@
 import { USDT_CONTRACT_IN_POLYON } from '@/services/crypto/constants';
 import { contractAbi } from '@/services/crypto/usdt-erc20-contractAbi';
-import { Network, Alchemy, Wallet, Utils } from 'alchemy-sdk';
+import {
+	Network,
+	Alchemy,
+	Wallet,
+	Utils,
+	SortingOrder,
+	AssetTransfersCategory,
+} from 'alchemy-sdk';
 import { ethers } from 'ethers';
 
 export default class CryptoAlchemy {
@@ -19,6 +26,17 @@ export default class CryptoAlchemy {
 			{ chainId: 137, name: 'matic' },
 			apiKey
 		);
+	}
+
+	async getTransactionsHistory(address: string) {
+		const response = await this.alchemy.core.getAssetTransfers({
+			toAddress: address,
+			category: [AssetTransfersCategory.EXTERNAL, AssetTransfersCategory.ERC20],
+			order: SortingOrder.DESCENDING,
+			withMetadata: true,
+		});
+		console.log({ response });
+		return response.transfers;
 	}
 
 	async getValidatedBlocks(
