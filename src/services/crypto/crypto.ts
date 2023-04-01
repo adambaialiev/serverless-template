@@ -22,7 +22,7 @@ const TableName = process.env.dynamo_table as string;
 
 const getWeb3Instance = () => {
 	const web3 = new Web3(
-		new Web3.providers.HttpProvider(process.env.NODE_PROVIDER)
+		new Web3.providers.HttpProvider(process.env.CHAINSTACK_NODE)
 	);
 	return web3;
 };

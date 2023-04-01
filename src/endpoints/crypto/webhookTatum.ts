@@ -90,7 +90,10 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 		if (asset === 'MATIC' && allWallets[address]) {
 			const userWallet = allWallets[address];
 
-			const balance = await cryptoEthers.getBalanceOfAddress(address);
+			const balance = await cryptoEthers.getBalanceOfAddress(address, {
+				coin: 'USDT',
+				network: 'MATIC',
+			});
 			console.log({ balance });
 			if (Number(balance) === 0) {
 				return;

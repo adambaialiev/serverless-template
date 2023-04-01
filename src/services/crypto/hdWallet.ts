@@ -5,6 +5,15 @@ const BIP84 = require('bip84');
 
 const ethereumPath = "m/44'/60'/0'/0/0";
 
+type MnemonicOptios = {
+	isPublic?: boolean;
+};
+
+type AddressPack = {
+	address: string;
+	privateKey?: string;
+};
+
 export default class HDWallet {
 	generateMnemonic() {
 		const mnemonic = generateMnemonic();
@@ -12,28 +21,43 @@ export default class HDWallet {
 		return mnemonic;
 	}
 
-	getEthAddressFromMnemonic(mnemonic: string) {
+	getEthAddressFromMnemonic(
+		mnemonic: string,
+		params: MnemonicOptios = {}
+	): AddressPack {
+		const { isPublic } = params;
 		const seed = mnemonicToSeedSync(mnemonic);
 		const node = HDNodeWallet.fromSeed(seed);
 		const ethNode = node.derivePath(ethereumPath);
-		return {
-			ethereumPrivateKey: ethNode.privateKey,
-			ethAddress: ethNode.address,
+		const pack = {
+			privateKey: ethNode.privateKey,
+			address: ethNode.address,
 		};
+		if (isPublic) {
+			delete pack.address;
+		}
+		return pack;
 	}
 
-	getBtcAddressFromMnemonic(mnemonic: string) {
+	getBtcAddressFromMnemonic(
+		mnemonic: string,
+		params: MnemonicOptios = {}
+	): AddressPack {
+		const { isPublic } = params;
 		const root = new BIP84.fromMnemonic(mnemonic);
 		const child0 = root.deriveAccount(0);
 
 		const account0 = new BIP84.fromZPrv(child0);
-		const privateKey = account0.getPrivateKey(0);
-		const publicKey = account0.getPublicKey(0);
-		const address = account0.getAddress(0);
-		return {
-			bitcoinPrivateKey: privateKey,
-			btcAddress: address,
-			btcPublicKey: publicKey,
+		const privateKey = account0.getPrivateKey(0) as string;
+		// const publicKey = account0.getPublicKey(0);
+		const address = account0.getAddress(0) as string;
+		const pack = {
+			privateKey,
+			address,
 		};
+		if (isPublic) {
+			delete pack.privateKey;
+		}
+		return pack;
 	}
 }

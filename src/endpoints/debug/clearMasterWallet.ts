@@ -13,7 +13,10 @@ export const handler: APIGatewayProxyHandler = async (
 		const cryptoEthers = new CryptoEthersService();
 		const alchemy = new CryptoAlchemy();
 
-		const balance = await cryptoEthers.getBalanceOfAddress(address);
+		const balance = await cryptoEthers.getBalanceOfAddress(address, {
+			coin: 'USDT',
+			network: 'MATIC',
+		});
 		console.log({ balance });
 		if (Number(balance) === 0) {
 			return;
