@@ -20,20 +20,29 @@ interface TransactionHistoryItem {
 	};
 }
 
+const networkMap = {
+	MATIC: Network.MATIC_MAINNET,
+	ETH: Network.ETH_MAINNET,
+};
+
+const ethersNetworkMap = {
+	MATIC: { chainId: 137, name: 'matic' },
+	ETH: { chainId: 1, name: 'mainnet' },
+};
+
 export default class CryptoAlchemy {
 	alchemy: Alchemy;
 	alchemyProvider: ethers.AlchemyProvider;
 
-	constructor() {
+	constructor(network: 'MATIC' | 'ETH') {
 		const apiKey = process.env.ALCHEMY_API_KEY;
 		const settings = {
 			apiKey,
-			network: Network.MATIC_MAINNET,
+			network: networkMap[network],
 		};
-		console.log({ apiKey });
 		this.alchemy = new Alchemy(settings);
 		this.alchemyProvider = new ethers.AlchemyProvider(
-			{ chainId: 137, name: 'matic' },
+			ethersNetworkMap[network],
 			apiKey
 		);
 	}

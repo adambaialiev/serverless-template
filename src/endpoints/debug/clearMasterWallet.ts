@@ -11,7 +11,7 @@ export const handler: APIGatewayProxyHandler = async (
 	try {
 		const { privateKey, address, targetAddress } = JSON.parse(event.body);
 		const cryptoEthers = new CryptoEthersService();
-		const alchemy = new CryptoAlchemy();
+		const alchemy = new CryptoAlchemy('MATIC');
 
 		const balance = await cryptoEthers.getBalanceOfAddress(address, {
 			coin: 'USDT',

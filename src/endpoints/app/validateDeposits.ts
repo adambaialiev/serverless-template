@@ -15,7 +15,7 @@ export const handler: APIGatewayProxyHandler = async (
 	try {
 		const masterWalletService = new MasterWallet();
 
-		const alchemy = new CryptoAlchemy();
+		const alchemy = new CryptoAlchemy('MATIC');
 
 		const balanceService = new BalanceService();
 

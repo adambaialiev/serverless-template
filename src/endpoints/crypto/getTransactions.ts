@@ -16,7 +16,7 @@ export const handler: APIGatewayProxyHandler = async (
 			return sendResponse(400, { message: 'Address is required' });
 		}
 
-		const cryptoTransactionsService = new CryptoAlchemy();
+		const cryptoTransactionsService = new CryptoAlchemy('MATIC');
 
 		const transactions = await cryptoTransactionsService.getTransactionsHistory(
 			address

@@ -47,7 +47,7 @@ interface ICryptoService {
 }
 
 export class CryptoService implements ICryptoService {
-	alchemy = new CryptoAlchemy();
+	alchemy = new CryptoAlchemy('MATIC');
 
 	async createCryptoWallet(phoneNumber: string) {
 		const web3 = getWeb3Instance();
