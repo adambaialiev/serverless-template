@@ -34,7 +34,7 @@ export default class HDWallet {
 			address: ethNode.address,
 		};
 		if (isPublic) {
-			delete pack.address;
+			delete pack.privateKey;
 		}
 		return pack;
 	}

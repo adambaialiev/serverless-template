@@ -20,6 +20,8 @@ provider:
     NODE_PROVIDER: ${env:NODE_PROVIDER}
     TATUM_WEBHOOK_URL: ${env:TATUM_WEBHOOK_URL}
     TATUM_API_KEY: ${env:TATUM_API_KEY}
+    ETHERSCAN_API_KEY: ${env:ETHERSCAN_API_KEY}
+    POLYGONSCAN_API_KEY: ${env:POLYGONSCAN_API_KEY}
 
   iamRoleStatements:
     - Effect: Allow
@@ -52,6 +54,14 @@ custom:
     createRoute53Record: true
 
 functions:
+  getCryptoTransactions:
+    timeout: 30
+    handler: build/src/endpoints/crypto/getTransactions.getTransactions
+    events:
+      - http:
+          path: /v1/crypto/get-transactions
+          method: post
+          cors: true
   getBalances:
     timeout: 30
     handler: build/src/endpoints/crypto/getBalances.getBalances
