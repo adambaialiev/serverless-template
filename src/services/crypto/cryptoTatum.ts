@@ -1,5 +1,10 @@
 import axios from 'axios';
 
+const headers = {
+	'Content-Type': 'application/json',
+	'x-api-key': process.env.TATUM_API_KEY,
+};
+
 export default class CryptoTatum {
 	async createSubscription(address: string) {
 		const params = {
@@ -10,10 +15,7 @@ export default class CryptoTatum {
 				url: process.env.TATUM_WEBHOOK_URL,
 			},
 		};
-		const headers = {
-			'Content-Type': 'application/json',
-			'x-api-key': process.env.TATUM_API_KEY,
-		};
+
 		await axios.post('https://api.tatum.io/v3/subscription', params, {
 			headers,
 		});
@@ -27,8 +29,14 @@ export default class CryptoTatum {
 			params: {
 				chain,
 				addresses: address,
+				tokenTypes: 'fungible',
+				excludeMetadata: true,
+				pageSize: '100',
+				offset: '0',
 			},
+			headers,
 		});
+		console.log({ response });
 		if (response.data) {
 			return response.data.results;
 		}
