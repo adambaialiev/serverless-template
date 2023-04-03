@@ -155,7 +155,7 @@ export default class CryptoAlchemy {
 			balance = Number(balance).toFixed(2);
 
 			data[metadata.name] = {
-				balance,
+				balance: Number(balance),
 				symbol: metadata.symbol,
 				logo: metadata.logo,
 			};
