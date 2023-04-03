@@ -9,7 +9,7 @@ const TableName = process.env.dynamo_table;
 
 export const updatePrices = async () => {
 	try {
-		const cryptoPrices = await marketPricesService.getCryptoPrices();
+		const cryptoPrices = await marketPricesService.getPrices();
 
 		await dynamoDb
 			.put({
@@ -22,7 +22,7 @@ export const updatePrices = async () => {
 			})
 			.promise();
 
-		return sendResponse(200, cryptoPrices);
+		return sendResponse(200, true);
 	} catch (error: unknown) {
 		console.error(error);
 		if (error instanceof Error) {

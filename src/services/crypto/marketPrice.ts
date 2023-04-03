@@ -1,10 +1,16 @@
 import axios from 'axios';
+import AWS from 'aws-sdk';
+import { TableKeys } from '@/common/dynamo/schema';
 
 const API_URL = process.env.COIN_MARKET_CAP_API_URL;
 const API_KEY = process.env.COIN_MARKET_CAP_API_KEY;
 
+const dynamoDb = new AWS.DynamoDB.DocumentClient();
+
+const TableName = process.env.dynamo_table;
+
 export class CryptoMarketPrice {
-	async getCryptoPrices(): Promise<Record<string, number>> {
+	async getPrices(): Promise<Record<string, number>> {
 		try {
 			const response = await axios.get(
 				`${API_URL}/cryptocurrency/quotes/latest?symbol=BTC,ETH,MATIC,USDT,USDC`,
@@ -33,5 +39,19 @@ export class CryptoMarketPrice {
 				throw new Error(error.message);
 			}
 		}
+	}
+
+	async getPricesFromDb() {
+		return (
+			await dynamoDb
+				.get({
+					TableName,
+					Key: {
+						[TableKeys.PK]: 'CRYPTO_PRICES#',
+						[TableKeys.SK]: 'CRYPTO_PRICES#',
+					},
+				})
+				.promise()
+		).Item;
 	}
 }
