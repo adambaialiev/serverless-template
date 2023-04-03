@@ -50,14 +50,25 @@ export default class CryptoAlchemy {
 	async getTransactionsHistory(
 		address: string
 	): Promise<TransactionHistoryItem[] | undefined> {
-		const response = await this.alchemy.core.getAssetTransfers({
+		const toAddressTransfers = await this.alchemy.core.getAssetTransfers({
 			toAddress: address,
 			category: [AssetTransfersCategory.EXTERNAL, AssetTransfersCategory.ERC20],
 			order: SortingOrder.DESCENDING,
 			withMetadata: true,
 		});
-		if (response.transfers) {
-			return response.transfers as TransactionHistoryItem[];
+
+		const fromAddressTransfers = await this.alchemy.core.getAssetTransfers({
+			fromAddress: address,
+			category: [AssetTransfersCategory.EXTERNAL, AssetTransfersCategory.ERC20],
+			order: SortingOrder.DESCENDING,
+			withMetadata: true,
+		});
+
+		if (toAddressTransfers.transfers && fromAddressTransfers.transfers) {
+			return [
+				...toAddressTransfers.transfers,
+				...fromAddressTransfers.transfers,
+			] as TransactionHistoryItem[];
 		}
 		return undefined;
 	}
