@@ -2,7 +2,9 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import HDWallet from '@/services/crypto/hdWallet';
 import { withAuthorization } from '@/middlewares/withAuthorization';
-import CryptoTatum from '@/services/crypto/cryptoTatum';
+import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
+
+const alchemy = new CryptoAlchemy('MATIC');
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -10,21 +12,17 @@ export const handler: APIGatewayProxyHandler = async (
 	callback
 ) => {
 	try {
-		const { mnemonic } = JSON.parse(event.body) as { mnemonic?: string };
+		const { mnemonic } = JSON.parse(event.body) as { mnemonic: string };
 		if (!mnemonic) {
 			return sendResponse(400, { message: 'Mnemonic is required' });
 		}
 		const hdWalletService = new HDWallet();
-		const tatum = new CryptoTatum();
 
 		const ethPack = hdWalletService.getEthAddressFromMnemonic(mnemonic, {
 			isPublic: true,
 		});
 
-		const balances = await tatum.getBalanceOfAddress(
-			ethPack.address,
-			'ethereum'
-		);
+		const balances = await alchemy.getTokenBalances(ethPack.address);
 
 		callback(null, {
 			statusCode: 200,

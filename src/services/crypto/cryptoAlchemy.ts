@@ -124,6 +124,34 @@ export default class CryptoAlchemy {
 		}
 	}
 
+	async getTokenBalances(address: string) {
+		const balances = await this.alchemy.core.getTokenBalances(address);
+
+		const nonZeroBalances = balances.tokenBalances.filter(
+			(token) => token.tokenBalance !== '0'
+		);
+
+		const data: Record<string, any> = {};
+
+		for (const token of nonZeroBalances) {
+			let balance = token.tokenBalance;
+
+			const metadata = await this.alchemy.core.getTokenMetadata(
+				token.contractAddress
+			);
+
+			balance = String(Number(balance) / Math.pow(10, metadata.decimals));
+			balance = Number(balance).toFixed(2);
+
+			data[metadata.name] = {
+				balance,
+				symbol: metadata.symbol,
+				logo: metadata.logo,
+			};
+		}
+		return data;
+	}
+
 	async makePolygonMaticTransaction(
 		privateKey: string,
 		address: string,
