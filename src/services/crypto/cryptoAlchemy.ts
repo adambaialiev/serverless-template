@@ -6,18 +6,13 @@ import {
 	Wallet,
 	Utils,
 	SortingOrder,
+	AssetTransfersWithMetadataResult,
 	AssetTransfersCategory,
 } from 'alchemy-sdk';
 import { ethers } from 'ethers';
 
-interface TransactionHistoryItem {
-	hash: string;
-	from: string;
-	to: string;
-	asset: 'USDT' | 'ETH' | 'MATIC';
-	metadata: {
-		blockTimestamp: string;
-	};
+interface TransactionHistoryItem extends AssetTransfersWithMetadataResult {
+	name: string;
 }
 
 const networkMap = {
@@ -47,28 +42,62 @@ export default class CryptoAlchemy {
 		);
 	}
 
-	async getTransactionsHistory(
-		address: string
-	): Promise<TransactionHistoryItem[] | undefined> {
-		const toAddressTransfers = await this.alchemy.core.getAssetTransfers({
-			toAddress: address,
-			category: [AssetTransfersCategory.EXTERNAL, AssetTransfersCategory.ERC20],
-			order: SortingOrder.DESCENDING,
-			withMetadata: true,
-		});
+	async getTransactionsHistory(address: string) {
+		const toAddressTransfersResponse =
+			await this.alchemy.core.getAssetTransfers({
+				toAddress: address,
+				category: [
+					AssetTransfersCategory.EXTERNAL,
+					AssetTransfersCategory.INTERNAL,
+					AssetTransfersCategory.ERC20,
+				],
+				order: SortingOrder.DESCENDING,
+				withMetadata: true,
+			});
 
-		const fromAddressTransfers = await this.alchemy.core.getAssetTransfers({
-			fromAddress: address,
-			category: [AssetTransfersCategory.EXTERNAL, AssetTransfersCategory.ERC20],
-			order: SortingOrder.DESCENDING,
-			withMetadata: true,
-		});
+		const fromAddressTransfersResponse =
+			await this.alchemy.core.getAssetTransfers({
+				fromAddress: address,
+				category: [
+					AssetTransfersCategory.EXTERNAL,
+					AssetTransfersCategory.INTERNAL,
+					AssetTransfersCategory.ERC20,
+				],
+				order: SortingOrder.DESCENDING,
+				withMetadata: true,
+			});
 
-		if (toAddressTransfers.transfers && fromAddressTransfers.transfers) {
-			return [
-				...toAddressTransfers.transfers,
-				...fromAddressTransfers.transfers,
-			] as TransactionHistoryItem[];
+		const fromAddressTransfers = await Promise.all(
+			fromAddressTransfersResponse.transfers.map(async (item) => {
+				if (item.rawContract.address) {
+					const metadata = await this.alchemy.core.getTokenMetadata(
+						item.rawContract.address
+					);
+					item = {
+						...item,
+						name: metadata.name,
+					} as TransactionHistoryItem;
+				}
+				return item;
+			})
+		);
+		const toAddressTransfers = await Promise.all(
+			toAddressTransfersResponse.transfers.map(async (item) => {
+				if (item.rawContract.address) {
+					const metadata = await this.alchemy.core.getTokenMetadata(
+						item.rawContract.address
+					);
+					item = {
+						...item,
+						name: metadata.name,
+					} as TransactionHistoryItem;
+				}
+				return item;
+			})
+		);
+
+		if (toAddressTransfers && fromAddressTransfers) {
+			return [...toAddressTransfers, ...fromAddressTransfers];
 		}
 		return undefined;
 	}
@@ -158,6 +187,27 @@ export default class CryptoAlchemy {
 				balance: Number(balance),
 				symbol: metadata.symbol,
 				logo: metadata.logo,
+			};
+		}
+		return data;
+	}
+
+	async getBalance(address: string) {
+		const response = await this.alchemy.core.getBalance(address, 'latest');
+		const data: Record<string, any> = {};
+		const balance = Utils.formatEther(response);
+
+		if (this.alchemy.config.network === Network.ETH_MAINNET) {
+			data.Ethereum = {
+				balance: Number(balance),
+				logo: null,
+				symbol: 'ETH',
+			};
+		} else {
+			data.Polygon = {
+				balance: Number(balance),
+				logo: null,
+				symbol: 'MATIC',
 			};
 		}
 		return data;

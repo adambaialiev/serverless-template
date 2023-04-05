@@ -4,7 +4,8 @@ import HDWallet from '@/services/crypto/hdWallet';
 import { withAuthorization } from '@/middlewares/withAuthorization';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 
-const alchemy = new CryptoAlchemy('MATIC');
+const maticAlchemy = new CryptoAlchemy('MATIC');
+const ethAlchemy = new CryptoAlchemy('ETH');
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -22,11 +23,16 @@ export const handler: APIGatewayProxyHandler = async (
 			isPublic: true,
 		});
 
-		const balances = await alchemy.getTokenBalances(ethPack.address);
+		const erc20Balances = await maticAlchemy.getTokenBalances(ethPack.address);
+		const ethBalance = await ethAlchemy.getBalance(ethPack.address);
+		const maticBalance = await maticAlchemy.getBalance(ethPack.address);
 
 		callback(null, {
 			statusCode: 200,
-			body: JSON.stringify(balances),
+			body: JSON.stringify({
+				balances: { ...erc20Balances, ...ethBalance, ...maticBalance },
+				address: ethPack.address,
+			}),
 		});
 	} catch (error: unknown) {
 		if (error instanceof Error) {
