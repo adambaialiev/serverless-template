@@ -24,6 +24,8 @@ provider:
     TATUM_API_KEY: ${env:TATUM_API_KEY}
     ETHERSCAN_API_KEY: ${env:ETHERSCAN_API_KEY}
     POLYGONSCAN_API_KEY: ${env:POLYGONSCAN_API_KEY}
+    COIN_MARKET_CAP_API_KEY: ${env:COIN_MARKET_CAP_API_KEY}
+    COIN_MARKET_CAP_API_URL: ${env:COIN_MARKET_CAP_API_URL}
 
   iamRoleStatements:
     - Effect: Allow
@@ -116,6 +118,14 @@ functions:
       - http:
           path: /v1/crypto/webhook
           method: post
+          cors: true
+  crypto-update-prices:
+    timeout: 30
+    handler: build/src/endpoints/crypto/updatePrices.updatePrices
+    events:
+      - http:
+          path: /v1/crypto/update-prices
+          method: get
           cors: true
   crypto-webhook-t:
     timeout: 30
