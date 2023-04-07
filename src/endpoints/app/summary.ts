@@ -22,7 +22,8 @@ export const handler: APIGatewayProxyHandler = async (
 
 		for (const address of Object.keys(allWallets)) {
 			allWalletsWithBalance[address] = await crypto.getBalanceOfAddress(
-				address
+				address,
+				{ coin: 'USDT', network: 'MATIC' }
 			);
 			address;
 		}
@@ -30,7 +31,8 @@ export const handler: APIGatewayProxyHandler = async (
 		const masterWallet = await masterWalletService.getMasterWallet();
 
 		const masterWalletBalance = await crypto.getBalanceOfAddress(
-			masterWallet.publicAddress
+			masterWallet.publicAddress,
+			{ coin: 'USDT', network: 'MATIC' }
 		);
 
 		const { poolBalance, usersList } =

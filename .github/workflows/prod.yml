@@ -8,8 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-      NODE_PROVIDER: ${{ secrets.NODE_PROVIDER }}
+      ALCHEMY_API_KEY_MATIC: ${env:ALCHEMY_API_KEY_MATIC}
+      ALCHEMY_API_KEY_ETH: ${env:ALCHEMY_API_KEY_ETH}
+      CHAINSTACK_NODE: ${{ secrets.CHAINSTACK_NODE }}
       TATUM_WEBHOOK_URL: ${{ secrets.TATUM_WEBHOOK_URL }}
       TATUM_API_KEY: ${{ secrets.TATUM_API_KEY }}
       COIN_MARKET_CAP_API_KEY: ${env:COIN_MARKET_CAP_API_KEY}
