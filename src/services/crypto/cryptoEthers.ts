@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { contractAbi } from '@/services/crypto/usdt-erc20-contractAbi';
 import {
 	USDT_CONTRACT_IN_ETH,
-	USDT_CONTRACT_IN_POLYON,
+	USDT_CONTRACT_IN_POLYGON,
 } from '@/services/crypto/constants';
 
 export const amountToRaw = (amount: number) =>
@@ -28,7 +28,7 @@ export type CoinPack = {
 };
 
 const networkToUSDTContractAddress = {
-	MATIC: USDT_CONTRACT_IN_POLYON,
+	MATIC: USDT_CONTRACT_IN_POLYGON,
 	ETH: USDT_CONTRACT_IN_ETH,
 };
 export default class CryptoEthersService {

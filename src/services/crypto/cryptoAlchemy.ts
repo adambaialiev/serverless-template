@@ -1,4 +1,8 @@
-import { USDT_CONTRACT_IN_POLYON } from '@/services/crypto/constants';
+import {
+	USDC_CONTRACT_IN_ETH,
+	USDT_CONTRACT_IN_ETH,
+	USDT_CONTRACT_IN_POLYGON,
+} from '@/services/crypto/constants';
 import { contractAbi } from '@/services/crypto/usdt-erc20-contractAbi';
 import {
 	Network,
@@ -129,6 +133,80 @@ export default class CryptoAlchemy {
 		return latestBlock - targetBlock;
 	}
 
+	async makeTransaction(
+		privateKey: string,
+		targetAddress: string,
+		amount: string,
+		asset: 'ETH' | 'MATIC' | 'USDT' | 'USDC'
+	): Promise<string | undefined> {
+		const { gasPrice } = await this.alchemy.core.getFeeData();
+
+		if (!gasPrice) {
+			return undefined;
+		}
+		const signer = new ethers.Wallet(privateKey, this.alchemyProvider);
+
+		const ethAssetContractsMap: Record<string, string> = {
+			USDT: USDT_CONTRACT_IN_ETH,
+			USDC: USDC_CONTRACT_IN_ETH,
+		};
+
+		if (this.alchemy.config.network === Network.ETH_MAINNET) {
+			if (asset === 'USDT' || asset === 'USDC') {
+				const erc20_rw = new ethers.Contract(
+					ethAssetContractsMap[asset],
+					contractAbi,
+					signer
+				);
+				const transaction = await erc20_rw.transfer(targetAddress, amount, {
+					from: signer.address,
+					gasPrice: gasPrice.toBigInt(),
+					gasLimit: 100000,
+				});
+
+				return transaction.hash;
+			}
+			const transaction = await signer.sendTransaction({
+				to: targetAddress,
+				value: Utils.parseEther(amount).toBigInt(),
+				gasPrice: gasPrice.toBigInt(),
+				gasLimit: 100000,
+			});
+			return transaction.hash;
+		}
+		if (this.alchemy.config.network === Network.MATIC_MAINNET) {
+			if (asset === 'USDT') {
+				const erc20_rw = new ethers.Contract(
+					USDT_CONTRACT_IN_POLYGON,
+					contractAbi,
+					signer
+				);
+				const transaction = await erc20_rw.transfer(targetAddress, amount, {
+					from: signer.address,
+					gasPrice: gasPrice.toBigInt(),
+					gasLimit: 100000,
+				});
+				console.log({ usdtTransaction: transaction });
+				return transaction.hash;
+			}
+			const wallet = new Wallet(privateKey);
+			const transaction = {
+				to: targetAddress,
+				value: Utils.parseEther(amount),
+				gasLimit: 100000,
+				nonce: await this.alchemy.core.getTransactionCount(wallet.getAddress()),
+				chainId: 137,
+				gasPrice,
+			};
+			const rawTransaction = await wallet.signTransaction(transaction);
+			const transactionResponse = await this.alchemy.transact.sendTransaction(
+				rawTransaction
+			);
+			console.log({ maticTransaction: transactionResponse });
+			return transactionResponse.hash;
+		}
+	}
+
 	async makePolygonUsdtTransaction(
 		privateKey: string,
 		targetPublicKey: string,
@@ -146,7 +224,7 @@ export default class CryptoAlchemy {
 			}
 			const signer = new ethers.Wallet(privateKey, this.alchemyProvider);
 			const erc20_rw = new ethers.Contract(
-				USDT_CONTRACT_IN_POLYON,
+				USDT_CONTRACT_IN_POLYGON,
 				contractAbi,
 				signer
 			);

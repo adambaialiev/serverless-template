@@ -190,6 +190,13 @@ functions:
           path: /v1/transaction
           method: post
           cors: true
+  makeCryptoTransfer:
+    handler: build/src/endpoints/crypto/makeTransaction.makeTransaction
+    events:
+      - http:
+          path: /v1/crypto/transaction
+          method: post
+          cors: true
   getTransactions:
     handler: build/src/endpoints/transactions/getTransactions.getTransactions
     events:
