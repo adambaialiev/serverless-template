@@ -88,11 +88,12 @@ export class AuthService {
 	async signIn(phoneNumber: string): Promise<SignInResponse> {
 		const isDemoAccount = DEMO_ACCOUNTS.includes(phoneNumber);
 
-		const otpCode = isDemoAccount
-			? OTP_CODE_FOR_DEMO_ACCOUNT
-			: getRandomOtpCode();
+		const otpCode =
+			isDemoAccount || process.env.stage !== 'prod'
+				? OTP_CODE_FOR_DEMO_ACCOUNT
+				: getRandomOtpCode();
 
-		if (!isDemoAccount) {
+		if (!isDemoAccount && process.env.stage === 'prod') {
 			const SNSParams = {
 				Message: `Your ShopWallet login verification code: ${otpCode}. Do not share this code with anyone`,
 				PhoneNumber: phoneNumber,

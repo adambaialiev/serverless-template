@@ -192,13 +192,6 @@ functions:
           method: put
           cors: true
 
-  makeTransaction:
-    handler: build/src/endpoints/transactions/makeTransaction.makeTransaction
-    events:
-      - http:
-          path: /v1/transaction
-          method: post
-          cors: true
   makeCryptoTransfer:
     handler: build/src/endpoints/crypto/makeTransaction.makeTransaction
     events:
