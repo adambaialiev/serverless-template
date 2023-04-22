@@ -41,6 +41,11 @@ export interface MasterWalletItem {
 	[MasterWalletAttributes.NETWORK]: DocumentClient.String;
 	[MasterWalletAttributes.CREATED_AT]: DocumentClient.String;
 }
+export interface CryptoPricesItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	prices: DocumentClient.AttributeMap;
+}
 
 export enum StoreAttributes {
 	UPDATED_AT = 'updatedAt',

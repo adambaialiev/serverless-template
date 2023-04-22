@@ -96,7 +96,8 @@ const handler: APIGatewayProxyHandler = async (event, context, callback) => {
 				const userWallet = allWallets[activity.toAddress];
 
 				const balance = await cryptoEthers.getBalanceOfAddress(
-					activity.toAddress
+					activity.toAddress,
+					{ coin: 'USDT', network: 'MATIC' }
 				);
 				console.log({ balance });
 				if (Number(balance) === 0) {

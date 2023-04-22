@@ -16,10 +16,15 @@ provider:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
-    ALCHEMY_API_KEY: ${env:ALCHEMY_API_KEY}
-    NODE_PROVIDER: ${env:NODE_PROVIDER}
+    ALCHEMY_API_KEY_MATIC: ${env:ALCHEMY_API_KEY_MATIC}
+    ALCHEMY_API_KEY_ETH: ${env:ALCHEMY_API_KEY_ETH}
+    CHAINSTACK_NODE: ${env:CHAINSTACK_NODE}
     TATUM_WEBHOOK_URL: ${env:TATUM_WEBHOOK_URL}
     TATUM_API_KEY: ${env:TATUM_API_KEY}
+    ETHERSCAN_API_KEY: ${env:ETHERSCAN_API_KEY}
+    POLYGONSCAN_API_KEY: ${env:POLYGONSCAN_API_KEY}
+    COIN_MARKET_CAP_API_KEY: ${env:COIN_MARKET_CAP_API_KEY}
+    COIN_MARKET_CAP_API_URL: ${env:COIN_MARKET_CAP_API_URL}
 
   iamRoleStatements:
     - Effect: Allow
@@ -52,6 +57,30 @@ custom:
     createRoute53Record: true
 
 functions:
+  getCryptoTransactions:
+    timeout: 30
+    handler: build/src/endpoints/crypto/getTransactions.getTransactions
+    events:
+      - http:
+          path: /v1/crypto/transactions/history
+          method: post
+          cors: true
+  getBalances:
+    timeout: 30
+    handler: build/src/endpoints/crypto/getBalances.getBalances
+    events:
+      - http:
+          path: /v1/crypto/get-balances
+          method: post
+          cors: true
+  createWallet:
+    timeout: 30
+    handler: build/src/endpoints/crypto/createWallet.createWallet
+    events:
+      - http:
+          path: /v1/crypto/create-wallet
+          method: post
+          cors: true
   clear:
     timeout: 30
     handler: build/src/endpoints/app/validateDeposits.validateDeposits
@@ -88,6 +117,14 @@ functions:
       - http:
           path: /v1/crypto/webhook
           method: post
+          cors: true
+  crypto-update-prices:
+    timeout: 30
+    handler: build/src/endpoints/crypto/updatePrices.updatePrices
+    events:
+      - http:
+          path: /v1/crypto/update-prices
+          method: get
           cors: true
   crypto-webhook-t:
     timeout: 30
@@ -155,11 +192,11 @@ functions:
           method: put
           cors: true
 
-  makeTransaction:
-    handler: build/src/endpoints/transactions/makeTransaction.makeTransaction
+  makeCryptoTransfer:
+    handler: build/src/endpoints/crypto/makeTransaction.makeTransaction
     events:
       - http:
-          path: /v1/transaction
+          path: /v1/crypto/transaction
           method: post
           cors: true
   getTransactions:
@@ -168,6 +205,20 @@ functions:
       - http:
           path: /v1/transactions/{phoneNumber}
           method: get
+          cors: true
+  getUsersTransactions:
+    handler: build/src/endpoints/crypto/getTransactionsBetweenUsers.getTransactionsBetweenUsers
+    events:
+      - http:
+          path: /v1/crypto/transactions
+          method: get
+          cors: true
+  getTransactionDetails:
+    handler: build/src/endpoints/crypto/getTransactionDetails.getTransactionDetails
+    events:
+      - http:
+          path: /v1/crypto/transaction-details
+          method: post
           cors: true
 
   getTransactionsRoom:

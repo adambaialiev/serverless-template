@@ -8,10 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-      NODE_PROVIDER: ${{ secrets.NODE_PROVIDER }}
+      ALCHEMY_API_KEY_MATIC: ${{ secrets.ALCHEMY_API_KEY_MATIC }}
+      ALCHEMY_API_KEY_ETH: ${{ secrets.ALCHEMY_API_KEY_ETH }}
+      CHAINSTACK_NODE: ${{ vars.CHAINSTACK_NODE }}
       TATUM_WEBHOOK_URL: ${{ secrets.TATUM_WEBHOOK_URL }}
       TATUM_API_KEY: ${{ secrets.TATUM_API_KEY }}
+      ETHERSCAN_API_KEY: ${{ vars.ETHERSCAN_API_KEY }}
+      POLYGONSCAN_API_KEY: ${{ vars.POLYGONSCAN_API_KEY }}
+      COIN_MARKET_CAP_API_KEY: ${{ vars.COIN_MARKET_CAP_API_KEY }}
+      COIN_MARKET_CAP_API_URL: ${{ vars.COIN_MARKET_CAP_API_URL }}
     steps:
       - uses: actions/setup-node@v3
         with:
