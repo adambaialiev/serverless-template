@@ -1,19 +1,14 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import {
-	CustomAPIGateway,
-	withAuthorization,
-} from '@/middlewares/withAuthorization';
 import { FeedbackService } from '@/services/feedback/feedbackService';
 import { sendResponse } from '@/utils/makeResponse';
 
 const feedbackService = new FeedbackService();
 
-const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
+const handler: APIGatewayProxyHandler = async (event) => {
 	try {
 		const { comment, rating } = JSON.parse(event.body);
-		const user = event.user;
 
-		const response = await feedbackService.create(user, comment, rating);
+		const response = await feedbackService.create(comment, rating);
 
 		return sendResponse(201, response);
 	} catch (error: unknown) {
@@ -24,4 +19,4 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	}
 };
 
-export const createFeedback = withAuthorization(handler);
+export const createFeedback = handler;

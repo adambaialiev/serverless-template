@@ -1,7 +1,6 @@
 import { buildFeedbackKey } from '@/common/dynamo/buildKey';
 import {
 	FeedbackAttributes,
-	UserItem,
 	TableKeys,
 	Entities,
 } from '@/common/dynamo/schema';
@@ -13,7 +12,7 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table as string;
 
 export class FeedbackService {
-	async create(user: UserItem, comment: string | undefined, rating: number) {
+	async create(comment: string | undefined, rating: number) {
 		const id = v4();
 
 		const date = Date.now().toString();
@@ -24,7 +23,6 @@ export class FeedbackService {
 			[FeedbackAttributes.ID]: id,
 			[FeedbackAttributes.COMMENT]: comment ?? '',
 			[FeedbackAttributes.RATING]: rating,
-			[FeedbackAttributes.USER]: user.id,
 			[FeedbackAttributes.CREATED_AT]: date,
 			[FeedbackAttributes.UPDATED_AT]: date,
 		};

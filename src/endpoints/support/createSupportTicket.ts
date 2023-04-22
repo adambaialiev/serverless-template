@@ -1,8 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import {
-	CustomAPIGateway,
-	withAuthorization,
-} from '@/middlewares/withAuthorization';
+import { CustomAPIGateway } from '@/middlewares/withAuthorization';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
 import {
@@ -50,4 +47,4 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	}
 };
 
-export const createSupportTicket = withAuthorization(handler);
+export const createSupportTicket = handler;
