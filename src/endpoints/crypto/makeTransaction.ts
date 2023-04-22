@@ -8,7 +8,7 @@ const maticAlchemy = new CryptoAlchemy('MATIC');
 const hdWalletService = new HDWallet();
 const ethAlchemy = new CryptoAlchemy('ETH');
 
-const handler: APIGatewayProxyHandler = async (event) => {
+export const makeTransaction: APIGatewayProxyHandler = async (event) => {
 	try {
 		const { mnemonic, target, amount, asset, network } = JSON.parse(
 			event.body
@@ -51,5 +51,3 @@ const handler: APIGatewayProxyHandler = async (event) => {
 		}
 	}
 };
-
-export const makeTransaction = handler;

@@ -1,5 +1,4 @@
 import { TableKeys } from '@/common/dynamo/schema';
-import { withAuthorization } from '@/middlewares/withAuthorization';
 import { CryptoMarketPrice } from '@/services/crypto/marketPrice';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
@@ -8,7 +7,7 @@ const marketPricesService = new CryptoMarketPrice();
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table;
 
-export const handler = async () => {
+export const updatePrices = async () => {
 	try {
 		const cryptoPrices = await marketPricesService.getPrices();
 
@@ -31,5 +30,3 @@ export const handler = async () => {
 		}
 	}
 };
-
-export const updatePrices = withAuthorization(handler);

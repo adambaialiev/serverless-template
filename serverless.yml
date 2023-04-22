@@ -62,7 +62,7 @@ functions:
     handler: build/src/endpoints/crypto/getTransactions.getTransactions
     events:
       - http:
-          path: /v1/crypto/get-transactions
+          path: /v1/crypto/transactions/history
           method: post
           cors: true
   getBalances:
@@ -205,6 +205,20 @@ functions:
       - http:
           path: /v1/transactions/{phoneNumber}
           method: get
+          cors: true
+  getUsersTransactions:
+    handler: build/src/endpoints/crypto/getTransactionsBetweenUsers.getTransactionsBetweenUsers
+    events:
+      - http:
+          path: /v1/crypto/transactions
+          method: get
+          cors: true
+  getTransactionDetails:
+    handler: build/src/endpoints/crypto/getTransactionDetails.getTransactionDetails
+    events:
+      - http:
+          path: /v1/crypto/transaction-details
+          method: post
           cors: true
 
   getTransactionsRoom:

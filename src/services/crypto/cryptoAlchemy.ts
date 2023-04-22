@@ -34,7 +34,7 @@ export default class CryptoAlchemy {
 	alchemyProvider: ethers.AlchemyProvider;
 
 	constructor(network: 'MATIC' | 'ETH') {
-		const apiKey = process.env.ALCHEMY_API_KEY;
+		const apiKey = process.env[`ALCHEMY_API_KEY_${network}`];
 		const settings = {
 			apiKey,
 			network: networkMap[network],
@@ -77,9 +77,12 @@ export default class CryptoAlchemy {
 					const metadata = await this.alchemy.core.getTokenMetadata(
 						item.rawContract.address
 					);
+					const itemDetails = await this.getTransactionsDetails(item.hash);
 					item = {
 						...item,
 						name: metadata.name,
+						status: itemDetails ? itemDetails.status : 2,
+						gasUsed: itemDetails ? Utils.formatEther(itemDetails.gasUsed) : '0',
 					} as TransactionHistoryItem;
 				}
 				return item;
@@ -91,9 +94,12 @@ export default class CryptoAlchemy {
 					const metadata = await this.alchemy.core.getTokenMetadata(
 						item.rawContract.address
 					);
+					const itemDetails = await this.getTransactionsDetails(item.hash);
 					item = {
 						...item,
 						name: metadata.name,
+						status: itemDetails ? itemDetails.status : 2,
+						gasUsed: itemDetails ? Utils.formatEther(itemDetails.gasUsed) : '0',
 					} as TransactionHistoryItem;
 				}
 				return item;
@@ -204,6 +210,16 @@ export default class CryptoAlchemy {
 			);
 			console.log({ maticTransaction: transactionResponse });
 			return transactionResponse.hash;
+		}
+	}
+
+	async getTransactionsDetails(hash: string) {
+		try {
+			const response = await this.alchemy.core.getTransactionReceipt(hash);
+			return response;
+		} catch (error) {
+			console.log(error);
+			return undefined;
 		}
 	}
 

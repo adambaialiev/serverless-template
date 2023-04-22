@@ -1,9 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { withAuthorization } from '@/middlewares/withAuthorization';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+const handler: APIGatewayProxyHandler = async (event) => {
 	try {
 		const maticCryptoTransactionsService = new CryptoAlchemy('MATIC');
 		const ethCryptoTransactionsService = new CryptoAlchemy('ETH');
@@ -31,4 +30,4 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 	}
 };
 
-export const getTransactions = withAuthorization(handler);
+export const getTransactions = handler;
