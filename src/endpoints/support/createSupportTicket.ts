@@ -14,6 +14,7 @@ import axios from "axios";
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
+const slackUrl = process.env.SLACK_SUPPORT_URL as string;
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
@@ -40,7 +41,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			.promise();
 
 		await axios.post(
-            process.env.SLACK_SUPPORT_URL,
+			slackUrl,
             {
 				text: `Email: ${email}\nDescription: ${description}`
 			})

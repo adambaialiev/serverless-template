@@ -5,6 +5,8 @@ import axios from "axios";
 
 const feedbackService = new FeedbackService();
 
+const slackUrl = process.env.SLACK_FEEDBACK_URL as string;
+
 const handler: APIGatewayProxyHandler = async (event) => {
 	try {
 		const { comment, rating } = JSON.parse(event.body);
@@ -12,7 +14,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
 		const response = await feedbackService.create(comment, rating);
 
 		await axios.post(
-			process.env.SLACK_FEEDBACK_URL,
+			slackUrl,
 			{
 				text: `Comment: ${comment}\nRating: ${rating}`
 			})
