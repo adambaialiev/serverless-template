@@ -12,6 +12,7 @@ import {
 } from '@/common/dynamo/schema';
 import { v4 } from 'uuid';
 import { buildSupportTicketKey } from '@/common/dynamo/buildKey';
+import axios from "axios";
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -40,6 +41,12 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 				ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
 			})
 			.promise();
+
+		await axios.post(
+            'https://hooks.slack.com/services/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',
+            {
+				email, description
+			})
 
 		return sendResponse(201, true);
 	} catch (error: unknown) {
