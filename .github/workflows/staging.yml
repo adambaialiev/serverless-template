@@ -17,8 +17,8 @@ jobs:
       POLYGONSCAN_API_KEY: ${{ vars.POLYGONSCAN_API_KEY }}
       COIN_MARKET_CAP_API_KEY: ${{ vars.COIN_MARKET_CAP_API_KEY }}
       COIN_MARKET_CAP_API_URL: ${{ vars.COIN_MARKET_CAP_API_URL }}
-      SLACK_SUPPORT_URL: ${{ vars.SLACK_SUPPORT_URL }}
-      SLACK_FEEDBACK_URL: ${{ vars.SLACK_FEEDBACK_URL }}
+      SLACK_SUPPORT_URL: ${{ secrets.SLACK_SUPPORT_URL }}
+      SLACK_FEEDBACK_URL: ${{ secrets.SLACK_FEEDBACK_URL }}
     steps:
       - uses: actions/setup-node@v3
         with:
