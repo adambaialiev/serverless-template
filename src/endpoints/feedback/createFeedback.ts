@@ -12,7 +12,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
 		const response = await feedbackService.create(comment, rating);
 
 		await axios.post(
-			'https://hooks.slack.com/services/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',
+			process.env.SLACK_FEEDBACK_URL,
 			{
 				text: `Comment: ${comment}\nRating: ${rating}`
 			})
