@@ -14,7 +14,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
 		await axios.post(
 			'https://hooks.slack.com/services/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',
 			{
-				user, comment, rating
+				comment, rating
 			})
 
 		return sendResponse(201, response);
