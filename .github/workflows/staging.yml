@@ -19,6 +19,11 @@ jobs:
       COIN_MARKET_CAP_API_URL: ${{ vars.COIN_MARKET_CAP_API_URL }}
       SLACK_SUPPORT_URL: ${{ secrets.SLACK_SUPPORT_URL }}
       SLACK_FEEDBACK_URL: ${{ secrets.SLACK_FEEDBACK_URL }}
+      SLACK_GET_BALANCES_URL: ${{ secrets.SLACK_GET_BALANCES_URL }}
+      SLACK_GET_TRANSACTION_URL: ${{ secrets.SLACK_GET_TRANSACTION_URL }}
+      SLACK_MAKE_TRANSACTION_URL: ${{ secrets.SLACK_MAKE_TRANSACTION_URL }}
+      SLACK_UPDATE_PRICES_URL: ${{ secrets.SLACK_UPDATE_PRICES_URL }}
+      SLACK_CREATE_WALLET_URL: ${{ secrets.SLACK_CREATE_WALLET_URL }}
     steps:
       - uses: actions/setup-node@v3
         with:
