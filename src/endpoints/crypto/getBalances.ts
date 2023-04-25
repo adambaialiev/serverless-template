@@ -2,13 +2,10 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import HDWallet from '@/services/crypto/hdWallet';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
-import axios from 'axios';
-import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
+import { SlackNotifications } from '@/utils/slackNotifications';
 
 const maticAlchemy = new CryptoAlchemy('MATIC');
 const ethAlchemy = new CryptoAlchemy('ETH');
-
-const slackUrl = getRelevantDotEnvVariable('SLACK_GET_BALANCES_URL') as string;
 
 export const getBalances: APIGatewayProxyHandler = async (
 	event,
@@ -30,9 +27,10 @@ export const getBalances: APIGatewayProxyHandler = async (
 		const ethBalance = await ethAlchemy.getBalance(ethPack.address);
 		const maticBalance = await maticAlchemy.getBalance(ethPack.address);
 
-		await axios.post(slackUrl, {
-			text: `Endpoint getBalances has been executed.`,
-		});
+		await SlackNotifications.sendMessage(
+			'SLACK_GET_BALANCES_URL',
+			`Endpoint getBalances has been executed.`
+		);
 
 		callback(null, {
 			statusCode: 200,

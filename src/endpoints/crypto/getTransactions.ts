@@ -1,10 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
-import axios from 'axios';
-import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
-
-const slackUrl = getRelevantDotEnvVariable('SLACK_GET_TRANSACTION_URL') as string;
+import { SlackNotifications } from '@/utils/slackNotifications';
 
 const handler: APIGatewayProxyHandler = async (event) => {
 	try {
@@ -26,9 +23,10 @@ const handler: APIGatewayProxyHandler = async (event) => {
 		const maticTransactions =
 			await maticCryptoTransactionsService.getTransactionsHistory(address);
 
-		await axios.post(slackUrl, {
-			text: `Endpoint getTransactions has been executed.\nAddress: ${address}.\nType: ${type}.`,
-		});
+		await SlackNotifications.sendMessage(
+			'SLACK_GET_TRANSACTION_URL',
+			`Endpoint getTransactions has been executed.\nAddress: ${address}.\nType: ${type}.`
+		);
 
 		return sendResponse(200, maticTransactions);
 	} catch (error: unknown) {

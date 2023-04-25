@@ -9,13 +9,11 @@ import {
 } from '@/common/dynamo/schema';
 import { v4 } from 'uuid';
 import { buildSupportTicketKey } from '@/common/dynamo/buildKey';
-import axios from "axios";
-import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
+import { SlackNotifications } from '@/utils/slackNotifications';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
-const slackUrl = getRelevantDotEnvVariable('SLACK_SUPPORT_URL') as string;
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
@@ -41,11 +39,10 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			})
 			.promise();
 
-		await axios.post(
-			slackUrl,
-            {
-				text: `Endpoint support has been executed.\nEmail: ${email}.\nDescription: ${description}.`
-			})
+		await SlackNotifications.sendMessage(
+			'SLACK_SUPPORT_URL',
+			`Endpoint support has been executed.\nEmail: ${email}.\nDescription: ${description}.`
+		);
 
 		return sendResponse(201, true);
 	} catch (error: unknown) {

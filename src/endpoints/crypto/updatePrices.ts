@@ -2,14 +2,11 @@ import { TableKeys } from '@/common/dynamo/schema';
 import { CryptoMarketPrice } from '@/services/crypto/marketPrice';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
-import axios from "axios";
-import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
+import { SlackNotifications } from '@/utils/slackNotifications';
 
 const marketPricesService = new CryptoMarketPrice();
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table;
-
-const slackUrl = getRelevantDotEnvVariable('SLACK_UPDATE_PRICES_URL') as string;
 
 export const updatePrices = async () => {
 	try {
@@ -26,9 +23,10 @@ export const updatePrices = async () => {
 			})
 			.promise();
 
-		await axios.post(slackUrl, {
-			text: `Endpoint updatePrices has been executed.`,
-		});
+		await SlackNotifications.sendMessage(
+			'SLACK_UPDATE_PRICES_URL',
+			`Endpoint updatePrices has been executed.`
+		);
 
 		return sendResponse(200, cryptoPrices);
 	} catch (error: unknown) {
