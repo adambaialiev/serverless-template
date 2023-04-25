@@ -2,6 +2,7 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import HDWallet from '@/services/crypto/hdWallet';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
+import { SlackNotifications } from '@/utils/slackNotifications';
 
 const maticAlchemy = new CryptoAlchemy('MATIC');
 const ethAlchemy = new CryptoAlchemy('ETH');
@@ -25,6 +26,11 @@ export const getBalances: APIGatewayProxyHandler = async (
 		const erc20Balances = await maticAlchemy.getTokenBalances(ethPack.address);
 		const ethBalance = await ethAlchemy.getBalance(ethPack.address);
 		const maticBalance = await maticAlchemy.getBalance(ethPack.address);
+
+		await SlackNotifications.sendMessage(
+			'SLACK_GET_BALANCES_URL',
+			`Endpoint getBalances has been executed.`
+		);
 
 		callback(null, {
 			statusCode: 200,

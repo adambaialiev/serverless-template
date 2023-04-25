@@ -2,6 +2,7 @@ import { TableKeys } from '@/common/dynamo/schema';
 import { CryptoMarketPrice } from '@/services/crypto/marketPrice';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
+import { SlackNotifications } from '@/utils/slackNotifications';
 
 const marketPricesService = new CryptoMarketPrice();
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
@@ -21,6 +22,11 @@ export const updatePrices = async () => {
 				},
 			})
 			.promise();
+
+		await SlackNotifications.sendMessage(
+			'SLACK_UPDATE_PRICES_URL',
+			`Endpoint updatePrices has been executed.`
+		);
 
 		return sendResponse(200, cryptoPrices);
 	} catch (error: unknown) {
