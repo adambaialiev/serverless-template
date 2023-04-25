@@ -14,7 +14,9 @@ export class SlackNotifications {
 		try {
 			const slackUrl =
 				process.env[`${process.env.stage.toUpperCase()}_${variable}`];
-			console.log({slackUrl})
+
+			console.log({slackUrl, stroke: `${process.env.stage.toUpperCase()}_${variable}`})
+
 			await axios.post(slackUrl, { text });
 		} catch (error) {
 			if (error instanceof Error) {
