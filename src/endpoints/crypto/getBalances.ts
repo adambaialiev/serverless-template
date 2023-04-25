@@ -3,11 +3,12 @@ import { sendResponse } from '@/utils/makeResponse';
 import HDWallet from '@/services/crypto/hdWallet';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 import axios from 'axios';
+import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
 
 const maticAlchemy = new CryptoAlchemy('MATIC');
 const ethAlchemy = new CryptoAlchemy('ETH');
 
-const slackUrl = process.env.SLACK_GET_BALANCES_URL as string;
+const slackUrl = getRelevantDotEnvVariable('SLACK_GET_BALANCES_URL') as string;
 
 export const getBalances: APIGatewayProxyHandler = async (
 	event,
@@ -15,6 +16,7 @@ export const getBalances: APIGatewayProxyHandler = async (
 	callback
 ) => {
 	try {
+		console.log({env: process.env, stage: process.env.stage, slackUrl})
 		const { mnemonic } = JSON.parse(event.body) as { mnemonic: string };
 		if (!mnemonic) {
 			return sendResponse(400, { message: 'Mnemonic is required' });

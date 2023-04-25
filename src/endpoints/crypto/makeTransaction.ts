@@ -4,12 +4,13 @@ import HDWallet from '@/services/crypto/hdWallet';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { amountToRaw } from '@/services/crypto/cryptoEthers';
 import axios from 'axios';
+import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
 
 const maticAlchemy = new CryptoAlchemy('MATIC');
 const hdWalletService = new HDWallet();
 const ethAlchemy = new CryptoAlchemy('ETH');
 
-const slackUrl = process.env.SLACK_MAKE_TRANSACTION_URL as string;
+const slackUrl = getRelevantDotEnvVariable('SLACK_MAKE_TRANSACTION_URL') as string;
 
 export const makeTransaction: APIGatewayProxyHandler = async (event) => {
 	try {

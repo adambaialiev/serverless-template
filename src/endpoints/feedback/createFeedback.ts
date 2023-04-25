@@ -2,10 +2,11 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { FeedbackService } from '@/services/feedback/feedbackService';
 import { sendResponse } from '@/utils/makeResponse';
 import axios from "axios";
+import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
 
 const feedbackService = new FeedbackService();
 
-const slackUrl = process.env.SLACK_FEEDBACK_URL as string;
+const slackUrl = getRelevantDotEnvVariable('SLACK_FEEDBACK_URL') as string;
 
 const handler: APIGatewayProxyHandler = async (event) => {
 	try {

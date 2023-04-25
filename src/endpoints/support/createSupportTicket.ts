@@ -10,11 +10,12 @@ import {
 import { v4 } from 'uuid';
 import { buildSupportTicketKey } from '@/common/dynamo/buildKey';
 import axios from "axios";
+import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.dynamo_table as string;
-const slackUrl = process.env.SLACK_SUPPORT_URL as string;
+const slackUrl = getRelevantDotEnvVariable('SLACK_SUPPORT_URL') as string;
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {

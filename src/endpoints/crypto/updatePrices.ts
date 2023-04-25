@@ -3,12 +3,13 @@ import { CryptoMarketPrice } from '@/services/crypto/marketPrice';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
 import axios from "axios";
+import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
 
 const marketPricesService = new CryptoMarketPrice();
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table;
 
-const slackUrl = process.env.SLACK_UPDATE_PRICES_URL as string;
+const slackUrl = getRelevantDotEnvVariable('SLACK_UPDATE_PRICES_URL') as string;
 
 export const updatePrices = async () => {
 	try {

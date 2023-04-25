@@ -2,8 +2,9 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import HDWallet from '@/services/crypto/hdWallet';
 import axios from "axios";
+import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
 
-const slackUrl = process.env.SLACK_CREATE_WALLET_URL as string;
+const slackUrl = getRelevantDotEnvVariable('SLACK_CREATE_WALLET_URL') as string;
 
 export const handler: APIGatewayProxyHandler = async (
 	event,

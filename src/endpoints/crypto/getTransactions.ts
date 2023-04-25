@@ -2,8 +2,9 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 import axios from 'axios';
+import { getRelevantDotEnvVariable } from "@/utils/getRelevantDotEnvVariable";
 
-const slackUrl = process.env.SLACK_GET_TRANSACTION_URL as string;
+const slackUrl = getRelevantDotEnvVariable('SLACK_GET_TRANSACTION_URL') as string;
 
 const handler: APIGatewayProxyHandler = async (event) => {
 	try {
