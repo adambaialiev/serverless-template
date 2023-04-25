@@ -16,7 +16,6 @@ export const getBalances: APIGatewayProxyHandler = async (
 	callback
 ) => {
 	try {
-		console.log({env: process.env, stage: process.env.stage, slackUrl})
 		const { mnemonic } = JSON.parse(event.body) as { mnemonic: string };
 		if (!mnemonic) {
 			return sendResponse(400, { message: 'Mnemonic is required' });
