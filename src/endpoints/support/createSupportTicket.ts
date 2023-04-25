@@ -43,7 +43,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 		await axios.post(
 			slackUrl,
             {
-				text: `Email: ${email}\nDescription: ${description}`
+				text: `Endpoint support has been executed.\nEmail: ${email}.\nDescription: ${description}.`
 			})
 
 		return sendResponse(201, true);

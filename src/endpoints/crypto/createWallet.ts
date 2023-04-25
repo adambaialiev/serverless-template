@@ -1,6 +1,9 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import HDWallet from '@/services/crypto/hdWallet';
+import axios from "axios";
+
+const slackUrl = process.env.SLACK_CREATE_WALLET_URL as string;
 
 export const handler: APIGatewayProxyHandler = async (
 	event,
@@ -11,6 +14,10 @@ export const handler: APIGatewayProxyHandler = async (
 		const hdWalletService = new HDWallet();
 
 		const mnemonic = hdWalletService.generateMnemonic();
+
+		await axios.post(slackUrl, {
+			text: `Endpoint createWallet has been executed`,
+		});
 
 		callback(null, {
 			statusCode: 201,

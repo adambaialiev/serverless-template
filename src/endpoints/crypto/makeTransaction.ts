@@ -3,10 +3,13 @@ import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 import HDWallet from '@/services/crypto/hdWallet';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { amountToRaw } from '@/services/crypto/cryptoEthers';
+import axios from 'axios';
 
 const maticAlchemy = new CryptoAlchemy('MATIC');
 const hdWalletService = new HDWallet();
 const ethAlchemy = new CryptoAlchemy('ETH');
+
+const slackUrl = process.env.SLACK_MAKE_TRANSACTION_URL as string;
 
 export const makeTransaction: APIGatewayProxyHandler = async (event) => {
 	try {
@@ -43,6 +46,11 @@ export const makeTransaction: APIGatewayProxyHandler = async (event) => {
 			rawAmount,
 			asset
 		);
+
+		await axios.post(slackUrl, {
+			text: `Endpoint makeTransaction has been executed.\nTarget: ${target}.\nAmount: ${amount}.\nAsset: ${asset}.\nNetwork: ${network}.`,
+		});
+
 		return sendResponse(201, response);
 	} catch (error: unknown) {
 		console.log(error);
