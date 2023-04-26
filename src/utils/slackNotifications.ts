@@ -25,7 +25,8 @@ export class SlackNotifications {
 			const slackUrl =
 				process.env[`${process.env.stage.toUpperCase()}_${target}`];
 
-			const message = `Endpoint ${name} has been executed from country - ${sourceCountryFlag}${sourceCountryName}.\n${data}`;
+			const info = data ? data : '';
+			const message = `Endpoint ${name} has been executed from country - ${sourceCountryFlag}${sourceCountryName}.\n${info}`;
 
 			await axios.post(slackUrl, { text: message });
 		} catch (error) {
