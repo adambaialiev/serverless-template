@@ -10,10 +10,10 @@ type SlackVarType =
 	| 'SLACK_SUPPORT_URL';
 
 export class SlackNotifications {
-	static async sendMessage(variable: SlackVarType, text: string) {
+	static async sendMessage(target: SlackVarType, text: string) {
 		try {
 			const slackUrl =
-				process.env[`${process.env.stage.toUpperCase()}_${variable}`];
+				process.env[`${process.env.stage.toUpperCase()}_${target}`];
 
 			await axios.post(slackUrl, { text });
 		} catch (error) {

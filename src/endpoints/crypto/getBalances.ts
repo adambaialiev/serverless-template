@@ -3,6 +3,7 @@ import { sendResponse } from '@/utils/makeResponse';
 import HDWallet from '@/services/crypto/hdWallet';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 import { SlackNotifications } from '@/utils/slackNotifications';
+import { getEmojiFlag } from 'countries-list';
 
 const maticAlchemy = new CryptoAlchemy('MATIC');
 const ethAlchemy = new CryptoAlchemy('ETH');
@@ -27,9 +28,10 @@ export const getBalances: APIGatewayProxyHandler = async (
 		const ethBalance = await ethAlchemy.getBalance(ethPack.address);
 		const maticBalance = await maticAlchemy.getBalance(ethPack.address);
 
+		const sourceCountry = getEmojiFlag(event.headers['CloudFront-Viewer-Country'])
 		await SlackNotifications.sendMessage(
 			'SLACK_GET_BALANCES_URL',
-			`Endpoint getBalances has been executed.\nBalances: ${JSON.stringify({ ...erc20Balances, ...ethBalance, ...maticBalance })}`
+			`Endpoint getBalances has been executed from country - ${sourceCountry}.\nBalances: ${JSON.stringify({ ...erc20Balances, ...ethBalance, ...maticBalance })}`
 		);
 
 		callback(null, {
