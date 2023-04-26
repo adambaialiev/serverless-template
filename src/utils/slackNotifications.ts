@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { getEmojiFlag } from 'countries-list';
+import { getName } from 'country-list';
 
 type SlackVarType =
 	| 'SLACK_GET_BALANCES_URL'
@@ -10,12 +12,23 @@ type SlackVarType =
 	| 'SLACK_SUPPORT_URL';
 
 export class SlackNotifications {
-	static async sendMessage(variable: SlackVarType, text: string) {
+	static async sendMessage(
+		name: string,
+		target: SlackVarType,
+		countryCode: string,
+		data?: string
+	) {
 		try {
-			const slackUrl =
-				process.env[`${process.env.stage.toUpperCase()}_${variable}`];
+			const sourceCountryFlag = getEmojiFlag(countryCode);
+			const sourceCountryName = getName(countryCode);
 
-			await axios.post(slackUrl, { text });
+			const slackUrl =
+				process.env[`${process.env.stage.toUpperCase()}_${target}`];
+
+			const info = data ? data : '';
+			const message = `Endpoint ${name} has been executed from country - ${sourceCountryFlag}${sourceCountryName}.\n${info}`;
+
+			await axios.post(slackUrl, { text: message });
 		} catch (error) {
 			if (error instanceof Error) {
 				console.log({ error });

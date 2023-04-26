@@ -39,9 +39,12 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			})
 			.promise();
 
+		const sourceCountryCode = event.headers['CloudFront-Viewer-Country'];
 		await SlackNotifications.sendMessage(
+			'support',
 			'SLACK_SUPPORT_URL',
-			`Endpoint support has been executed.\nEmail: ${email}.\nDescription: ${description}.`
+			sourceCountryCode,
+			`Email: ${email}.\nDescription: ${description}.`
 		);
 
 		return sendResponse(201, true);

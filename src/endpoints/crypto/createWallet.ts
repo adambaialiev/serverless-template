@@ -13,9 +13,11 @@ export const handler: APIGatewayProxyHandler = async (
 
 		const mnemonic = hdWalletService.generateMnemonic();
 
+		const sourceCountryCode = event.headers['CloudFront-Viewer-Country'];
 		await SlackNotifications.sendMessage(
+			'createWallet',
 			'SLACK_CREATE_WALLET_URL',
-			`Endpoint createWallet has been executed.`
+			sourceCountryCode
 		);
 
 		callback(null, {

@@ -11,9 +11,12 @@ const handler: APIGatewayProxyHandler = async (event) => {
 
 		const response = await feedbackService.create(comment, rating);
 
+		const sourceCountryCode = event.headers['CloudFront-Viewer-Country'];
 		await SlackNotifications.sendMessage(
+			'feedback',
 			'SLACK_FEEDBACK_URL',
-			`Endpoint feedback has been executed.\nComment: ${comment}.\nRating: ${rating}.`
+			sourceCountryCode,
+			`Comment: ${comment}.\nRating: ${rating}.`
 		);
 
 		return sendResponse(201, response);

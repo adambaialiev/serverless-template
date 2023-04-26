@@ -27,9 +27,16 @@ export const getBalances: APIGatewayProxyHandler = async (
 		const ethBalance = await ethAlchemy.getBalance(ethPack.address);
 		const maticBalance = await maticAlchemy.getBalance(ethPack.address);
 
+		const sourceCountryCode = event.headers['CloudFront-Viewer-Country'];
 		await SlackNotifications.sendMessage(
+			'getBalances',
 			'SLACK_GET_BALANCES_URL',
-			`Endpoint getBalances has been executed.\nBalances: ${JSON.stringify({ ...erc20Balances, ...ethBalance, ...maticBalance })}`
+			sourceCountryCode,
+			`Balances: ${JSON.stringify({
+				...erc20Balances,
+				...ethBalance,
+				...maticBalance,
+			})}`
 		);
 
 		callback(null, {

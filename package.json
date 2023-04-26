@@ -28,6 +28,7 @@
 		"bip84": "^0.2.7",
 		"bitcoinjs-lib": "^6.1.0",
 		"countries-list": "^2.6.1",
+		"country-list": "^2.3.0",
 		"crypto-secure-random-digit": "^1.0.10",
 		"ecpair": "^2.1.0",
 		"ethereumjs-util": "^7.1.5",
@@ -42,6 +43,7 @@
 	},
 	"devDependencies": {
 		"@types/aws-lambda": "^8.10.109",
+		"@types/country-list": "^2.1.1",
 		"@types/jsonwebtoken": "^9.0.1",
 		"@types/node": "^18.11.18",
 		"@types/uuid": "^9.0.0",
@@ -51,6 +53,7 @@
 		"eslint-config-standard-with-typescript": "^27.0.1",
 		"eslint-plugin-import": "^2.25.2",
 		"eslint-plugin-prettier": "^4.2.1",
+		"prettier": "^2.8.8",
 		"serverless-domain-manager": "^6.2.1",
 		"serverless-prune-plugin": "^2.0.1",
 		"tsc-alias": "^1.8.2",

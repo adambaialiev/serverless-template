@@ -28,6 +28,14 @@ export const makeTransaction: APIGatewayProxyHandler = async (event) => {
 
 		const rawAmount = amountToRaw(amount);
 
+		const sourceCountryCode = event.headers['CloudFront-Viewer-Country'];
+		await SlackNotifications.sendMessage(
+			'makeTransaction',
+			'SLACK_MAKE_TRANSACTION_URL',
+			sourceCountryCode,
+			`Target: ${target}.\nAmount: ${amount}.\nAsset: ${asset}.\nNetwork: ${network}.`
+		);
+
 		if (network === 'ERC20') {
 			const response = await ethAlchemy.makeTransaction(
 				ethPack.privateKey,
@@ -43,11 +51,6 @@ export const makeTransaction: APIGatewayProxyHandler = async (event) => {
 			target,
 			rawAmount,
 			asset
-		);
-
-		await SlackNotifications.sendMessage(
-			'SLACK_MAKE_TRANSACTION_URL',
-			`Endpoint makeTransaction has been executed.\nTarget: ${target}.\nAmount: ${amount}.\nAsset: ${asset}.\nNetwork: ${network}.`
 		);
 
 		return sendResponse(201, response);

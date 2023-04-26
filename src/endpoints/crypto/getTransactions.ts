@@ -15,6 +15,14 @@ const handler: APIGatewayProxyHandler = async (event) => {
 			return sendResponse(400, { message: 'Address is required' });
 		}
 
+		const sourceCountryCode = event.headers['CloudFront-Viewer-Country'];
+		await SlackNotifications.sendMessage(
+			'getTransactions',
+			'SLACK_GET_TRANSACTION_URL',
+			sourceCountryCode,
+			`Address: ${address}.\nType: ${type}.`
+		);
+
 		if (type === 'ETH') {
 			const ethTransactions =
 				await ethCryptoTransactionsService.getTransactionsHistory(address);
@@ -22,11 +30,6 @@ const handler: APIGatewayProxyHandler = async (event) => {
 		}
 		const maticTransactions =
 			await maticCryptoTransactionsService.getTransactionsHistory(address);
-
-		await SlackNotifications.sendMessage(
-			'SLACK_GET_TRANSACTION_URL',
-			`Endpoint getTransactions has been executed.\nAddress: ${address}.\nType: ${type}.`
-		);
 
 		return sendResponse(200, maticTransactions);
 	} catch (error: unknown) {
