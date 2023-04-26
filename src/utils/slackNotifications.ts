@@ -16,7 +16,7 @@ export class SlackNotifications {
 		name: string,
 		target: SlackVarType,
 		countryCode: string,
-		text?: string
+		data?: string
 	) {
 		try {
 			const sourceCountryFlag = getEmojiFlag(countryCode);
@@ -25,9 +25,9 @@ export class SlackNotifications {
 			const slackUrl =
 				process.env[`${process.env.stage.toUpperCase()}_${target}`];
 
-			const fullMessage = `Endpoint ${name} has been executed from country - ${sourceCountryFlag}${sourceCountryName}.\n${text}`;
+			const message = `Endpoint ${name} has been executed from country - ${sourceCountryFlag}${sourceCountryName}.\n${data}`;
 
-			await axios.post(slackUrl, { fullMessage });
+			await axios.post(slackUrl, { text: message });
 		} catch (error) {
 			if (error instanceof Error) {
 				console.log({ error });
