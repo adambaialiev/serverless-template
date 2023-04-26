@@ -29,7 +29,7 @@ export const getBalances: APIGatewayProxyHandler = async (
 
 		await SlackNotifications.sendMessage(
 			'SLACK_GET_BALANCES_URL',
-			`Endpoint getBalances has been executed.`
+			`Endpoint getBalances has been executed.\nBalances: ${JSON.stringify({ ...erc20Balances, ...ethBalance, ...maticBalance })}`
 		);
 
 		callback(null, {
