@@ -346,6 +346,14 @@ functions:
           method: post
           cors: true
 
+  createMonitoringInfo:
+      handler: build/src/endpoints/monitoring/createMonitoringInfo.createMonitoringInfo
+      events:
+        - http:
+            path: /v1/monitoring
+            method: post
+            cors: true
+
 resources:
   Resources:
     MainTable:
