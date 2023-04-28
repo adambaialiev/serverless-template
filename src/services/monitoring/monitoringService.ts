@@ -3,13 +3,10 @@ import {
 	Entities,
 	MonitoringAttributes,
 	TableKeys,
+	UserAttributes,
 } from '@/common/dynamo/schema';
 import { buildMonitoringUserKey } from '@/common/dynamo/buildKey';
 import AWS from 'aws-sdk';
-
-const dynamo = new AWS.DynamoDB.DocumentClient();
-
-const TableName = process.env.dynamo_table as string;
 
 interface createProps {
 	eventName: string;
@@ -17,15 +14,16 @@ interface createProps {
 	deviceId: string;
 }
 
+const dynamoDB = new AWS.DynamoDB.DocumentClient();
+const TableName = process.env.dynamo_table as string;
+
 export default class MonitoringService {
 	async create({ eventName, platform, deviceId }: createProps) {
 		const id = v4();
 
 		const date = Date.now().toString();
 
-		const Item = {
-			[TableKeys.PK]: Entities.MONITORING_USER,
-			[TableKeys.SK]: buildMonitoringUserKey(id),
+		const newAction = {
 			[MonitoringAttributes.ID]: id,
 			[MonitoringAttributes.EVENT_NAME]: eventName,
 			[MonitoringAttributes.PLATFORM]: platform,
@@ -33,14 +31,26 @@ export default class MonitoringService {
 			[MonitoringAttributes.CREATED_AT]: date,
 		};
 
-		await dynamo
-			.put({
-				Item,
+		const response = await dynamoDB
+			.update({
 				TableName,
-				ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+				Key: {
+					[TableKeys.PK]: Entities.MONITORING_USER,
+					[TableKeys.SK]: buildMonitoringUserKey(id),
+				},
+				UpdateExpression:
+					'SET #actions = list_append(if_not_exists(#actions, :emptyList), :event)',
+				ExpressionAttributeNames: {
+					'#actions': UserAttributes.WITHDRAWAL_ADDRESSES,
+				},
+				ExpressionAttributeValues: {
+					':emptyList': [],
+					':event': [newAction],
+				},
+				ReturnValues: 'UPDATED_NEW',
 			})
 			.promise();
 
-		return 'Success';
+		return response;
 	}
 }

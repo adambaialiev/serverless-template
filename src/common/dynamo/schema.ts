@@ -286,7 +286,7 @@ export interface DepositToValidateItem {
 
 export enum MonitoringAttributes {
 	ID = 'id',
-	EVENT_NAME = 'id',
+	EVENT_NAME = 'eventName',
 	CREATED_AT = 'createdAt',
 	DEVICE_ID = 'deviceId',
 	PLATFORM = 'platform',
