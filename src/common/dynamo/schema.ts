@@ -285,18 +285,5 @@ export interface DepositToValidateItem {
 }
 
 export enum MonitoringAttributes {
-	ID = 'id',
-	EVENT_NAME = 'eventName',
-	CREATED_AT = 'createdAt',
-	DEVICE_ID = 'deviceId',
-	PLATFORM = 'platform',
-}
-
-export interface MonitoringItem {
-	[TableKeys.PK]: DocumentClient.String;
-	[TableKeys.SK]: DocumentClient.String;
-	[MonitoringAttributes.ID]: DocumentClient.String;
-	[MonitoringAttributes.CREATED_AT]: DocumentClient.String;
-	[MonitoringAttributes.DEVICE_ID]: DocumentClient.String;
-	[MonitoringAttributes.PLATFORM]: DocumentClient.String;
+	ACTIONS = 'actions',
 }
