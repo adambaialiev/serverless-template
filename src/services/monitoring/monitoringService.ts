@@ -1,53 +1,52 @@
 import { v4 } from 'uuid';
-import {
-	MonitoringAttributes,
-	TableKeys,
-} from '@/common/dynamo/schema';
+import { MonitoringAttributes, TableKeys } from '@/common/dynamo/schema';
 import { buildMonitoringUserKey } from '@/common/dynamo/buildKey';
 import AWS from 'aws-sdk';
 
 interface createProps {
 	eventName: string;
-	platform: string;
-	deviceId: string;
+	metaData: {
+		platform: string;
+		deviceId: string;
+		osVersion: string;
+		modelName: string;
+	};
 }
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table as string;
 
 export default class MonitoringService {
-	async create({ eventName, platform, deviceId }: createProps) {
+	async create({ eventName, metaData }: createProps) {
 		const id = v4();
 		const date = Date.now().toString();
 
 		const newAction = {
 			id,
 			eventName,
-			platform,
-			deviceId,
 			date,
+			metaData,
 		};
 
-		const response = await dynamoDB
+		await dynamoDB
 			.update({
 				TableName,
 				Key: {
-					[TableKeys.PK]: buildMonitoringUserKey(deviceId),
-					[TableKeys.SK]: buildMonitoringUserKey(deviceId),
+					[TableKeys.PK]: buildMonitoringUserKey(metaData.deviceId),
+					[TableKeys.SK]: buildMonitoringUserKey(metaData.deviceId),
 				},
 				UpdateExpression:
-					'SET #actions = list_append(if_not_exists(#actions, :emptyList), :event)',
+					'SET #events = list_append(if_not_exists(#events, :emptyList), :event)',
 				ExpressionAttributeNames: {
-					'#actions': MonitoringAttributes.ACTIONS,
+					'#events': MonitoringAttributes.ACTIONS,
 				},
 				ExpressionAttributeValues: {
 					':emptyList': [],
 					':event': [newAction],
 				},
-				ReturnValues: 'ALL_OLD',
 			})
 			.promise();
 
-		return response;
+		return 'Success';
 	}
 }

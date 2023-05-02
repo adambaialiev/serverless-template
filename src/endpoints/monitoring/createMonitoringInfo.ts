@@ -7,9 +7,9 @@ const monitoring = new MonitoringService();
 const handler: APIGatewayProxyHandler = async (event) => {
 	try {
 		console.log({ event });
-		const { eventName, deviceId, platform } = JSON.parse(event.body);
+		const { eventName, metaData } = JSON.parse(event.body);
 
-		const response = await monitoring.create({ eventName, deviceId, platform });
+		const response = await monitoring.create({ eventName, metaData });
 
 		return sendResponse(201, response);
 	} catch (error: unknown) {
