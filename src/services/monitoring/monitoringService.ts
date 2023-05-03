@@ -5,6 +5,7 @@ import AWS from 'aws-sdk';
 
 interface createProps {
 	eventName: string;
+	coin: string | null;
 	metaData: {
 		platform: string;
 		deviceId: string;
