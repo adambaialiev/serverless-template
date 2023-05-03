@@ -285,5 +285,5 @@ export interface DepositToValidateItem {
 }
 
 export enum MonitoringAttributes {
-	ACTIONS = 'actions',
+	EVENTS = 'events',
 }

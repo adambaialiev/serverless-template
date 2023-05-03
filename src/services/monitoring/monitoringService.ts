@@ -18,13 +18,14 @@ const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.dynamo_table as string;
 
 export default class MonitoringService {
-	async create({ eventName, metaData }: createProps) {
+	async create({ eventName, coin, metaData }: createProps) {
 		const id = v4();
 		const date = Date.now().toString();
 
-		const newAction = {
+		const newEvent = {
 			id,
 			eventName,
+			coin,
 			date,
 			metaData,
 		};
@@ -39,11 +40,11 @@ export default class MonitoringService {
 				UpdateExpression:
 					'SET #events = list_append(if_not_exists(#events, :emptyList), :event)',
 				ExpressionAttributeNames: {
-					'#events': MonitoringAttributes.ACTIONS,
+					'#events': MonitoringAttributes.EVENTS,
 				},
 				ExpressionAttributeValues: {
 					':emptyList': [],
-					':event': [newAction],
+					':event': [newEvent],
 				},
 			})
 			.promise();
