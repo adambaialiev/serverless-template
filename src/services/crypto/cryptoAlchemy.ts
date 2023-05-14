@@ -79,14 +79,22 @@ export default class CryptoAlchemy {
 		const fromAddressTransfers = await Promise.all(
 			fromAddressTransfersResponse.transfers.map(async (item) => {
 				const itemDetails = await this.getTransactionsDetails(item.hash);
-				const txFee = String(
-					Number(itemDetails.gasUsed) * Number(itemDetails.effectiveGasPrice)
-				);
+				console.log({ item, itemDetails });
+				let txFee;
+				if (
+					itemDetails &&
+					itemDetails.gasUsed &&
+					itemDetails.effectiveGasPrice
+				) {
+					txFee = String(
+						Number(itemDetails.gasUsed) * Number(itemDetails.effectiveGasPrice)
+					);
+				}
 				item = {
 					...item,
 					network: transactionNetworkMap[this.alchemy.config.network],
 					status: itemDetails ? itemDetails.status : 2,
-					gasUsed: itemDetails ? Utils.formatEther(txFee) : '0',
+					gasUsed: itemDetails && txFee ? Utils.formatEther(txFee) : '0',
 				} as TransactionHistoryItem;
 				return item;
 			})
