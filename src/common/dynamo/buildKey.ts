@@ -30,3 +30,6 @@ export const buildHomeTransactionKey = (hash: string) =>
 
 export const buildDepositToValidateKey = (hash: string) =>
 	buildKey(Entities.DEPOSIT_TO_VALIDATE, hash);
+
+export const buildMonitoringUserKey = (hash: string) =>
+	buildKey(Entities.MONITORING_USER, hash);

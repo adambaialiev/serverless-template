@@ -16,12 +16,17 @@ import {
 import { ethers } from 'ethers';
 
 interface TransactionHistoryItem extends AssetTransfersWithMetadataResult {
-	name: string;
+	network: string;
 }
 
 const networkMap = {
 	MATIC: Network.MATIC_MAINNET,
 	ETH: Network.ETH_MAINNET,
+};
+
+const transactionNetworkMap: Record<string, 'POLYGON' | 'ERC20'> = {
+	[Network.MATIC_MAINNET]: 'POLYGON',
+	[Network.ETH_MAINNET]: 'ERC20',
 };
 
 const ethersNetworkMap = {
@@ -73,35 +78,39 @@ export default class CryptoAlchemy {
 
 		const fromAddressTransfers = await Promise.all(
 			fromAddressTransfersResponse.transfers.map(async (item) => {
-				if (item.rawContract.address) {
-					const metadata = await this.alchemy.core.getTokenMetadata(
-						item.rawContract.address
+				const itemDetails = await this.getTransactionsDetails(item.hash);
+				console.log({ item, itemDetails });
+				let txFee;
+				if (
+					itemDetails &&
+					itemDetails.gasUsed &&
+					itemDetails.effectiveGasPrice
+				) {
+					txFee = String(
+						Number(itemDetails.gasUsed) * Number(itemDetails.effectiveGasPrice)
 					);
-					const itemDetails = await this.getTransactionsDetails(item.hash);
-					item = {
-						...item,
-						name: metadata.name,
-						status: itemDetails ? itemDetails.status : 2,
-						gasUsed: itemDetails ? Utils.formatEther(itemDetails.gasUsed) : '0',
-					} as TransactionHistoryItem;
 				}
+				item = {
+					...item,
+					network: transactionNetworkMap[this.alchemy.config.network],
+					status: itemDetails ? itemDetails.status : 2,
+					gasUsed: itemDetails && txFee ? Utils.formatEther(txFee) : '0',
+				} as TransactionHistoryItem;
 				return item;
 			})
 		);
 		const toAddressTransfers = await Promise.all(
 			toAddressTransfersResponse.transfers.map(async (item) => {
-				if (item.rawContract.address) {
-					const metadata = await this.alchemy.core.getTokenMetadata(
-						item.rawContract.address
-					);
-					const itemDetails = await this.getTransactionsDetails(item.hash);
-					item = {
-						...item,
-						name: metadata.name,
-						status: itemDetails ? itemDetails.status : 2,
-						gasUsed: itemDetails ? Utils.formatEther(itemDetails.gasUsed) : '0',
-					} as TransactionHistoryItem;
-				}
+				const itemDetails = await this.getTransactionsDetails(item.hash);
+				const txFee = String(
+					Number(itemDetails.gasUsed) * Number(itemDetails.effectiveGasPrice)
+				);
+				item = {
+					...item,
+					network: transactionNetworkMap[this.alchemy.config.network],
+					status: itemDetails ? itemDetails.status : 2,
+					gasUsed: itemDetails ? Utils.formatEther(txFee) : '0',
+				} as TransactionHistoryItem;
 				return item;
 			})
 		);

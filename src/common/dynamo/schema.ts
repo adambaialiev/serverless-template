@@ -23,6 +23,7 @@ export enum Entities {
 	WITHDRAW_TO_PROCESS = 'WITHDRAW_TO_PROCESS#',
 	HOME_TRANSACTION = 'HOME_TRANSACTION#',
 	DEPOSIT_TO_VALIDATE = 'DEPOSITS_TO_VALIDATE#',
+	MONITORING_USER = 'MONITORING_USER#',
 }
 
 export enum MasterWalletAttributes {
@@ -41,6 +42,7 @@ export interface MasterWalletItem {
 	[MasterWalletAttributes.NETWORK]: DocumentClient.String;
 	[MasterWalletAttributes.CREATED_AT]: DocumentClient.String;
 }
+
 export interface CryptoPricesItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
@@ -92,6 +94,7 @@ export interface UserWalletItem {
 	[UserWalletAttributes.PRIVATE_KEY]: DocumentClient.String;
 	[UserWalletAttributes.PHONE_NUMBER]: DocumentClient.String;
 }
+
 export enum FeedbackAttributes {
 	ID = 'id',
 	CREATED_AT = 'createdAt',
@@ -279,4 +282,8 @@ export interface DepositToValidateItem {
 	[DepositToValidateAttributes.PHONE_NUMBER]: DocumentClient.String;
 	[DepositToValidateAttributes.ADDRESS]: DocumentClient.String;
 	[DepositToValidateAttributes.BLOCK_NUMBER]: DocumentClient.String;
+}
+
+export enum MonitoringAttributes {
+	EVENTS = 'events',
 }
