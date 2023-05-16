@@ -6,7 +6,7 @@ import { SlackNotifications } from '@/utils/slackNotifications';
 const maticAlchemy = new CryptoAlchemy('MATIC');
 const ethAlchemy = new CryptoAlchemy('ETH');
 
-export const getBalances: APIGatewayProxyHandler = async (
+export const getTokenBalances: APIGatewayProxyHandler = async (
 	event,
 	context,
 	callback
@@ -24,7 +24,7 @@ export const getBalances: APIGatewayProxyHandler = async (
 		const sourceCountryCode = event.headers['CloudFront-Viewer-Country'];
 
 		await SlackNotifications.sendMessage(
-			'getBalances',
+			'getTokenBalances',
 			'SLACK_GET_BALANCES_URL',
 			sourceCountryCode,
 			`Balances: ${JSON.stringify({
