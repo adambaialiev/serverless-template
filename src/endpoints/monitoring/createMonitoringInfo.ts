@@ -27,7 +27,7 @@ const handler: APIGatewayProxyHandler = async (event) => {
 			'monitoring',
 			'SLACK_MONITORING_URL',
 			sourceCountryCode,
-			`Balances: ${postData}`
+			JSON.stringify(postData, null, '\t')
 		);
 
 		return sendResponse(201, response);
