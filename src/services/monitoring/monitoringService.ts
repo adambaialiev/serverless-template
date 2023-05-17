@@ -11,6 +11,7 @@ interface createProps {
 		deviceId: string;
 		osVersion: string;
 		modelName: string;
+		country: string;
 	};
 }
 

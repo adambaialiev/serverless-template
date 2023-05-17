@@ -9,6 +9,7 @@ type SlackVarType =
 	| 'SLACK_GET_TRANSACTION_URL'
 	| 'SLACK_CREATE_WALLET_URL'
 	| 'SLACK_FEEDBACK_URL'
+	| 'SLACK_MONITORING_URL'
 	| 'SLACK_SUPPORT_URL';
 
 export class SlackNotifications {
