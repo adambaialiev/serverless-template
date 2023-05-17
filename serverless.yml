@@ -81,6 +81,14 @@ functions:
           path: /v1/crypto/get-balances
           method: post
           cors: true
+  getTokenBalances:
+    timeout: 30
+    handler: build/src/endpoints/crypto/getTokenBalances.getTokenBalances
+    events:
+      - http:
+          path: /v1/crypto/get-token-balances
+          method: post
+          cors: true
   createWallet:
     timeout: 30
     handler: build/src/endpoints/crypto/createWallet.createWallet
