@@ -47,7 +47,6 @@ export default class MonitoringService {
 					'#country': MonitoringAttributes.COUNTRY,
 				},
 				ExpressionAttributeValues: {
-					':emptyList': [],
 					':events': events,
 					':deviceInfo': deviceInfo,
 					':userId': userId,
