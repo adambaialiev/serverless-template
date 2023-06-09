@@ -18,13 +18,13 @@ export interface MonitoringPayload {
 		};
 		userId: string;
 		sessionId: string;
+		platform: 'ios' | 'android';
 	};
-	platform: 'ios' | 'android';
 }
 
 export default class MonitoringService {
-	async create(country: string, { payload, platform }: MonitoringPayload) {
-		const { events, deviceInfo, userId, sessionId } = payload;
+	async create(country: string, { payload }: MonitoringPayload) {
+		const { events, deviceInfo, userId, sessionId, platform } = payload;
 
 		const dynamoDB = new AWS.DynamoDB.DocumentClient();
 		const TableName = process.env.dynamo_table as string;
