@@ -7,23 +7,21 @@ import {
 import AWS from 'aws-sdk';
 
 export interface MonitoringPayload {
-	payload: {
-		events: { type: string; timestamp: string; metaInfo: any }[];
-		deviceInfo: {
-			description: string;
-			systemName?: string;
-			systemVersion?: string;
-			model?: string;
-			name?: string;
-		};
-		userId: string;
-		sessionId: string;
-		platform: 'ios' | 'android';
+	events: { type: string; timestamp: string; metaInfo: any }[];
+	deviceInfo: {
+		description: string;
+		systemName?: string;
+		systemVersion?: string;
+		model?: string;
+		name?: string;
 	};
+	userId: string;
+	sessionId: string;
+	platform: 'ios' | 'android';
 }
 
 export default class MonitoringService {
-	async create(country: string, { payload }: MonitoringPayload) {
+	async create(country: string, payload: MonitoringPayload) {
 		const { events, deviceInfo, userId, sessionId, platform } = payload;
 
 		const dynamoDB = new AWS.DynamoDB.DocumentClient();
