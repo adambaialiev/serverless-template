@@ -356,12 +356,20 @@ functions:
           cors: true
 
   createMonitoringInfo:
-      handler: build/src/endpoints/monitoring/createMonitoringInfo.createMonitoringInfo
-      events:
-        - http:
-            path: /v1/monitoring
-            method: post
-            cors: true
+    handler: build/src/endpoints/monitoring/createMonitoringInfo.createMonitoringInfo
+    events:
+      - http:
+          path: /v1/monitoring
+          method: post
+          cors: true
+
+  reportMonitoringEvents:
+    handler: build/src/endpoints/monitoring-2/reportMonitoringEvents.reportMonitoringEvents
+    events:
+      - http:
+          path: /v1/report-monitoring-events
+          method: post
+          cors: true
 
 resources:
   Resources:

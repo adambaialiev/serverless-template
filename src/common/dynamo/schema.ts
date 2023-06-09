@@ -23,7 +23,9 @@ export enum Entities {
 	WITHDRAW_TO_PROCESS = 'WITHDRAW_TO_PROCESS#',
 	HOME_TRANSACTION = 'HOME_TRANSACTION#',
 	DEPOSIT_TO_VALIDATE = 'DEPOSITS_TO_VALIDATE#',
-	MONITORING_USER = 'MONITORING_USER#',
+	MONITORING_USER_IOS = 'MONITORING_USER_IOS#',
+	MONITORING_USER_ANDROID = 'MONITORING_USER_ANDROID#',
+	MONITORING_SESSION = 'MONITORING_SESSION#',
 }
 
 export enum MasterWalletAttributes {
@@ -286,4 +288,10 @@ export interface DepositToValidateItem {
 
 export enum MonitoringAttributes {
 	EVENTS = 'events',
+	DEVICE_INFO = 'deviceInfo',
+	META_INFO = 'metaInfo',
+	USER_ID = 'userId',
+	SESSION_ID = 'sessionId',
+	PLATFORM = 'platform',
+	COUNTRY = 'country',
 }
