@@ -20,6 +20,19 @@ export interface MonitoringPayload {
 	platform: 'ios' | 'android';
 }
 
+export interface ReportAppActivatedPayload {
+	deviceInfo: {
+		description: string;
+		systemName?: string;
+		systemVersion?: string;
+		model?: string;
+		name?: string;
+	};
+	userId: string;
+	sessionId: string;
+	platform: 'ios' | 'android';
+}
+
 export default class MonitoringService {
 	async create(country: string, payload: MonitoringPayload) {
 		const { events, deviceInfo, userId, sessionId, platform } = payload;
