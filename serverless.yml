@@ -25,6 +25,14 @@ provider:
     POLYGONSCAN_API_KEY: ${env:POLYGONSCAN_API_KEY}
     COIN_MARKET_CAP_API_KEY: ${env:COIN_MARKET_CAP_API_KEY}
     COIN_MARKET_CAP_API_URL: ${env:COIN_MARKET_CAP_API_URL}
+    STAGING_SLACK_SUPPORT_URL: ${env:STAGING_SLACK_SUPPORT_URL}
+    STAGING_SLACK_FEEDBACK_URL: ${env:STAGING_SLACK_FEEDBACK_URL}
+    STAGING_SLACK_GET_BALANCES_URL: ${env:STAGING_SLACK_GET_BALANCES_URL}
+    STAGING_SLACK_GET_TRANSACTION_URL: ${env:STAGING_SLACK_GET_TRANSACTION_URL}
+    STAGING_SLACK_MAKE_TRANSACTION_URL: ${env:STAGING_SLACK_MAKE_TRANSACTION_URL}
+    STAGING_SLACK_UPDATE_PRICES_URL: ${env:STAGING_SLACK_UPDATE_PRICES_URL}
+    STAGING_SLACK_CREATE_WALLET_URL: ${env:STAGING_SLACK_CREATE_WALLET_URL}
+    STAGING_SLACK_MONITORING_URL: ${env:STAGING_SLACK_MONITORING_URL}
     PROD_SLACK_SUPPORT_URL: ${env:PROD_SLACK_SUPPORT_URL}
     PROD_SLACK_FEEDBACK_URL: ${env:PROD_SLACK_FEEDBACK_URL}
     PROD_SLACK_GET_BALANCES_URL: ${env:PROD_SLACK_GET_BALANCES_URL}
@@ -32,6 +40,7 @@ provider:
     PROD_SLACK_MAKE_TRANSACTION_URL: ${env:PROD_SLACK_MAKE_TRANSACTION_URL}
     PROD_SLACK_UPDATE_PRICES_URL: ${env:PROD_SLACK_UPDATE_PRICES_URL}
     PROD_SLACK_CREATE_WALLET_URL: ${env:PROD_SLACK_CREATE_WALLET_URL}
+    PROD_SLACK_MONITORING_URL: ${env:PROD_SLACK_MONITORING_URL}
 
   iamRoleStatements:
     - Effect: Allow
@@ -78,6 +87,14 @@ functions:
     events:
       - http:
           path: /v1/crypto/get-balances
+          method: post
+          cors: true
+  getTokenBalances:
+    timeout: 30
+    handler: build/src/endpoints/crypto/getTokenBalances.getTokenBalances
+    events:
+      - http:
+          path: /v1/crypto/get-token-balances
           method: post
           cors: true
   createWallet:
@@ -347,12 +364,28 @@ functions:
           cors: true
 
   createMonitoringInfo:
-      handler: build/src/endpoints/monitoring/createMonitoringInfo.createMonitoringInfo
-      events:
-        - http:
-            path: /v1/monitoring
-            method: post
-            cors: true
+    handler: build/src/endpoints/monitoring/createMonitoringInfo.createMonitoringInfo
+    events:
+      - http:
+          path: /v1/monitoring
+          method: post
+          cors: true
+
+  reportMonitoringEvents:
+    handler: build/src/endpoints/monitoring-2/reportMonitoringEvents.reportMonitoringEvents
+    events:
+      - http:
+          path: /v1/report-monitoring-events
+          method: post
+          cors: true
+
+  reportAppActivated:
+    handler: build/src/endpoints/monitoring-2/reportAppActivated.reportAppActivated
+    events:
+      - http:
+          path: /v1/report-app-activated
+          method: post
+          cors: true
 
 resources:
   Resources:

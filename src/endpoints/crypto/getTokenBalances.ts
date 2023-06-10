@@ -1,35 +1,29 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import HDWallet from '@/services/crypto/hdWallet';
 import CryptoAlchemy from '@/services/crypto/cryptoAlchemy';
 import { SlackNotifications } from '@/utils/slackNotifications';
 
 const maticAlchemy = new CryptoAlchemy('MATIC');
 const ethAlchemy = new CryptoAlchemy('ETH');
 
-export const getBalances: APIGatewayProxyHandler = async (
+export const getTokenBalances: APIGatewayProxyHandler = async (
 	event,
 	context,
 	callback
 ) => {
 	try {
-		const { mnemonic } = JSON.parse(event.body) as { mnemonic: string };
-		if (!mnemonic) {
-			return sendResponse(400, { message: 'Mnemonic is required' });
+		const { address } = JSON.parse(event.body) as { address: string };
+		if (!address) {
+			return sendResponse(400, { message: 'Address is required' });
 		}
-		const hdWalletService = new HDWallet();
 
-		const ethPack = hdWalletService.getEthAddressFromMnemonic(mnemonic, {
-			isPublic: true,
-		});
-
-		const erc20Balances = await maticAlchemy.getTokenBalances(ethPack.address);
-		const ethBalance = await ethAlchemy.getBalance(ethPack.address);
-		const maticBalance = await maticAlchemy.getBalance(ethPack.address);
+		const erc20Balances = await maticAlchemy.getTokenBalances(address);
+		const ethBalance = await ethAlchemy.getBalance(address);
+		const maticBalance = await maticAlchemy.getBalance(address);
 
 		const sourceCountryCode = event.headers['CloudFront-Viewer-Country'];
 		await SlackNotifications.sendMessage(
-			'getBalances',
+			'getTokenBalances',
 			'SLACK_GET_BALANCES_URL',
 			sourceCountryCode,
 			`Balances: ${JSON.stringify(
@@ -47,7 +41,7 @@ export const getBalances: APIGatewayProxyHandler = async (
 			statusCode: 200,
 			body: JSON.stringify({
 				balances: { ...erc20Balances, ...ethBalance, ...maticBalance },
-				address: ethPack.address,
+				address,
 			}),
 		});
 	} catch (error: unknown) {
