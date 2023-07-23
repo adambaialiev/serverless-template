@@ -55,6 +55,7 @@ const processMessage = (payload: TelegramPayload) => {
 
 const sendMessage = async (chatId: number, text: string) => {
 	const url = `${TELEGRAM_API_BASE_URL}/sendMessage`;
+	console.log({ url });
 	const data = {
 		chat_id: chatId,
 		text,
