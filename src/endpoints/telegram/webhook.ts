@@ -72,6 +72,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 		const text = body.message.text;
 
 		if (text.startsWith('/start')) {
+			console.log('handling start');
 			// save user to db
 			const user = body.message.from;
 			const userData: TelegramUserData = {
@@ -97,12 +98,8 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 					})
 					.promise();
 			} catch (error) {
-				//
+				console.log({ error });
 			}
-			return sendResponse(200, {
-				message: 'Message processed successfully',
-				body: body,
-			});
 		}
 
 		const response = processMessage(body);
