@@ -73,6 +73,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  telegramWebhook:
+    handler: build/src/endpoints/crypto/webhook.webhook
+    events:
+      - http:
+          path: /v1/telegram/webhook
+          method: post
+          cors: true
   getCryptoTransactions:
     timeout: 30
     handler: build/src/endpoints/crypto/getTransactions.getTransactions
