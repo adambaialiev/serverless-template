@@ -42,7 +42,7 @@ interface TelegramUserData {
 }
 
 const processMessage = (payload: TelegramPayload) => {
-	const { text } = payload.message;
+	const { text, chat } = payload.message;
 	if (payload.message.text.startsWith('/start')) {
 		return 'Welcome to ShopWallet. I will help you find profitable wallets for your research. Send me a message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21. Good luck!';
 	}
@@ -50,10 +50,11 @@ const processMessage = (payload: TelegramPayload) => {
 	if (!contractAddress || !since || !till) {
 		return 'Please provide a valid message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21';
 	}
+	addToSQSQueue(chat.id, contractAddress, since, till);
 	return 'Analyzing...';
 };
 
-const sendMessage = async (chatId: number, text: string) => {
+export const sendTelegramMessage = async (chatId: number, text: string) => {
 	const url = `${TELEGRAM_API_BASE_URL}/sendMessage`;
 	console.log({ url });
 	const data = {
@@ -61,6 +62,29 @@ const sendMessage = async (chatId: number, text: string) => {
 		text,
 	};
 	await axios.post(url, data);
+};
+
+const addToSQSQueue = (
+	chatId: number,
+	contractAddress: string,
+	startDate: string,
+	endDate: string
+) => {
+	const sqs = new AWS.SQS();
+	const queueUrl = process.env.MAIN_QUEUE_URL;
+	const messageBody = JSON.stringify({
+		chatId,
+		contractAddress,
+		startDate,
+		endDate,
+	});
+
+	const params = {
+		MessageBody: messageBody,
+		QueueUrl: queueUrl,
+	};
+
+	sqs.sendMessage(params);
 };
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
@@ -106,7 +130,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 		const response = processMessage(body);
 
 		try {
-			await sendMessage(body.message.chat.id, response);
+			await sendTelegramMessage(body.message.chat.id, response);
 		} catch (error) {
 			//
 		}

@@ -16,6 +16,8 @@ provider:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
+    MAIN_QUEUE_URL:
+      Ref: MainQueue
     ALCHEMY_API_KEY_MATIC: ${env:ALCHEMY_API_KEY_MATIC}
     ALCHEMY_API_KEY_ETH: ${env:ALCHEMY_API_KEY_ETH}
     CHAINSTACK_NODE: ${env:CHAINSTACK_NODE}
@@ -56,6 +58,7 @@ provider:
         - dynamodb:RemoveItem
         - dynamodb:DeleteItem
         - sns:*
+        - sqs:*
       Resource: '*'
 
 plugins:
@@ -74,6 +77,14 @@ custom:
     createRoute53Record: true
 
 functions:
+  dexAnalyzer:
+    handler: build/src/endpoints/telegram/dexAnalyzer.dexAnalyzer
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - MainQueue
+              - Arn
   telegramWebhook:
     handler: build/src/endpoints/telegram/webhook.webhook
     events:
@@ -397,6 +408,11 @@ functions:
 
 resources:
   Resources:
+    MainQueue:
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        QueueName: MainQueue-${self:provider.profile}.fifo
+        FifoQueue: true
     MainTable:
       Type: AWS::DynamoDB::Table
       Properties:
