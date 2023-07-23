@@ -5,8 +5,7 @@ import { sendResponse } from '@/utils/makeResponse';
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
 		const body = JSON.parse(event.body);
-		console.log({ body });
-
+		console.log(JSON.stringify(body, null, 4));
 		return sendResponse(200, {
 			message: 'Message processed successfully',
 			body: body,
