@@ -50,7 +50,12 @@ const processMessage = async (payload: TelegramPayload) => {
 	if (!contractAddress || !since || !till) {
 		return 'Please provide a valid message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21';
 	}
-	await addToSQSQueue(chat.id, contractAddress, since, till);
+	try {
+		await addToSQSQueue(chat.id, contractAddress, since, till);
+	} catch (error) {
+		console.log({ error });
+	}
+
 	return 'Analyzing...';
 };
 
@@ -72,6 +77,7 @@ const addToSQSQueue = async (
 ) => {
 	const sqs = new AWS.SQS();
 	const queueUrl = process.env.MAIN_QUEUE_URL;
+	console.log({ queueUrl });
 	const messageBody = JSON.stringify({
 		chatId,
 		contractAddress,
