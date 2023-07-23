@@ -41,7 +41,7 @@ interface TelegramUserData {
 	walletsFound: number;
 }
 
-const processMessage = (payload: TelegramPayload) => {
+const processMessage = async (payload: TelegramPayload) => {
 	const { text, chat } = payload.message;
 	if (payload.message.text.startsWith('/start')) {
 		return 'Welcome to ShopWallet. I will help you find profitable wallets for your research. Send me a message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21. Good luck!';
@@ -50,7 +50,7 @@ const processMessage = (payload: TelegramPayload) => {
 	if (!contractAddress || !since || !till) {
 		return 'Please provide a valid message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21';
 	}
-	addToSQSQueue(chat.id, contractAddress, since, till);
+	await addToSQSQueue(chat.id, contractAddress, since, till);
 	return 'Analyzing...';
 };
 
@@ -64,7 +64,7 @@ export const sendTelegramMessage = async (chatId: number, text: string) => {
 	await axios.post(url, data);
 };
 
-const addToSQSQueue = (
+const addToSQSQueue = async (
 	chatId: number,
 	contractAddress: string,
 	startDate: string,
@@ -84,7 +84,7 @@ const addToSQSQueue = (
 		QueueUrl: queueUrl,
 	};
 
-	sqs.sendMessage(params);
+	await sqs.sendMessage(params).promise();
 };
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
@@ -127,7 +127,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			}
 		}
 
-		const response = processMessage(body);
+		const response = await processMessage(body);
 
 		try {
 			await sendTelegramMessage(body.message.chat.id, response);
