@@ -7,7 +7,10 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 		const body = JSON.parse(event.body);
 		console.log({ body });
 
-		return sendResponse(200, { message: 'Message processed successfully' });
+		return sendResponse(200, {
+			message: 'Message processed successfully',
+			body: body,
+		});
 	} catch (error: unknown) {
 		console.log(error);
 		if (error instanceof Error) {
