@@ -411,8 +411,7 @@ resources:
     MainQueue:
       Type: 'AWS::SQS::Queue'
       Properties:
-        QueueName: MainQueue-${self:provider.profile}.fifo
-        FifoQueue: true
+        QueueName: MainQueue-${self:provider.profile}
     MainTable:
       Type: AWS::DynamoDB::Table
       Properties:
