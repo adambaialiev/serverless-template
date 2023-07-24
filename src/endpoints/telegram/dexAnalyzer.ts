@@ -7,6 +7,7 @@ import {
 import analyzer from '@/endpoints/telegram/analyzer';
 import { WalletPerformanceItem } from '@/endpoints/telegram/analyzers/walletsPerformance';
 import {
+	STANDARD_ERROR_MESSAGE,
 	TelegramPayload,
 	sendTelegramMessage,
 } from '@/endpoints/telegram/webhook';
@@ -128,10 +129,10 @@ const handler = async (event: SQSEvent) => {
 						console.log({ error });
 					}
 				}
+				const previousData = telegramUserItem?.data as TelegramUserData;
+				const shouldHideAddresses =
+					previousData && previousData.walletsFound > 25;
 				const getFormattedPayloadMessage = () => {
-					const previousData = telegramUserItem?.data as TelegramUserData;
-					const shouldHideAddresses =
-						previousData && previousData.walletsFound > 25;
 					return walletsPerformance
 						.map((item, index) => {
 							const wallet = item[0] as string;
@@ -142,15 +143,20 @@ const handler = async (event: SQSEvent) => {
 						})
 						.join('');
 				};
+				const getCallToActionMessage = () => {
+					return shouldHideAddresses
+						? '\n\nPlease upgrade to premium in order to unlock hidden addresses for all your requests. Contact @marcus_bot_support'
+						: '';
+				};
 				const reply = `${tradesCount} DEX trades were analyzed. Profitable wallets found: ${
 					walletsPerformance.length
-				}.${getFormattedPayloadMessage()}`;
+				}.${getFormattedPayloadMessage()}${getCallToActionMessage()}`;
 				await sendTelegramMessage(message.chat.id, reply);
 			} catch (error) {
 				console.log({ error });
 				await sendTelegramMessage(
 					message.chat.id,
-					'An error occurred while fetching the data. Please provide a valid message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21'
+					`An error occurred while fetching the data. ${STANDARD_ERROR_MESSAGE}`
 				);
 			}
 		}

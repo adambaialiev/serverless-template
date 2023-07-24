@@ -23,14 +23,16 @@ export interface TelegramPayload {
 	};
 }
 
+export const STANDARD_ERROR_MESSAGE = `Please provide a valid message in the format: Contract_Address_Of_Coin Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21`;
+
 const processMessage = async (payload: TelegramPayload) => {
 	const { text } = payload.message;
 	if (payload.message.text.startsWith('/start')) {
-		return 'Welcome to ShopWallet. I will help you find profitable wallets for your research. Send me a message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21. Good luck!';
+		return 'I will help you find profitable wallets for your research. I can analyze DEX trades for a specific coin in a specific time period. Send me a message in the format: Contract_Address_Of_Coin Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21. Good luck!';
 	}
 	const [contractAddress, since, till] = text.split(' ');
 	if (!contractAddress || !since || !till) {
-		return 'Please provide a valid message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21';
+		return STANDARD_ERROR_MESSAGE;
 	}
 	try {
 		await addToSQSQueue(payload, contractAddress, since, till);
@@ -79,11 +81,6 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
 		const body = JSON.parse(event.body) as TelegramPayload;
 		console.log(JSON.stringify(body, null, 4));
-		const text = body.message.text;
-
-		if (text.startsWith('/start')) {
-			console.log('handling start');
-		}
 
 		const response = await processMessage(body);
 
