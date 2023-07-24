@@ -5,9 +5,8 @@ export const buildKey = (entity: Entities, id: string) => `${entity}${id}`;
 export const buildUserKey = (phoneNumber: string) =>
 	buildKey(Entities.USER, phoneNumber);
 
-export const buildTelegramUserKey = (id: string) => {
+export const buildTelegramUserKey = (id: string) =>
 	buildKey(Entities.TELEGRAM_USER, id);
-};
 
 export const buildUserWalletKey = (address: string) =>
 	buildKey(Entities.USER_WALLET, address);
