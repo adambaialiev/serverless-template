@@ -42,12 +42,14 @@ const handler = async (event: SQSEvent) => {
 			const { message } = telegramPayload;
 			let telegramUserItem: TelegramUserItem | undefined;
 			try {
+				const key = buildTelegramUserKey(message.from.id.toString());
+				console.log({ key });
 				const output = await dynamo
 					.get({
 						TableName,
 						Key: {
-							[TableKeys.PK]: Entities.TELEGRAM_USER,
-							[TableKeys.SK]: buildTelegramUserKey(message.from.id.toString()),
+							[TableKeys.PK]: `${Entities.TELEGRAM_USER}`,
+							[TableKeys.SK]: key,
 						},
 					})
 					.promise();
@@ -67,6 +69,7 @@ const handler = async (event: SQSEvent) => {
 					formattedTill
 				);
 				console.log({ walletsPerformance });
+				console.log({ telegramUserItem });
 				if (!telegramUserItem) {
 					const user = message.from;
 					const userData: TelegramUserData = {
@@ -74,7 +77,7 @@ const handler = async (event: SQSEvent) => {
 						walletsFound: walletsPerformance.length,
 					};
 					const userItem = {
-						[TableKeys.PK]: Entities.TELEGRAM_USER,
+						[TableKeys.PK]: `${Entities.TELEGRAM_USER}`,
 						[TableKeys.SK]: buildTelegramUserKey(user.id.toString()),
 						[TelegramUserAttributes.ID]: user.id.toString(),
 						[TelegramUserAttributes.META]: user,
@@ -104,7 +107,7 @@ const handler = async (event: SQSEvent) => {
 							.update({
 								TableName,
 								Key: {
-									[TableKeys.PK]: Entities.TELEGRAM_USER,
+									[TableKeys.PK]: `${Entities.TELEGRAM_USER}`,
 									[TableKeys.SK]: buildTelegramUserKey(
 										message.from.id.toString()
 									),
@@ -123,8 +126,9 @@ const handler = async (event: SQSEvent) => {
 					}
 				}
 				const getFormattedPayloadMessage = () => {
-					const previousData = telegramUserItem.data as TelegramUserData;
-					const shouldHideAddresses = previousData.walletsFound > 25;
+					const previousData = telegramUserItem?.data as TelegramUserData;
+					const shouldHideAddresses =
+						previousData && previousData.walletsFound > 25;
 					return walletsPerformance
 						.map((item, index) => {
 							const wallet = item[0] as string;
