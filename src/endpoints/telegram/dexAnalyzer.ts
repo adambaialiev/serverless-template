@@ -27,10 +27,10 @@ export interface TelegramUserData {
 	walletsFound: number;
 }
 
-const handler = async (event: SQSEvent) => {
-	const dynamo = new AWS.DynamoDB.DocumentClient();
+const dynamo = new AWS.DynamoDB.DocumentClient();
+const TableName = process.env.dynamo_table as string;
 
-	const TableName = process.env.dynamo_table as string;
+const handler = async (event: SQSEvent) => {
 	try {
 		for (const record of event.Records) {
 			const { payload, contractAddress, startDate, endDate } = JSON.parse(
