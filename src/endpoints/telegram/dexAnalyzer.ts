@@ -1,6 +1,5 @@
 import { buildTelegramUserKey } from '@/common/dynamo/buildKey';
 import {
-	Entities,
 	TableKeys,
 	TelegramUserAttributes,
 	TelegramUserItem,
@@ -48,7 +47,7 @@ const handler = async (event: SQSEvent) => {
 					.get({
 						TableName,
 						Key: {
-							[TableKeys.PK]: `${Entities.TELEGRAM_USER}`,
+							[TableKeys.PK]: key,
 							[TableKeys.SK]: key,
 						},
 					})
@@ -77,7 +76,7 @@ const handler = async (event: SQSEvent) => {
 						walletsFound: walletsPerformance.length,
 					};
 					const userItem = {
-						[TableKeys.PK]: `${Entities.TELEGRAM_USER}`,
+						[TableKeys.PK]: buildTelegramUserKey(user.id.toString()),
 						[TableKeys.SK]: buildTelegramUserKey(user.id.toString()),
 						[TelegramUserAttributes.ID]: user.id.toString(),
 						[TelegramUserAttributes.META]: user,
@@ -107,7 +106,9 @@ const handler = async (event: SQSEvent) => {
 							.update({
 								TableName,
 								Key: {
-									[TableKeys.PK]: `${Entities.TELEGRAM_USER}`,
+									[TableKeys.PK]: buildTelegramUserKey(
+										message.from.id.toString()
+									),
 									[TableKeys.SK]: buildTelegramUserKey(
 										message.from.id.toString()
 									),
