@@ -33,6 +33,7 @@ jobs:
       PROD_SLACK_UPDATE_PRICES_URL: ${{ secrets.PROD_SLACK_UPDATE_PRICES_URL }}
       PROD_SLACK_CREATE_WALLET_URL: ${{ secrets.PROD_SLACK_CREATE_WALLET_URL }}
       PROD_SLACK_MONITORING_URL: ${{ secrets.PROD_SLACK_MONITORING_URL }}
+      TELEGRAM_BOT_TOKEN: ${{ vars.PROD_TELEGRAM_BOT_TOKEN }}
     steps:
       - uses: actions/setup-node@v3
         with:
