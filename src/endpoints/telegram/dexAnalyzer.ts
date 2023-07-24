@@ -36,7 +36,8 @@ const handler = async (event: SQSEvent) => {
 			const { payload, contractAddress, startDate, endDate } = JSON.parse(
 				record.body
 			);
-			console.log({ payload, contractAddress, startDate, endDate });
+			console.log({ contractAddress, startDate, endDate });
+			console.log(JSON.stringify(payload, null, 4));
 			const telegramPayload = payload as TelegramPayload;
 			const { message } = telegramPayload;
 			let telegramUserItem: TelegramUserItem | undefined;
@@ -50,6 +51,7 @@ const handler = async (event: SQSEvent) => {
 						},
 					})
 					.promise();
+				console.log({ userOutput: output.Item });
 				if (output.Item) {
 					telegramUserItem = output.Item as TelegramUserItem;
 				}
@@ -64,7 +66,7 @@ const handler = async (event: SQSEvent) => {
 					formattedSince,
 					formattedTill
 				);
-
+				console.log({ walletsPerformance });
 				if (!telegramUserItem) {
 					const user = message.from;
 					const userData: TelegramUserData = {
@@ -84,7 +86,7 @@ const handler = async (event: SQSEvent) => {
 							.put({
 								Item: userItem,
 								TableName,
-								ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
+								ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
 							})
 							.promise();
 					} catch (error) {
@@ -98,22 +100,24 @@ const handler = async (event: SQSEvent) => {
 							walletsFound:
 								previousData.walletsFound + walletsPerformance.length,
 						};
-						await dynamo.update({
-							TableName,
-							Key: {
-								[TableKeys.PK]: Entities.TELEGRAM_USER,
-								[TableKeys.SK]: buildTelegramUserKey(
-									message.from.id.toString()
-								),
-							},
-							UpdateExpression: `SET #data = :data`,
-							ExpressionAttributeNames: {
-								'#data': TelegramUserAttributes.DATA,
-							},
-							ExpressionAttributeValues: {
-								':data': newData,
-							},
-						});
+						await dynamo
+							.update({
+								TableName,
+								Key: {
+									[TableKeys.PK]: Entities.TELEGRAM_USER,
+									[TableKeys.SK]: buildTelegramUserKey(
+										message.from.id.toString()
+									),
+								},
+								UpdateExpression: `SET #data = :data`,
+								ExpressionAttributeNames: {
+									'#data': TelegramUserAttributes.DATA,
+								},
+								ExpressionAttributeValues: {
+									':data': newData,
+								},
+							})
+							.promise();
 					} catch (error) {
 						console.log({ error });
 					}
