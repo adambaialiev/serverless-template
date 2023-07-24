@@ -90,7 +90,7 @@ const handler = async (event: SQSEvent) => {
 							.put({
 								Item: userItem,
 								TableName,
-								ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+								ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
 							})
 							.promise();
 					} catch (error) {
