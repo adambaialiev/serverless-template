@@ -1,14 +1,147 @@
-import { sendTelegramMessage } from '@/endpoints/telegram/webhook';
+import { buildTelegramUserKey } from '@/common/dynamo/buildKey';
+import {
+	Entities,
+	TableKeys,
+	TelegramUserAttributes,
+	TelegramUserItem,
+} from '@/common/dynamo/schema';
+import analyzer from '@/endpoints/telegram/analyzer';
+import { WalletPerformanceItem } from '@/endpoints/telegram/analyzers/walletsPerformance';
+import {
+	TelegramPayload,
+	sendTelegramMessage,
+} from '@/endpoints/telegram/webhook';
 import { SQSEvent } from 'aws-lambda';
+import AWS from 'aws-sdk';
+
+export interface TelegramUser {
+	id: number;
+	is_bot: boolean;
+	first_name: string;
+	username: string;
+	language_code: string;
+}
+
+export interface TelegramUserData {
+	requestsMade: number;
+	walletsFound: number;
+}
 
 const handler = async (event: SQSEvent) => {
+	const dynamo = new AWS.DynamoDB.DocumentClient();
+
+	const TableName = process.env.dynamo_table as string;
 	try {
 		for (const record of event.Records) {
-			const { chatId, contractAddress, startDate, endDate } = JSON.parse(
+			const { payload, contractAddress, startDate, endDate } = JSON.parse(
 				record.body
 			);
-			console.log({ chatId, contractAddress, startDate, endDate });
-			await sendTelegramMessage(chatId, 'Here are the results: bla bla bla');
+			console.log({ payload, contractAddress, startDate, endDate });
+			const telegramPayload = payload as TelegramPayload;
+			const { message } = telegramPayload;
+			let telegramUserItem: TelegramUserItem | undefined;
+			try {
+				const output = await dynamo
+					.get({
+						TableName,
+						Key: {
+							[TableKeys.PK]: Entities.TELEGRAM_USER,
+							[TableKeys.SK]: buildTelegramUserKey(message.from.id.toString()),
+						},
+					})
+					.promise();
+				if (output.Item) {
+					telegramUserItem = output.Item as TelegramUserItem;
+				}
+			} catch (error) {
+				console.log({ error });
+			}
+			try {
+				const formattedSince = `${startDate}T00:00:00Z`;
+				const formattedTill = `${endDate}T23:59:59Z`;
+				const { walletsPerformance, tradesCount } = await analyzer(
+					contractAddress,
+					formattedSince,
+					formattedTill
+				);
+
+				if (!telegramUserItem) {
+					const user = message.from;
+					const userData: TelegramUserData = {
+						requestsMade: 1,
+						walletsFound: walletsPerformance.length,
+					};
+					const userItem = {
+						[TableKeys.PK]: Entities.TELEGRAM_USER,
+						[TableKeys.SK]: buildTelegramUserKey(user.id.toString()),
+						[TelegramUserAttributes.ID]: user.id.toString(),
+						[TelegramUserAttributes.META]: user,
+						[TelegramUserAttributes.DATA]: userData,
+						[TelegramUserAttributes.IS_PREMIUM]: false,
+					};
+					try {
+						await dynamo
+							.put({
+								Item: userItem,
+								TableName,
+								ConditionExpression: `attribute_not_exists(${TableKeys.PK})`,
+							})
+							.promise();
+					} catch (error) {
+						console.log({ error });
+					}
+				} else {
+					try {
+						const previousData = telegramUserItem.data as TelegramUserData;
+						const newData: TelegramUserData = {
+							requestsMade: previousData.requestsMade + 1,
+							walletsFound:
+								previousData.walletsFound + walletsPerformance.length,
+						};
+						await dynamo.update({
+							TableName,
+							Key: {
+								[TableKeys.PK]: Entities.TELEGRAM_USER,
+								[TableKeys.SK]: buildTelegramUserKey(
+									message.from.id.toString()
+								),
+							},
+							UpdateExpression: `SET #data = :data`,
+							ExpressionAttributeNames: {
+								'#data': TelegramUserAttributes.DATA,
+							},
+							ExpressionAttributeValues: {
+								':data': newData,
+							},
+						});
+					} catch (error) {
+						console.log({ error });
+					}
+				}
+				const getFormattedPayloadMessage = () => {
+					const previousData = telegramUserItem.data as TelegramUserData;
+					const shouldHideAddresses = previousData.walletsFound > 25;
+					return walletsPerformance
+						.map((item, index) => {
+							const wallet = item[0] as string;
+							const performance = item[1] as WalletPerformanceItem;
+							return `\n${index + 1}. Address: ${
+								shouldHideAddresses ? 'hidden' : wallet
+							}. Profit is ${performance.profit} WETH`;
+						})
+						.join('');
+				};
+				const reply = `${tradesCount} DEX trades were analyzed. Profitable wallets found: ${
+					walletsPerformance.length
+				}.${getFormattedPayloadMessage()}`;
+				await sendTelegramMessage(message.chat.id, reply);
+			} catch (error) {
+				console.log({ error });
+				await sendTelegramMessage(
+					message.chat.id,
+					'An error occurred while fetching the data. Please provide a valid message in the format: Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD. Example of a valid request: 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21'
+				);
+			}
 		}
 
 		return {

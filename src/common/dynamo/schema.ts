@@ -152,6 +152,15 @@ export interface SupportTicketItem {
 	[SupportTicketAttributes.IS_RESOLVED]: DocumentClient.BooleanAttributeValue;
 }
 
+export interface TelegramUserItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[TelegramUserAttributes.ID]: DocumentClient.String;
+	[TelegramUserAttributes.META]: DocumentClient.AttributeMap;
+	[TelegramUserAttributes.DATA]: DocumentClient.AttributeMap;
+	[TelegramUserAttributes.IS_PREMIUM]: DocumentClient.BooleanAttributeValue;
+}
+
 export interface UserItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;

@@ -78,6 +78,7 @@ custom:
 
 functions:
   dexAnalyzer:
+    timeout: 30
     handler: build/src/endpoints/telegram/dexAnalyzer.dexAnalyzer
     events:
       - sqs:
