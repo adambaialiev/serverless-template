@@ -40,7 +40,7 @@ const processMessage = async (payload: TelegramPayload) => {
 		console.log({ error });
 	}
 
-	return 'Analyzing... Please wait...';
+	return 'Processing started. May take up to 1-2 min. Please wait the response...';
 };
 
 export const sendTelegramMessage = async (chatId: number, text: string) => {
