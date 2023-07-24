@@ -14,6 +14,7 @@ export enum IndexNames {
 export enum Entities {
 	MASTER_WALLET = 'MASTER_WALLET',
 	USER = 'USER#',
+	TELEGRAM_USER = 'TELEGRAM_USER#',
 	USER_WALLET = 'USER_WALLET#',
 	FEEDBACK = 'FEEDBACK#',
 	SUPPORT_TICKET = 'SUPPORT_TICKET#',
@@ -61,6 +62,13 @@ export interface StoreItem {
 	[TableKeys.SK]: DocumentClient.String;
 	[StoreAttributes.UPDATED_AT]: DocumentClient.String;
 	[StoreAttributes.VALUES]: DocumentClient.AttributeMap;
+}
+
+export enum TelegramUserAttributes {
+	ID = 'id',
+	META = 'meta',
+	DATA = 'data',
+	IS_PREMIUM = 'isPremium',
 }
 
 export enum UserAttributes {
@@ -142,6 +150,15 @@ export interface SupportTicketItem {
 	[SupportTicketAttributes.DESCRIPTION]: DocumentClient.String;
 	[SupportTicketAttributes.EMAIL]: DocumentClient.String;
 	[SupportTicketAttributes.IS_RESOLVED]: DocumentClient.BooleanAttributeValue;
+}
+
+export interface TelegramUserItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[TelegramUserAttributes.ID]: DocumentClient.String;
+	[TelegramUserAttributes.META]: DocumentClient.AttributeMap;
+	[TelegramUserAttributes.DATA]: DocumentClient.AttributeMap;
+	[TelegramUserAttributes.IS_PREMIUM]: DocumentClient.BooleanAttributeValue;
 }
 
 export interface UserItem {

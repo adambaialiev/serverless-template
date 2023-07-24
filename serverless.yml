@@ -16,6 +16,8 @@ provider:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
+    MAIN_QUEUE_URL:
+      Ref: MainQueue
     ALCHEMY_API_KEY_MATIC: ${env:ALCHEMY_API_KEY_MATIC}
     ALCHEMY_API_KEY_ETH: ${env:ALCHEMY_API_KEY_ETH}
     CHAINSTACK_NODE: ${env:CHAINSTACK_NODE}
@@ -41,6 +43,7 @@ provider:
     PROD_SLACK_UPDATE_PRICES_URL: ${env:PROD_SLACK_UPDATE_PRICES_URL}
     PROD_SLACK_CREATE_WALLET_URL: ${env:PROD_SLACK_CREATE_WALLET_URL}
     PROD_SLACK_MONITORING_URL: ${env:PROD_SLACK_MONITORING_URL}
+    TELEGRAM_BOT_TOKEN: ${env:TELEGRAM_BOT_TOKEN}
 
   iamRoleStatements:
     - Effect: Allow
@@ -55,6 +58,7 @@ provider:
         - dynamodb:RemoveItem
         - dynamodb:DeleteItem
         - sns:*
+        - sqs:*
       Resource: '*'
 
 plugins:
@@ -73,6 +77,22 @@ custom:
     createRoute53Record: true
 
 functions:
+  dexAnalyzer:
+    timeout: 30
+    handler: build/src/endpoints/telegram/dexAnalyzer.dexAnalyzer
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - MainQueue
+              - Arn
+  telegramWebhook:
+    handler: build/src/endpoints/telegram/webhook.webhook
+    events:
+      - http:
+          path: /v1/telegram/webhook
+          method: post
+          cors: true
   getCryptoTransactions:
     timeout: 30
     handler: build/src/endpoints/crypto/getTransactions.getTransactions
@@ -389,6 +409,10 @@ functions:
 
 resources:
   Resources:
+    MainQueue:
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        QueueName: MainQueue-${self:provider.profile}
     MainTable:
       Type: AWS::DynamoDB::Table
       Properties:
