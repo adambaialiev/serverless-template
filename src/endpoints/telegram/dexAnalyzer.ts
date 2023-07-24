@@ -75,14 +75,16 @@ const handler = async (event: SQSEvent) => {
 						requestsMade: 1,
 						walletsFound: walletsPerformance.length,
 					};
+					const key = buildTelegramUserKey(user.id.toString());
 					const userItem = {
-						[TableKeys.PK]: buildTelegramUserKey(user.id.toString()),
-						[TableKeys.SK]: buildTelegramUserKey(user.id.toString()),
+						[TableKeys.PK]: key,
+						[TableKeys.SK]: key,
 						[TelegramUserAttributes.ID]: user.id.toString(),
 						[TelegramUserAttributes.META]: user,
 						[TelegramUserAttributes.DATA]: userData,
 						[TelegramUserAttributes.IS_PREMIUM]: false,
 					};
+					console.log(JSON.stringify(userItem, null, 4));
 					try {
 						await dynamo
 							.put({

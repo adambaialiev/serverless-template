@@ -38,7 +38,7 @@ const processMessage = async (payload: TelegramPayload) => {
 		console.log({ error });
 	}
 
-	return 'Analyzing...';
+	return 'Analyzing... Please wait...';
 };
 
 export const sendTelegramMessage = async (chatId: number, text: string) => {
