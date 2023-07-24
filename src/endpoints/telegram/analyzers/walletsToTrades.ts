@@ -20,8 +20,7 @@ const analyzer = (map: WalletsToTrades) => (tradeData: TradeDataItem) => {
         count: 1,
         trades: [tradeData],
       };
-    } else {
-      if (
+    } else if (
         !map[p].trades.find(
           (t) => t.Transaction.Hash === tradeData.Transaction.Hash
         )
@@ -29,7 +28,6 @@ const analyzer = (map: WalletsToTrades) => (tradeData: TradeDataItem) => {
         map[p].count++;
         map[p].trades.push(tradeData);
       }
-    }
   });
 };
 
