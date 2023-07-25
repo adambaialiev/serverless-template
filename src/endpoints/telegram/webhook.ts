@@ -7,6 +7,8 @@ import { TelegramUser } from '@/endpoints/telegram/dexAnalyzer';
 
 const TELEGRAM_API_BASE_URL = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`;
 
+const SLACK_URL = process.env.SLACK_BOT_CHANNEL_URL;
+
 export interface TelegramPayload {
 	update_id: number;
 	message: {
@@ -78,7 +80,12 @@ const addToSQSQueue = async (
 };
 
 export const sendMessageToSlackBot = (text: string) => {
-	axios.post(process.env.SLACK_BOT_CHANNEL_URL, { text });
+	console.log({ SLACK_URL, text });
+	try {
+		axios.post(SLACK_URL, { text });
+	} catch (error) {
+		console.log({ error });
+	}
 };
 
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
