@@ -127,8 +127,14 @@ const handler = async (event: SQSEvent) => {
 					}
 				}
 				const previousData = telegramUserItem?.data as TelegramUserData;
-				const shouldHideAddresses =
-					previousData && previousData.walletsFound > 25;
+				const decideShouldHideAddresses = () => {
+					if (telegramUserItem.isPremium) {
+						return false;
+					}
+					return previousData && previousData.walletsFound >= 20;
+				};
+				const shouldHideAddresses = decideShouldHideAddresses();
+
 				const getFormattedPayloadMessage = () => {
 					return walletsPerformance
 						.map((item, index) => {
