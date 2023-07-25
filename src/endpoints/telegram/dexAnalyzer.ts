@@ -9,6 +9,7 @@ import { WalletPerformanceItem } from '@/endpoints/telegram/analyzers/walletsPer
 import {
 	STANDARD_ERROR_MESSAGE,
 	TelegramPayload,
+	sendMessageToSlackBot,
 	sendTelegramMessage,
 } from '@/endpoints/telegram/webhook';
 import { SQSEvent } from 'aws-lambda';
@@ -33,17 +34,15 @@ const TableName = process.env.dynamo_table as string;
 const handler = async (event: SQSEvent) => {
 	try {
 		for (const record of event.Records) {
-			const { payload, contractAddress, startDate, endDate } = JSON.parse(
-				record.body
-			);
-			console.log({ contractAddress, startDate, endDate });
-			console.log(JSON.stringify(payload, null, 4));
+			const body = JSON.parse(record.body);
+			const { payload, contractAddress, startDate, endDate } = body;
+			// console.log({ contractAddress, startDate, endDate });
+			// console.log(JSON.stringify(payload, null, 4));
 			const telegramPayload = payload as TelegramPayload;
 			const { message } = telegramPayload;
 			let telegramUserItem: TelegramUserItem | undefined;
 			try {
 				const key = buildTelegramUserKey(message.from.id.toString());
-				console.log({ key });
 				const output = await dynamo
 					.get({
 						TableName,
@@ -53,7 +52,6 @@ const handler = async (event: SQSEvent) => {
 						},
 					})
 					.promise();
-				console.log({ userOutput: output.Item });
 				if (output.Item) {
 					telegramUserItem = output.Item as TelegramUserItem;
 				}
@@ -68,8 +66,7 @@ const handler = async (event: SQSEvent) => {
 					formattedSince,
 					formattedTill
 				);
-				console.log({ walletsPerformance });
-				console.log({ telegramUserItem });
+
 				if (!telegramUserItem) {
 					const user = message.from;
 					const userData: TelegramUserData = {
@@ -85,7 +82,7 @@ const handler = async (event: SQSEvent) => {
 						[TelegramUserAttributes.DATA]: userData,
 						[TelegramUserAttributes.IS_PREMIUM]: false,
 					};
-					console.log(JSON.stringify(userItem, null, 4));
+
 					try {
 						await dynamo
 							.put({
@@ -151,13 +148,31 @@ const handler = async (event: SQSEvent) => {
 				const reply = `${tradesCount} DEX trades were analyzed. Profitable wallets found: ${
 					walletsPerformance.length
 				}.${getFormattedPayloadMessage()}${getCallToActionMessage()}`;
+				await sendMessageToSlackBot(
+					'Queue Request: ' +
+						'```' +
+						JSON.stringify(body, null, 4) +
+						'```' +
+						' Response: ' +
+						'```' +
+						reply +
+						'```'
+				);
 				await sendTelegramMessage(message.chat.id, reply);
 			} catch (error) {
 				console.log({ error });
-				await sendTelegramMessage(
-					message.chat.id,
-					`An error occurred while fetching the data. ${STANDARD_ERROR_MESSAGE}`
+				const reply = `An error occurred while fetching the data. ${STANDARD_ERROR_MESSAGE}`;
+				await sendMessageToSlackBot(
+					'Queue Request: ' +
+						'```' +
+						JSON.stringify(body, null, 4) +
+						'```' +
+						' Response: ' +
+						'```' +
+						reply +
+						'```'
 				);
+				await sendTelegramMessage(message.chat.id, reply);
 			}
 		}
 
