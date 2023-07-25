@@ -77,6 +77,10 @@ const addToSQSQueue = async (
 	await sqs.sendMessage(params).promise();
 };
 
+export const sendMessageToSlackBot = (text: string) => {
+	axios.post(process.env.SLACK_BOT_CHANNEL_URL, { text });
+};
+
 const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 	try {
 		const body = JSON.parse(event.body) as TelegramPayload;
@@ -89,6 +93,10 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 		} catch (error) {
 			//
 		}
+
+		sendMessageToSlackBot(
+			'Request:' + '```' + body + '```' + 'Response:' + '```' + response + '```'
+		);
 
 		return sendResponse(200, {
 			message: 'Message processed successfully',
