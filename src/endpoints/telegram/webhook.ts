@@ -79,10 +79,10 @@ const addToSQSQueue = async (
 	await sqs.sendMessage(params).promise();
 };
 
-export const sendMessageToSlackBot = (text: string) => {
+export const sendMessageToSlackBot = async (text: string) => {
 	console.log({ SLACK_URL, text });
 	try {
-		axios.post(SLACK_URL, { text });
+		await axios.post(SLACK_URL, { text });
 	} catch (error) {
 		console.log({ error });
 	}
@@ -101,7 +101,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 			//
 		}
 
-		sendMessageToSlackBot(
+		await sendMessageToSlackBot(
 			'Request:' + '```' + body + '```' + 'Response:' + '```' + response + '```'
 		);
 
