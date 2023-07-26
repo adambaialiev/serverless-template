@@ -147,7 +147,7 @@ const handler = async (event: SQSEvent) => {
 						.join('');
 				};
 				const getCallToActionMessage = () => {
-					return shouldHideAddresses
+					return shouldHideAddresses && walletsPerformance.length > 0
 						? '\n\nPlease upgrade to premium in order to unlock hidden addresses for all your requests. Contact @marcus_bot_support'
 						: '';
 				};
