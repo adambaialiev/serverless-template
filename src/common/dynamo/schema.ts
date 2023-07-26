@@ -67,6 +67,7 @@ export interface StoreItem {
 export enum TelegramUserAttributes {
 	ID = 'id',
 	META = 'meta',
+	CHAT_ID = 'chatId',
 	DATA = 'data',
 	IS_PREMIUM = 'isPremium',
 }
