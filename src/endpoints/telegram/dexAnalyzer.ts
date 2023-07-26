@@ -79,6 +79,7 @@ const handler = async (event: SQSEvent) => {
 						[TableKeys.SK]: key,
 						[TelegramUserAttributes.ID]: user.id.toString(),
 						[TelegramUserAttributes.META]: user,
+						[TelegramUserAttributes.CHAT_ID]: message.chat.id.toString(),
 						[TelegramUserAttributes.DATA]: userData,
 						[TelegramUserAttributes.IS_PREMIUM]: false,
 					};
