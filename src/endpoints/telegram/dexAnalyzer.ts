@@ -129,7 +129,7 @@ const handler = async (event: SQSEvent) => {
 				}
 				const previousData = telegramUserItem?.data as TelegramUserData;
 				const decideShouldHideAddresses = () => {
-					if (telegramUserItem.isPremium) {
+					if (telegramUserItem && telegramUserItem.isPremium) {
 						return false;
 					}
 					return previousData && previousData.walletsFound >= 20;
