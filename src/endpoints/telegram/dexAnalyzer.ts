@@ -166,7 +166,7 @@ const handler = async (event: SQSEvent) => {
 						.map((coin) => {
 							const info = coinToTrades[coin];
 							return info.performance
-								? `👉${coin}/WETH.\n\t👉Buy trades: ${info.buyTradesCount}. Spent ${info.performance.expense} WETH\n\t👉Sell trades: ${info.sellTradesCount}. Received ${info.performance.profit} WETH\n\tProfit is ${info.performance.profit} WETH`
+								? `\n👉${coin}/WETH.\n\t👉Buy trades: ${info.buyTradesCount}. Spent ${info.performance.expense} WETH\n\t👉Sell trades: ${info.sellTradesCount}. Received ${info.performance.profit} WETH\n\tProfit is ${info.performance.profit} WETH`
 								: '';
 						})
 						.join('');
@@ -212,7 +212,7 @@ const handler = async (event: SQSEvent) => {
 				);
 				await sendTelegramMessage(message.chat.id, reply);
 			} catch (error) {
-				console.log({ error });
+				console.log(JSON.stringify(error, null, 4));
 				const reply = `An error occurred while fetching the data. ${STANDARD_ERROR_MESSAGE}`;
 				await sendMessageToSlackBot(
 					'Queue Request: ' +
