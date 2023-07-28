@@ -102,7 +102,7 @@ const handler: APIGatewayProxyHandler = async (event: CustomAPIGateway) => {
 		}
 
 		await sendMessageToSlackBot(
-			'Request: ' +
+			`Request from ${body.message.from.username}: ` +
 				'```' +
 				JSON.stringify(body, null, 4) +
 				'```' +

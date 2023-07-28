@@ -178,7 +178,7 @@ const handler = async (event: SQSEvent) => {
 						.map((item, index) => {
 							const wallet = item[0] as string;
 							const performance = item[1] as WalletPerformanceItem;
-							return `\n${index + 1}. Address: ${
+							return `\n${index + 1}. *Address:* ${
 								shouldHideAddresses ? 'hidden' : wallet
 							}.\n👉 Buy trades: ${performance.buyTradesCount}. Spent ${
 								performance.expense
@@ -186,7 +186,7 @@ const handler = async (event: SQSEvent) => {
 								performance.sellTradesCount
 							}. Received ${performance.revenue} WETH.\n👉 Profit is ${
 								performance.profit
-							} WETH\n${DIVIDER}💰Below is analysis of all DEX trades for this wallet💰${DIVIDER}\n${getFormattedWalletDetailsMessage(
+							} WETH\n${DIVIDER}\n💰Below is analysis of all DEX trades for this wallet💰\n${DIVIDER}\n${getFormattedWalletDetailsMessage(
 								wallet
 							)}`;
 						})
@@ -215,7 +215,7 @@ const handler = async (event: SQSEvent) => {
 				console.log(JSON.stringify(error, null, 4));
 				const reply = `An error occurred while fetching the data. ${STANDARD_ERROR_MESSAGE}`;
 				await sendMessageToSlackBot(
-					'Queue Request: ' +
+					`Queue Request from ${message.from.username}: ` +
 						'```' +
 						JSON.stringify(body, null, 4) +
 						'```' +
