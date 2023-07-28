@@ -10,7 +10,7 @@ export interface CoinToTrades {
 	};
 }
 
-interface CoinPerformance {
+export interface CoinPerformance {
 	firstTradeIsSell?: boolean;
 	revenue: number;
 	expense: number;

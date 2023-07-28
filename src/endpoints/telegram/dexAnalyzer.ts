@@ -5,6 +5,9 @@ import {
 	TelegramUserItem,
 } from '@/common/dynamo/schema';
 import analyzer from '@/endpoints/telegram/analyzer';
+import analyzerWallet from '@/endpoints/telegram/analyzerWallet';
+import { CoinToTrades } from '@/endpoints/telegram/analyzers/singleWalletPerformance';
+import { WalletPerformanceSummary } from '@/endpoints/telegram/analyzers/singleWalletPerformanceSummary';
 import { WalletPerformanceItem } from '@/endpoints/telegram/analyzers/walletsPerformance';
 import {
 	STANDARD_ERROR_MESSAGE,
@@ -14,6 +17,8 @@ import {
 } from '@/endpoints/telegram/webhook';
 import { SQSEvent } from 'aws-lambda';
 import AWS from 'aws-sdk';
+
+const DIVIDER = '-------------------------------';
 
 export interface TelegramUser {
 	id: number;
@@ -66,6 +71,25 @@ const handler = async (event: SQSEvent) => {
 					formattedSince,
 					formattedTill
 				);
+				const walletsDetailedPerformance: {
+					[key: string]: {
+						coinToTrades: CoinToTrades;
+						summary: WalletPerformanceSummary;
+					};
+				} = {};
+				try {
+					for (let i = 0; i < walletsPerformance.length; i++) {
+						const wallet = walletsPerformance[i][0] as string;
+						const { singleWalletPerformanceSummary, singleWalletPerformance } =
+							await analyzerWallet(wallet);
+						walletsDetailedPerformance[wallet] = {
+							coinToTrades: singleWalletPerformance,
+							summary: singleWalletPerformanceSummary,
+						};
+					}
+				} catch (error) {
+					console.log({ error });
+				}
 
 				if (!telegramUserItem) {
 					const user = message.from;
@@ -136,6 +160,19 @@ const handler = async (event: SQSEvent) => {
 				};
 				const shouldHideAddresses = decideShouldHideAddresses();
 
+				const getFormattedWalletDetailsMessage = (wallet: string) => {
+					const { coinToTrades, summary } = walletsDetailedPerformance[wallet];
+					const result = Object.keys(coinToTrades)
+						.map((coin) => {
+							const info = coinToTrades[coin];
+							return info.performance
+								? `👉${coin}/WETH.\n\t👉Buy trades: ${info.buyTradesCount}. Spent ${info.performance.expense} WETH\n\t👉Sell trades: ${info.sellTradesCount}. Received ${info.performance.profit} WETH\n\tProfit is ${info.performance.profit} WETH`
+								: '';
+						})
+						.join('');
+					return `👉Buy trades: ${summary.buyTrades}. Spent ${summary.expense} WETH\n👉Sell trades: ${summary.sellTrades}. Received ${summary.revenue} WETH.\n👉Profit is ${summary.profit} WETH\n${result}`;
+				};
+
 				const getFormattedPayloadMessage = () => {
 					return walletsPerformance
 						.map((item, index) => {
@@ -143,7 +180,15 @@ const handler = async (event: SQSEvent) => {
 							const performance = item[1] as WalletPerformanceItem;
 							return `\n${index + 1}. Address: ${
 								shouldHideAddresses ? 'hidden' : wallet
-							}. Profit is ${performance.profit} WETH`;
+							}.\n👉 Buy trades: ${performance.buyTradesCount}. Spent ${
+								performance.expense
+							} WETH.\n👉 Sell trades: ${
+								performance.sellTradesCount
+							}. Received ${performance.revenue} WETH.\n👉 Profit is ${
+								performance.profit
+							} WETH\n${DIVIDER}💰Below is analysis of all DEX trades for this wallet💰${DIVIDER}\n${getFormattedWalletDetailsMessage(
+								wallet
+							)}`;
 						})
 						.join('');
 				};
