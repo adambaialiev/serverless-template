@@ -51,6 +51,7 @@ export const sendTelegramMessage = async (chatId: number, text: string) => {
 	const data = {
 		chat_id: chatId,
 		text,
+		parse_mode: 'markdown',
 	};
 	await axios.post(url, data);
 };

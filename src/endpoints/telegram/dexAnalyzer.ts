@@ -18,7 +18,7 @@ import {
 import { SQSEvent } from 'aws-lambda';
 import AWS from 'aws-sdk';
 
-const DIVIDER = '-------------------------------';
+const DIVIDER = '---------------------------------------';
 
 export interface TelegramUser {
 	id: number;
@@ -162,15 +162,13 @@ const handler = async (event: SQSEvent) => {
 
 				const getFormattedWalletDetailsMessage = (wallet: string) => {
 					const { coinToTrades, summary } = walletsDetailedPerformance[wallet];
-					return `👉Buy trades: ${summary.buyTrades}. Spent ${
+					return `👉Number of coins traded: ${
+						Object.keys(coinToTrades).length
+					}\n👉Buy trades: ${summary.buyTrades}. Spent ${
 						summary.expense
 					} WETH\n👉Sell trades: ${summary.sellTrades}. Received ${
 						summary.revenue
-					} WETH.\n👉Profit is ${
-						summary.profit
-					} WETH\n👉Number of coins traded: ${
-						Object.keys(coinToTrades).length
-					}`;
+					} WETH.\n👉Profit is ${summary.profit} WETH`;
 				};
 
 				const getFormattedPayloadMessage = () => {
@@ -188,7 +186,7 @@ const handler = async (event: SQSEvent) => {
 								performance.profit
 							} WETH\n${DIVIDER}\n💰Below is analysis of all DEX trades for this wallet💰\n${DIVIDER}\n${getFormattedWalletDetailsMessage(
 								wallet
-							)}`;
+							)}\n`;
 						})
 						.join('');
 				};
@@ -201,7 +199,7 @@ const handler = async (event: SQSEvent) => {
 					walletsPerformance.length
 				}.${getFormattedPayloadMessage()}${getCallToActionMessage()}`;
 				await sendMessageToSlackBot(
-					'Queue Request: ' +
+					`Queue Request from ${message.from.username}:  ` +
 						'```' +
 						JSON.stringify(body, null, 4) +
 						'```' +
