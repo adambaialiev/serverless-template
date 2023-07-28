@@ -43,7 +43,7 @@ export interface TradeDataItem {
 	};
 }
 
-interface TradeData {
+export interface TradeData {
 	sellside: TradeDataItem[];
 }
 
