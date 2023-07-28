@@ -162,15 +162,15 @@ const handler = async (event: SQSEvent) => {
 
 				const getFormattedWalletDetailsMessage = (wallet: string) => {
 					const { coinToTrades, summary } = walletsDetailedPerformance[wallet];
-					const result = Object.keys(coinToTrades)
-						.map((coin) => {
-							const info = coinToTrades[coin];
-							return info.performance
-								? `\n👉${coin}/WETH.\n\t👉Buy trades: ${info.buyTradesCount}. Spent ${info.performance.expense} WETH\n\t👉Sell trades: ${info.sellTradesCount}. Received ${info.performance.profit} WETH\n\tProfit is ${info.performance.profit} WETH`
-								: '';
-						})
-						.join('');
-					return `👉Buy trades: ${summary.buyTrades}. Spent ${summary.expense} WETH\n👉Sell trades: ${summary.sellTrades}. Received ${summary.revenue} WETH.\n👉Profit is ${summary.profit} WETH\n${result}`;
+					return `👉Buy trades: ${summary.buyTrades}. Spent ${
+						summary.expense
+					} WETH\n👉Sell trades: ${summary.sellTrades}. Received ${
+						summary.revenue
+					} WETH.\n👉Profit is ${
+						summary.profit
+					} WETH\n👉Number of coins traded: ${
+						Object.keys(coinToTrades).length
+					}`;
 				};
 
 				const getFormattedPayloadMessage = () => {
