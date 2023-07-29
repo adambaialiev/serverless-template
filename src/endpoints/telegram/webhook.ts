@@ -27,10 +27,13 @@ export interface TelegramPayload {
 
 export const STANDARD_ERROR_MESSAGE = `Please provide a valid message in the format: Coin_Symbol/Coin_Contract_Address Start_Date End_Date. Date format is YYYY-MM-DD.\nExample of a valid request: SCOOBY 2023-07-18 2023-07-21 or 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21`;
 
+export const WELCOME_MESSAGE =
+	'MARCUS DEX BOT can help you find profitable wallets for your copy trading activities. It can analyze DEX trades for a specific coin in a specific time period.\nExample of a valid request: ```/coin SCOOBY 2023-07-18 2023-07-21``` or ```/coin 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21```';
+
 const processMessage = async (payload: TelegramPayload) => {
 	const { text } = payload.message;
 	if (payload.message.text.startsWith('/start')) {
-		return 'I will help you find profitable wallets for your research. I can analyze DEX trades for a specific coin in a specific time period.\nExample of a valid request: SCOOBY 2023-07-18 2023-07-21 or 0xAd497eE6a70aCcC3Cbb5eB874e60d87593B86F2F 2023-07-18 2023-07-21\nFirst word is token symbol or token contract address, second word is start date, and third word is end date. Date format is YYYY-MM-DD. Good luck!';
+		return WELCOME_MESSAGE;
 	}
 	const [contractAddress, since, till] = text.split(' ');
 	if (!contractAddress || !since || !till) {
