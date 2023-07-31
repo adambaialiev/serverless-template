@@ -89,6 +89,65 @@ const analyzer = (map: CoinToTrades) => (tradeData: TradeDataItem) => {
 	}
 };
 
+interface ProfitabilityOverTime {
+	[key: string]: {
+		revenue: number;
+		expense: number;
+		profit: number;
+		ratio: string;
+	};
+}
+
+const analyzeProfitabilityOverTime = (trades: TradeDataItem[]) => {
+	const map: ProfitabilityOverTime = {};
+	const analysis = trades
+		.slice()
+		.reverse()
+		.reduce((acc, trade, index) => {
+			const isBuyTrade = 'WETH' !== trade.Trade.Currency.Symbol;
+			const amount = isBuyTrade
+				? Number(trade.Trade.Side.Amount)
+				: Number(trade.Trade.Amount);
+			const getTimeKey = () => {
+				const date = new Date(trade.Block.Time);
+				const year = date.getFullYear();
+				const month = date.getMonth();
+				const day = date.getDate();
+				return `${year}-${month}-${day};`;
+			};
+			if (index === 0 && isBuyTrade) {
+				const timeKey = getTimeKey();
+				if (!map[timeKey]) {
+					map[timeKey] = {
+						expense: 0,
+						revenue: 0,
+						profit: 0,
+						ratio: '',
+					};
+					if (isBuyTrade) {
+						map[timeKey].expense += amount;
+					} else {
+						map[timeKey].revenue += amount;
+					}
+				} else if (isBuyTrade) {
+					map[timeKey].expense += amount;
+				} else {
+					map[timeKey].revenue += amount;
+				}
+			}
+			return acc;
+		}, map);
+	Object.keys(analysis).forEach((timeKey) => {
+		const item = analysis[timeKey];
+		item.profit = item.revenue - item.expense;
+		const getRatio = () => {
+			return Math.floor(item.profit / item.expense) * 100;
+		};
+		item.ratio = `${getRatio()}%`;
+	});
+	return analysis;
+};
+
 export const getSingleWalletPerformanceResult = (trades: TradeDataItem[]) => {
 	const coinToTradesMap: CoinToTrades = {};
 	trades.forEach(analyzer(coinToTradesMap));
@@ -97,5 +156,8 @@ export const getSingleWalletPerformanceResult = (trades: TradeDataItem[]) => {
 		const result = getPerformance(trades);
 		coinToTradesMap[coin].performance = result;
 	});
-	return coinToTradesMap;
+	return {
+		coinToTradesMap,
+		profitabilityOverTime: analyzeProfitabilityOverTime(trades),
+	};
 };

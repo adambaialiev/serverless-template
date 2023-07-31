@@ -80,10 +80,10 @@ const handler = async (event: SQSEvent) => {
 				try {
 					for (let i = 0; i < walletsPerformance.length; i++) {
 						const wallet = walletsPerformance[i][0] as string;
-						const { singleWalletPerformanceSummary, singleWalletPerformance } =
+						const { singleWalletPerformanceSummary, coinToTradesMap } =
 							await analyzerWallet(wallet);
 						walletsDetailedPerformance[wallet] = {
-							coinToTrades: singleWalletPerformance,
+							coinToTrades: coinToTradesMap,
 							summary: singleWalletPerformanceSummary,
 						};
 					}

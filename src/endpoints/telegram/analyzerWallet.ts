@@ -24,17 +24,16 @@ export default async function analyzerWallet(wallet: string) {
 	)) as any;
 	const data = result['EVM'] as TradeData;
 
-	const singleWalletPerformance = getSingleWalletPerformanceResult(
-		data.sellside
-	);
+	const { coinToTradesMap, profitabilityOverTime } =
+		getSingleWalletPerformanceResult(data.sellside);
 
-	const singleWalletPerformanceSummary = getSingleWalletPerformanceSummary(
-		singleWalletPerformance
-	);
+	const singleWalletPerformanceSummary =
+		getSingleWalletPerformanceSummary(coinToTradesMap);
 
 	return {
 		singleWalletPerformanceSummary,
-		singleWalletPerformance,
+		coinToTradesMap,
+		profitabilityOverTime,
 		data,
 	};
 }
