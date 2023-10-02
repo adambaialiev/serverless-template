@@ -16,6 +16,10 @@ provider:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
+    learning_platform_table:
+      Ref: LearningPlatformTable
+    learning_platform_bucket:
+      Ref: LearningPlatformBucket
     MAIN_QUEUE_URL:
       Ref: MainQueue
     ALCHEMY_API_KEY_MATIC: ${env:ALCHEMY_API_KEY_MATIC}
@@ -78,6 +82,27 @@ custom:
     createRoute53Record: true
 
 functions:
+  create-creator:
+    handler: build/src/endpoints/learningPlatform/creator/createCreator.main
+    events:
+      - http:
+          path: /creator
+          method: POST
+          cors: true
+  get-creators:
+    handler: build/src/endpoints/learningPlatform/creator/getCreators.main
+    events:
+      - http:
+          path: /creator
+          method: GET
+          cors: true
+  get-upload-url:
+    handler: build/src/endpoints/learningPlatform/creator/getUploadUrl.main
+    events:
+      - http:
+          path: /creator/upload-url
+          method: POST
+          cors: true
   dexAnalyzer:
     timeout: 30
     handler: build/src/endpoints/telegram/dexAnalyzer.dexAnalyzer
@@ -442,3 +467,53 @@ resources:
             Projection:
               ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
+    LearningPlatformTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: LearningPlatformTable-${self:provider.profile}
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+    LearningPlatformBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: learning-platform-bucket-${self:provider.profile}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
