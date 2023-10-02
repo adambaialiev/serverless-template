@@ -7,9 +7,9 @@ import KSUID from 'ksuid';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
-const TableName = process.env.dynamo_table as string;
+const TableName = process.env.learning_platform_table as string;
 
-const BucketName = process.env.bucket as string;
+const BucketName = process.env.learning_platform_bucket as string;
 
 export const buildFileUrl = (key: string) =>
 	`https://${BucketName}.s3.amazonaws.com/${key}`;
