@@ -10,7 +10,7 @@ export interface GetUploadUrlParams {
 
 const bucketName = process.env.learning_platform_bucket;
 
-const URL_EXPIRATION_SECONDS = 300;
+const URL_EXPIRATION_SECONDS = 3000;
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {

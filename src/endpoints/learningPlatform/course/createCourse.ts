@@ -12,7 +12,7 @@ const TableName = process.env.learning_platform_table as string;
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
-		const { name, imageKey } = JSON.parse(event.body);
+		const { name, imageKey, authorId } = JSON.parse(event.body);
 
 		const imageUrl = buildFileUrl(imageKey);
 
@@ -21,6 +21,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			[TableKeys.PK]: Entities.COURSE,
 			[TableKeys.SK]: buildCourseKey(id),
 			[CourseAttributes.ID]: id,
+			[CourseAttributes.AUTHOR_ID]: authorId,
 			[CourseAttributes.NAME]: name,
 			[CourseAttributes.CREATED_AT]: Date.now().toString(),
 			[CourseAttributes.IMAGE_URL]: imageUrl,

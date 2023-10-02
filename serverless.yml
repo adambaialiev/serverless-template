@@ -48,6 +48,7 @@ provider:
         - dynamodb:DeleteItem
         - sns:*
         - sqs:*
+        - s3:*
       Resource: '*'
 
 plugins:

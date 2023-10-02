@@ -332,6 +332,7 @@ export interface CreatorItem {
 
 export enum CourseAttributes {
 	ID = 'id',
+	AUTHOR_ID = 'authorId',
 	NAME = 'name',
 	CREATED_AT = 'createdAt',
 	IMAGE_URL = 'imageUrl',
@@ -342,6 +343,7 @@ export interface CourseItem {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
 	[CourseAttributes.ID]: DocumentClient.String;
+	[CourseAttributes.AUTHOR_ID]: DocumentClient.String;
 	[CourseAttributes.NAME]: DocumentClient.String;
 	[CourseAttributes.CREATED_AT]: DocumentClient.String;
 	[CourseAttributes.IMAGE_URL]: DocumentClient.String;
