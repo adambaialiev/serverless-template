@@ -42,3 +42,5 @@ export const buildMonitoringUserAndroidKey = (id: string) =>
 
 export const buildMonitoringSessionKey = (id: string) =>
 	buildKey(Entities.MONITORING_SESSION, id);
+
+export const buildCreatorKey = (id: string) => buildKey(Entities.CREATOR, id);

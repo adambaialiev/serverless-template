@@ -27,6 +27,7 @@ export enum Entities {
 	MONITORING_USER_IOS = 'MONITORING_USER_IOS#',
 	MONITORING_USER_ANDROID = 'MONITORING_USER_ANDROID#',
 	MONITORING_SESSION = 'MONITORING_SESSION#',
+	CREATOR = 'CREATOR#',
 }
 
 export enum MasterWalletAttributes {
@@ -312,4 +313,18 @@ export enum MonitoringAttributes {
 	SESSION_ID = 'sessionId',
 	PLATFORM = 'platform',
 	COUNTRY = 'country',
+}
+
+export enum CreatorAttributes {
+	ID = 'id',
+	NAME = 'name',
+	CREATED_AT = 'createdAt',
+}
+
+export interface CreatorItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[CreatorAttributes.ID]: DocumentClient.String;
+	[CreatorAttributes.NAME]: DocumentClient.String;
+	[CreatorAttributes.CREATED_AT]: DocumentClient.String;
 }
