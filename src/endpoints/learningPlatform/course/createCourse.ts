@@ -1,9 +1,10 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
-import { Entities, CreatorAttributes, TableKeys } from '@/common/dynamo/schema';
-import { buildCreatorKey } from '@/common/dynamo/buildKey';
+import { Entities, TableKeys, CourseAttributes } from '@/common/dynamo/schema';
+import { buildCourseKey } from '@/common/dynamo/buildKey';
 import KSUID from 'ksuid';
+import { buildFileUrl } from '../utils';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -11,15 +12,19 @@ const TableName = process.env.learning_platform_table as string;
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
-		const { name } = JSON.parse(event.body);
+		const { name, imageKey } = JSON.parse(event.body);
+
+		const imageUrl = buildFileUrl(imageKey);
 
 		const id = KSUID.randomSync().string;
 		const Item = {
-			[TableKeys.PK]: Entities.CREATOR,
-			[TableKeys.SK]: buildCreatorKey(id),
-			[CreatorAttributes.ID]: id,
-			[CreatorAttributes.NAME]: name,
-			[CreatorAttributes.CREATED_AT]: Date.now().toString(),
+			[TableKeys.PK]: Entities.COURSE,
+			[TableKeys.SK]: buildCourseKey(id),
+			[CourseAttributes.ID]: id,
+			[CourseAttributes.NAME]: name,
+			[CourseAttributes.CREATED_AT]: Date.now().toString(),
+			[CourseAttributes.IMAGE_URL]: imageUrl,
+			[CourseAttributes.LESSONS]: {},
 		};
 
 		await dynamo

@@ -66,6 +66,20 @@ custom:
     createRoute53Record: true
 
 functions:
+  create-course:
+    handler: build/src/endpoints/learningPlatform/course/createCourse.main
+    events:
+      - http:
+          path: /course
+          method: POST
+          cors: true
+  get-courses:
+    handler: build/src/endpoints/learningPlatform/course/getCourses.main
+    events:
+      - http:
+          path: /course
+          method: GET
+          cors: true
   create-creator:
     handler: build/src/endpoints/learningPlatform/creator/createCreator.main
     events:
