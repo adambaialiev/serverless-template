@@ -84,7 +84,7 @@ functions:
     handler: build/src/endpoints/learningPlatform/creator/getUploadUrl.main
     events:
       - http:
-          path: /creator/upload-url
+          path: /upload-url
           method: POST
           cors: true
 resources:
