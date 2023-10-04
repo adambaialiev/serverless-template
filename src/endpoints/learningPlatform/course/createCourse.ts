@@ -5,6 +5,7 @@ import { Entities, TableKeys, CourseAttributes } from '@/common/dynamo/schema';
 import { buildCourseKey } from '@/common/dynamo/buildKey';
 import KSUID from 'ksuid';
 import { buildFileUrl } from '../utils';
+import { Lessons } from '../types';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -17,6 +18,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 		const imageUrl = buildFileUrl(imageKey);
 
 		const id = KSUID.randomSync().string;
+		const emptyLessons: Lessons = { lessons: [] };
 		const Item = {
 			[TableKeys.PK]: Entities.COURSE,
 			[TableKeys.SK]: buildCourseKey(id),
@@ -25,7 +27,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			[CourseAttributes.NAME]: name,
 			[CourseAttributes.CREATED_AT]: Date.now().toString(),
 			[CourseAttributes.IMAGE_URL]: imageUrl,
-			[CourseAttributes.LESSONS]: {},
+			[CourseAttributes.LESSONS]: emptyLessons,
 		};
 
 		await dynamo
