@@ -27,14 +27,18 @@ export const main: APIGatewayProxyHandler = async () => {
 
 		const items = queryOutput.Items.map((item) => ({
 			...item,
-			lessons: {
-				...item.lessons,
-				lessons: item.lessons.map((lesson: Lesson) => ({
-					...lesson,
-					videoUrl: buildFileUrl(lesson.videoUrl),
-					imageUrl: buildFileUrl(lesson.imageUrl),
-				})),
-			},
+			lessons: item.lessons
+				? {
+						...item.lessons,
+						lessons: item.lessons.lessons
+							? item.lessons.lessons.map((lesson: Lesson) => ({
+									...lesson,
+									videoUrl: buildFileUrl(lesson.videoUrl),
+									imageUrl: buildFileUrl(lesson.imageUrl),
+							  }))
+							: [],
+				  }
+				: { lessons: [] },
 		}));
 
 		return sendResponse(201, items);
