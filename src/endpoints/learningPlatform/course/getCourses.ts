@@ -2,8 +2,7 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
 import { Entities, TableKeys } from '@/common/dynamo/schema';
-import { Lesson } from '../types';
-import { buildFileUrl } from '../utils';
+import { BucketName } from '../utils';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -25,23 +24,10 @@ export const main: APIGatewayProxyHandler = async () => {
 			})
 			.promise();
 
-		const items = queryOutput.Items.map((item) => ({
-			...item,
-			lessons: item.lessons
-				? {
-						...item.lessons,
-						lessons: item.lessons.lessons
-							? item.lessons.lessons.map((lesson: Lesson) => ({
-									...lesson,
-									videoUrl: buildFileUrl(lesson.videoUrl),
-									imageUrl: buildFileUrl(lesson.imageUrl),
-							  }))
-							: [],
-				  }
-				: { lessons: [] },
-		}));
-
-		return sendResponse(201, items);
+		return sendResponse(201, {
+			courses: queryOutput.Items,
+			bucketName: BucketName,
+		});
 	} catch (error: unknown) {
 		console.log(error);
 		if (error instanceof Error) {
