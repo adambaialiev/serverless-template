@@ -3,6 +3,7 @@ export interface Lesson {
 	videoUrl: string;
 	imageUrl: string;
 	description: string;
+	duration: string;
 }
 
 export interface Lessons {
