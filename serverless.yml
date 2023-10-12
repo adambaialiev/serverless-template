@@ -82,7 +82,7 @@ functions:
           method: POST
           cors: true
   update-course:
-    handler: build/src/endpoints/learningPlatform/course/createCourse.main
+    handler: build/src/endpoints/learningPlatform/course/updateCourse.main
     events:
       - http:
           path: /course
