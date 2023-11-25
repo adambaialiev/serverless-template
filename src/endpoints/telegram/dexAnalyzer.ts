@@ -151,12 +151,12 @@ const handler = async (event: SQSEvent) => {
 						console.log({ error });
 					}
 				}
-				const previousData = telegramUserItem?.data as TelegramUserData;
+				// const previousData = telegramUserItem?.data as TelegramUserData;
 				const decideShouldHideAddresses = () => {
 					if (telegramUserItem && telegramUserItem.isPremium) {
-						return false;
+						return true;
 					}
-					return previousData && previousData.walletsFound >= 20;
+					return true;
 				};
 				const shouldHideAddresses = decideShouldHideAddresses();
 

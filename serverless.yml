@@ -16,6 +16,10 @@ provider:
     stage: ${opt:stage}
     dynamo_table:
       Ref: MainTable
+    learning_platform_table:
+      Ref: LearningPlatformTable
+    learning_platform_bucket:
+      Ref: LearningPlatformBucket
     MAIN_QUEUE_URL:
       Ref: MainQueue
     ALCHEMY_API_KEY_MATIC: ${env:ALCHEMY_API_KEY_MATIC}
@@ -27,22 +31,6 @@ provider:
     POLYGONSCAN_API_KEY: ${env:POLYGONSCAN_API_KEY}
     COIN_MARKET_CAP_API_KEY: ${env:COIN_MARKET_CAP_API_KEY}
     COIN_MARKET_CAP_API_URL: ${env:COIN_MARKET_CAP_API_URL}
-    STAGING_SLACK_SUPPORT_URL: ${env:STAGING_SLACK_SUPPORT_URL}
-    STAGING_SLACK_FEEDBACK_URL: ${env:STAGING_SLACK_FEEDBACK_URL}
-    STAGING_SLACK_GET_BALANCES_URL: ${env:STAGING_SLACK_GET_BALANCES_URL}
-    STAGING_SLACK_GET_TRANSACTION_URL: ${env:STAGING_SLACK_GET_TRANSACTION_URL}
-    STAGING_SLACK_MAKE_TRANSACTION_URL: ${env:STAGING_SLACK_MAKE_TRANSACTION_URL}
-    STAGING_SLACK_UPDATE_PRICES_URL: ${env:STAGING_SLACK_UPDATE_PRICES_URL}
-    STAGING_SLACK_CREATE_WALLET_URL: ${env:STAGING_SLACK_CREATE_WALLET_URL}
-    STAGING_SLACK_MONITORING_URL: ${env:STAGING_SLACK_MONITORING_URL}
-    PROD_SLACK_SUPPORT_URL: ${env:PROD_SLACK_SUPPORT_URL}
-    PROD_SLACK_FEEDBACK_URL: ${env:PROD_SLACK_FEEDBACK_URL}
-    PROD_SLACK_GET_BALANCES_URL: ${env:PROD_SLACK_GET_BALANCES_URL}
-    PROD_SLACK_GET_TRANSACTION_URL: ${env:PROD_SLACK_GET_TRANSACTION_URL}
-    PROD_SLACK_MAKE_TRANSACTION_URL: ${env:PROD_SLACK_MAKE_TRANSACTION_URL}
-    PROD_SLACK_UPDATE_PRICES_URL: ${env:PROD_SLACK_UPDATE_PRICES_URL}
-    PROD_SLACK_CREATE_WALLET_URL: ${env:PROD_SLACK_CREATE_WALLET_URL}
-    PROD_SLACK_MONITORING_URL: ${env:PROD_SLACK_MONITORING_URL}
     TELEGRAM_BOT_TOKEN: ${env:TELEGRAM_BOT_TOKEN}
     SLACK_WALLET_WATCHER_URL: ${env:SLACK_WALLET_WATCHER_URL}
     SLACK_BOT_CHANNEL_URL: ${env:SLACK_BOT_CHANNEL_URL}
@@ -61,6 +49,7 @@ provider:
         - dynamodb:DeleteItem
         - sns:*
         - sqs:*
+        - s3:*
       Resource: '*'
 
 plugins:
@@ -79,336 +68,55 @@ custom:
     createRoute53Record: true
 
 functions:
-  dexAnalyzer:
-    timeout: 30
-    handler: build/src/endpoints/telegram/dexAnalyzer.dexAnalyzer
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - MainQueue
-              - Arn
-  telegramWebhook:
-    handler: build/src/endpoints/telegram/webhook.webhook
+  update-lessons:
+    handler: build/src/endpoints/learningPlatform/course/updateLessons.main
     events:
       - http:
-          path: /v1/telegram/webhook
-          method: post
+          path: /course/lessons
+          method: POST
           cors: true
-  getCryptoTransactions:
-    timeout: 30
-    handler: build/src/endpoints/crypto/getTransactions.getTransactions
+  create-course:
+    handler: build/src/endpoints/learningPlatform/course/createCourse.main
     events:
       - http:
-          path: /v1/crypto/transactions/history
-          method: post
+          path: /course
+          method: POST
           cors: true
-  getBalances:
-    timeout: 30
-    handler: build/src/endpoints/crypto/getBalances.getBalances
+  update-course:
+    handler: build/src/endpoints/learningPlatform/course/updateCourse.main
     events:
       - http:
-          path: /v1/crypto/get-balances
-          method: post
+          path: /course
+          method: PUT
           cors: true
-  getTokenBalances:
-    timeout: 30
-    handler: build/src/endpoints/crypto/getTokenBalances.getTokenBalances
+  get-courses:
+    handler: build/src/endpoints/learningPlatform/course/getCourses.main
     events:
       - http:
-          path: /v1/crypto/get-token-balances
-          method: post
+          path: /course
+          method: GET
           cors: true
-  createWallet:
-    timeout: 30
-    handler: build/src/endpoints/crypto/createWallet.createWallet
+  create-creator:
+    handler: build/src/endpoints/learningPlatform/creator/createCreator.main
     events:
       - http:
-          path: /v1/crypto/create-wallet
-          method: post
+          path: /creator
+          method: POST
           cors: true
-  clear:
-    timeout: 30
-    handler: build/src/endpoints/app/validateDeposits.validateDeposits
+  get-creators:
+    handler: build/src/endpoints/learningPlatform/creator/getCreators.main
     events:
       - http:
-          path: /v1/app/clear
-          method: post
+          path: /creator
+          method: GET
           cors: true
-  summary:
-    handler: build/src/endpoints/app/summary.summary
+  get-upload-url:
+    handler: build/src/endpoints/learningPlatform/creator/getUploadUrl.main
     events:
       - http:
-          path: /v1/app/summary
-          method: post
+          path: /upload-url
+          method: POST
           cors: true
-  clearMW:
-    handler: build/src/endpoints/debug/clearMasterWallet.clearMasterWallet
-    events:
-      - http:
-          path: /v1/clear-master-wallet
-          method: post
-          cors: true
-  debug:
-    handler: build/src/endpoints/debug/debug.debug
-    events:
-      - http:
-          path: /v1/debug
-          method: post
-          cors: true
-  crypto-webhook:
-    timeout: 30
-    handler: build/src/endpoints/crypto/webhook.webhook
-    events:
-      - http:
-          path: /v1/crypto/webhook
-          method: post
-          cors: true
-  crypto-update-prices:
-    timeout: 30
-    handler: build/src/endpoints/crypto/updatePrices.updatePrices
-    events:
-      - http:
-          path: /v1/crypto/update-prices
-          method: get
-          cors: true
-  crypto-webhook-t:
-    timeout: 30
-    handler: build/src/endpoints/crypto/webhookTatum.webhook
-    events:
-      - http:
-          path: /v1/crypto/webhook-tatum
-          method: post
-          cors: true
-  init:
-    handler: build/src/endpoints/app/init.init
-    events:
-      - http:
-          path: /v1/app/init
-          method: post
-          cors: true
-  getUserWallet:
-    handler: build/src/endpoints/user/getUserWallet.getUserWallet
-    events:
-      - http:
-          path: /v1/user/wallet
-          method: post
-          cors: true
-
-  getUsersForAdmin:
-    handler: build/src/endpoints/user/getUsersForAdmin.getUsersForAdmin
-    events:
-      - http:
-          path: /v1/users/get-users-for-admin
-          method: post
-          cors: true
-  withdraw:
-    handler: build/src/endpoints/wallet/withdraw.withdraw
-    events:
-      - http:
-          path: /v1/wallet/withdraw
-          method: post
-          cors: true
-  addWithdrawalAddress:
-    handler: build/src/endpoints/wallet/addWithdrawalAddress.addWithdrawalAddress
-    events:
-      - http:
-          path: /v1/wallet/withdraw/add-address
-          method: post
-          cors: true
-  removeWithdrawalAddress:
-    handler: build/src/endpoints/wallet/removeWithdrawalAddress.removeWithdrawalAddress
-    events:
-      - http:
-          path: /v1/wallet/withdraw/remove-address/{id}
-          method: delete
-          cors: true
-  savePushTokenToUser:
-    handler: build/src/endpoints/savePushTokenToUser/savePushTokenToUser.savePushTokenToUser
-    events:
-      - http:
-          path: /v1/users/pushToken
-          method: post
-          cors: true
-  decrementBadgeCount:
-    handler: build/src/endpoints/notifications/decrementBadgeCount.decrementBadgeCount
-    events:
-      - http:
-          path: /v1/notifications/badge/decrement
-          method: put
-          cors: true
-
-  makeCryptoTransfer:
-    handler: build/src/endpoints/crypto/makeTransaction.makeTransaction
-    events:
-      - http:
-          path: /v1/crypto/transaction
-          method: post
-          cors: true
-  getTransactions:
-    handler: build/src/endpoints/transactions/getTransactions.getTransactions
-    events:
-      - http:
-          path: /v1/transactions/{phoneNumber}
-          method: get
-          cors: true
-  getUsersTransactions:
-    handler: build/src/endpoints/crypto/getTransactionsBetweenUsers.getTransactionsBetweenUsers
-    events:
-      - http:
-          path: /v1/crypto/transactions
-          method: get
-          cors: true
-  getTransactionDetails:
-    handler: build/src/endpoints/crypto/getTransactionDetails.getTransactionDetails
-    events:
-      - http:
-          path: /v1/crypto/transaction-details
-          method: post
-          cors: true
-
-  getTransactionsRoom:
-    handler: build/src/endpoints/transactions/getTransactionsRoom.getTransactionsRoom
-    events:
-      - http:
-          path: /v1/transactions/room
-          method: post
-          cors: true
-  createTransactionRequest:
-    timeout: 10
-    handler: build/src/endpoints/transactions/createRequest.createRequest
-    events:
-      - http:
-          path: /v1/transactions/request
-          method: post
-          cors: true
-  acceptRequest:
-    handler: build/src/endpoints/transactions/acceptRequest.acceptRequest
-    events:
-      - http:
-          path: /v1/transactions/request/accept/{id}
-          method: put
-          cors: true
-  declineRequest:
-    handler: build/src/endpoints/transactions/declineRequest.declineRequest
-    events:
-      - http:
-          path: /v1/transactions/request/decline/{id}
-          method: put
-          cors: true
-
-  getUser:
-    handler: build/src/endpoints/user/getUser.getUser
-    events:
-      - http:
-          path: /v1/users/{phoneNumber}
-          method: get
-          cors: true
-  getAlienPackAvatars:
-    handler: build/src/endpoints/avatarPacks/getAlienPacks.getAlienPacks
-    events:
-      - http:
-          path: /v1/avatars/alien-pack
-          method: get
-          cors: true
-  getMonsterPackAvatars:
-    handler: build/src/endpoints/avatarPacks/getMonsterPacks.getMonsterPacks
-    events:
-      - http:
-          path: /v1/avatars/monster-pack
-          method: get
-          cors: true
-  getRegisteredUsers:
-    handler: build/src/endpoints/user/getRegisteredUsers.getRegisteredUsers
-    events:
-      - http:
-          path: /v1/users/registered
-          method: post
-  updateIsReadTransaction:
-    handler: build/src/endpoints/transactions/updateReadState.updateReadState
-    events:
-      - http:
-          path: /v1/transactions/read/{id}
-          method: put
-  updateUser:
-    handler: build/src/endpoints/user/updateUser.updateUser
-    events:
-      - http:
-          path: /v1/users/update
-          method: put
-          cors: true
-
-  signIn:
-    handler: build/src/endpoints/sign-in/sign-in.signIn
-    events:
-      - http:
-          path: /v1/auth/sign-in
-          method: post
-          cors: true
-
-  signInVerify:
-    handler: build/src/endpoints/sign-in-verify/sign-in-verify.signInVerify
-    events:
-      - http:
-          path: /v1/auth/sign-in/verify
-          method: post
-          cors: true
-
-  refreshToken:
-    handler: build/src/endpoints/refreshToken/refreshToken.refreshTokenHandler
-    events:
-      - http:
-          path: /v1/auth/refreshToken
-          method: post
-          cors: true
-
-  deleteAccount:
-    handler: build/src/endpoints/delete-account/deleteAccount.deleteAccount
-    events:
-      - http:
-          path: /v1/auth/delete
-          method: post
-          cors: true
-
-  createSupportTicket:
-    handler: build/src/endpoints/support/createSupportTicket.createSupportTicket
-    events:
-      - http:
-          path: /v1/support
-          method: post
-          cors: true
-  createFeedback:
-    handler: build/src/endpoints/feedback/createFeedback.createFeedback
-    events:
-      - http:
-          path: /v1/feedback
-          method: post
-          cors: true
-
-  createMonitoringInfo:
-    handler: build/src/endpoints/monitoring/createMonitoringInfo.createMonitoringInfo
-    events:
-      - http:
-          path: /v1/monitoring
-          method: post
-          cors: true
-
-  reportMonitoringEvents:
-    handler: build/src/endpoints/monitoring-2/reportMonitoringEvents.reportMonitoringEvents
-    events:
-      - http:
-          path: /v1/report-monitoring-events
-          method: post
-          cors: true
-
-  reportAppActivated:
-    handler: build/src/endpoints/monitoring-2/reportAppActivated.reportAppActivated
-    events:
-      - http:
-          path: /v1/report-app-activated
-          method: post
-          cors: true
-
 resources:
   Resources:
     MainQueue:
@@ -443,3 +151,53 @@ resources:
             Projection:
               ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
+    LearningPlatformTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: LearningPlatformTable-${self:provider.profile}
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+    LearningPlatformBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: learning-platform-bucket-${self:provider.profile}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000

@@ -8,3 +8,4 @@ build
 .idea
 .env.wallet-adam-dev
 .env
+.DS_Store
