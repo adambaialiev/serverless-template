@@ -29,6 +29,26 @@ export enum Entities {
 	MONITORING_SESSION = 'MONITORING_SESSION#',
 	CREATOR = 'CREATOR#',
 	COURSE = 'COURSE#',
+	ASSISTANT = 'ASSISTANT#',
+	ASSISTANT_RESPONSE = 'ASSISTANT_RESPONSE#',
+}
+
+export enum AssistantResponseAttributes {
+	ID = 'id',
+	MESSAGE_ID = 'messageId',
+	RESPONSE = 'response',
+	PROMPT = 'prompt',
+	CREATED_AT = 'createdAt',
+	COUNTRY = 'country',
+	IDENTITY = 'identity',
+}
+
+export interface AssistantResponseItem {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[AssistantResponseAttributes.ID]: DocumentClient.String;
+	[AssistantResponseAttributes.PROMPT]: DocumentClient.String;
+	[AssistantResponseAttributes.CREATED_AT]: DocumentClient.String;
 }
 
 export enum MasterWalletAttributes {

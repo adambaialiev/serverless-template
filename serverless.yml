@@ -18,6 +18,8 @@ provider:
       Ref: MainTable
     learning_platform_table:
       Ref: LearningPlatformTable
+    booksgpt_table:
+      Ref: BooksGPTTable
     learning_platform_bucket:
       Ref: LearningPlatformBucket
     MAIN_QUEUE_URL:
@@ -68,6 +70,76 @@ custom:
     createRoute53Record: true
 
 functions:
+  assistant-feed:
+    handler: build/src/endpoints/booksgpt/assistantFeed.main
+    events:
+      - http:
+          path: /booksgpt/assistant/{assistantId}/feed
+          method: GET
+          cors: true
+          request:
+            parameters:
+              paths:
+                assistantId: true
+  add-response-to-feed:
+    handler: build/src/endpoints/booksgpt/addResponseToAssistantFeed.main
+    events:
+      - http:
+          path: /booksgpt/assistant/{assistantId}/feed
+          method: POST
+          cors: true
+  retrieve-run:
+    handler: build/src/endpoints/booksgpt/retrieveRun.main
+    events:
+      - http:
+          path: /booksgpt/threads/{threadId}/runs/{runId}
+          method: GET
+          cors: true
+          request:
+            parameters:
+              paths:
+                threadId: true
+                runId: true
+  list-messages:
+    handler: build/src/endpoints/booksgpt/listMessages.main
+    events:
+      - http:
+          path: /booksgpt/threads/{threadId}/messages
+          method: GET
+          cors: true
+          request:
+            parameters:
+              paths:
+                threadId: true
+  create-thread-and-run:
+    handler: build/src/endpoints/booksgpt/createThreadAndRun.main
+    events:
+      - http:
+          path: /booksgpt/threads/runs
+          method: POST
+          cors: true
+  create-run:
+    handler: build/src/endpoints/booksgpt/createRun.main
+    events:
+      - http:
+          path: /booksgpt/threads/{threadId}/runs
+          method: POST
+          cors: true
+          request:
+            parameters:
+              paths:
+                threadId: true
+  create-message:
+    handler: build/src/endpoints/booksgpt/createMessage.main
+    events:
+      - http:
+          path: /booksgpt/threads/{threadId}/messages
+          method: POST
+          cors: true
+          request:
+            parameters:
+              paths:
+                threadId: true
   update-lessons:
     handler: build/src/endpoints/learningPlatform/course/updateLessons.main
     events:
@@ -127,6 +199,34 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: MainTable-${self:provider.profile}
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: GSI1PK
+            AttributeType: S
+          - AttributeName: GSI1SK
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: GSI1
+            KeySchema:
+              - AttributeName: GSI1PK
+                KeyType: HASH
+              - AttributeName: GSI1SK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+    BooksGPTTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: BooksGPTTable-${self:provider.profile}
         AttributeDefinitions:
           - AttributeName: PK
             AttributeType: S

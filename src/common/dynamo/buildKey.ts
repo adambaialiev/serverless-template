@@ -46,3 +46,9 @@ export const buildMonitoringSessionKey = (id: string) =>
 export const buildCreatorKey = (id: string) => buildKey(Entities.CREATOR, id);
 
 export const buildCourseKey = (id: string) => buildKey(Entities.COURSE, id);
+
+export const buildAssistantResponseKey = (id: string) =>
+	buildKey(Entities.ASSISTANT_RESPONSE, id);
+
+export const buildAssistantKey = (id: string) =>
+	buildKey(Entities.ASSISTANT, id);
