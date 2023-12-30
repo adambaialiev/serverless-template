@@ -74,7 +74,7 @@ functions:
     handler: build/src/endpoints/booksgpt/assistantFeed.main
     events:
       - http:
-          path: /booksgpt/assistant/{assistantId}/feed
+          path: /v1/booksgpt/assistant/{assistantId}/feed
           method: GET
           cors: true
           request:
@@ -85,14 +85,14 @@ functions:
     handler: build/src/endpoints/booksgpt/addResponseToAssistantFeed.main
     events:
       - http:
-          path: /booksgpt/assistant/{assistantId}/feed
+          path: /v1/booksgpt/assistant/{assistantId}/feed
           method: POST
           cors: true
   retrieve-run:
     handler: build/src/endpoints/booksgpt/retrieveRun.main
     events:
       - http:
-          path: /booksgpt/threads/{threadId}/runs/{runId}
+          path: /v1/booksgpt/threads/{threadId}/runs/{runId}
           method: GET
           cors: true
           request:
@@ -104,7 +104,7 @@ functions:
     handler: build/src/endpoints/booksgpt/listMessages.main
     events:
       - http:
-          path: /booksgpt/threads/{threadId}/messages
+          path: /v1/booksgpt/threads/{threadId}/messages
           method: GET
           cors: true
           request:
@@ -115,14 +115,14 @@ functions:
     handler: build/src/endpoints/booksgpt/createThreadAndRun.main
     events:
       - http:
-          path: /booksgpt/threads/runs
+          path: /v1/booksgpt/threads/runs
           method: POST
           cors: true
   create-run:
     handler: build/src/endpoints/booksgpt/createRun.main
     events:
       - http:
-          path: /booksgpt/threads/{threadId}/runs
+          path: /v1/booksgpt/threads/{threadId}/runs
           method: POST
           cors: true
           request:
@@ -133,7 +133,7 @@ functions:
     handler: build/src/endpoints/booksgpt/createMessage.main
     events:
       - http:
-          path: /booksgpt/threads/{threadId}/messages
+          path: /v1/booksgpt/threads/{threadId}/messages
           method: POST
           cors: true
           request:
