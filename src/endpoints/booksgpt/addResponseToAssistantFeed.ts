@@ -16,37 +16,43 @@ const TableName = process.env.booksgpt_table as string;
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
 		const { assistantId } = event.pathParameters;
-		const { prompt, response, messageId } = JSON.parse(event.body);
 
-		const id = KSUID.randomSync().string;
-
-		const countryCode = event.headers['CloudFront-Viewer-Country'];
-
-		const country = getName(countryCode);
-
-		const identity = event['requestContext']['identity'];
-
-		const Item = {
-			[TableKeys.PK]: buildAssistantKey(assistantId),
-			[TableKeys.SK]: buildAssistantResponseKey(id),
-			[AssistantResponseAttributes.ID]: id,
-			[AssistantResponseAttributes.MESSAGE_ID]: messageId,
-			[AssistantResponseAttributes.PROMPT]: prompt,
-			[AssistantResponseAttributes.RESPONSE]: response,
-			[AssistantResponseAttributes.IDENTITY]: JSON.stringify(identity),
-			[AssistantResponseAttributes.COUNTRY]: country,
-			[AssistantResponseAttributes.CREATED_AT]: Date.now().toString(),
+		const { responses } = JSON.parse(event.body) as {
+			responses: { prompt: string; response: string; messageId?: string }[];
 		};
 
-		await dynamo
-			.put({
-				Item,
-				TableName,
-				ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
-			})
-			.promise();
+		for (const r of responses) {
+			const { prompt, response, messageId } = r;
+			const id = KSUID.randomSync().string;
 
-		return sendResponse(201, response.data);
+			const countryCode = event.headers['CloudFront-Viewer-Country'];
+
+			const country = getName(countryCode);
+
+			const identity = event['requestContext']['identity'];
+
+			const Item = {
+				[TableKeys.PK]: buildAssistantKey(assistantId),
+				[TableKeys.SK]: buildAssistantResponseKey(id),
+				[AssistantResponseAttributes.ID]: id,
+				[AssistantResponseAttributes.MESSAGE_ID]: messageId,
+				[AssistantResponseAttributes.PROMPT]: prompt,
+				[AssistantResponseAttributes.RESPONSE]: response,
+				[AssistantResponseAttributes.IDENTITY]: JSON.stringify(identity),
+				[AssistantResponseAttributes.COUNTRY]: country,
+				[AssistantResponseAttributes.CREATED_AT]: Date.now().toString(),
+			};
+
+			await dynamo
+				.put({
+					Item,
+					TableName,
+					ConditionExpression: `attribute_not_exists(${TableKeys.SK})`,
+				})
+				.promise();
+		}
+
+		return sendResponse(201, true);
 	} catch (error: unknown) {
 		console.log(error);
 		if (error instanceof Error) {

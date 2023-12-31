@@ -1,13 +1,15 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
-import { Entities, TableKeys } from '@/common/dynamo/schema';
+import { TableKeys } from '@/common/dynamo/schema';
+import { buildAssistantKey } from '@/common/dynamo/buildKey';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 const TableName = process.env.booksgpt_table as string;
 
-export const main: APIGatewayProxyHandler = async () => {
+export const main: APIGatewayProxyHandler = async (event) => {
+	const { assistantId } = event.pathParameters;
 	try {
 		const queryOutput = await dynamo
 			.query({
@@ -17,7 +19,7 @@ export const main: APIGatewayProxyHandler = async () => {
 					'#pk': TableKeys.PK,
 				},
 				ExpressionAttributeValues: {
-					':pk': Entities.ASSISTANT,
+					':pk': buildAssistantKey(assistantId),
 				},
 				ScanIndexForward: false,
 			})
