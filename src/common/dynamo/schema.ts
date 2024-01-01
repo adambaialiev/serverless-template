@@ -41,6 +41,7 @@ export enum AssistantResponseAttributes {
 	CREATED_AT = 'createdAt',
 	COUNTRY = 'country',
 	IDENTITY = 'identity',
+	IS_PUBLIC = 'isPublic',
 }
 
 export interface AssistantResponseItem {

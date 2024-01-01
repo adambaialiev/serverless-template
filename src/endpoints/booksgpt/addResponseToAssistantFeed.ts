@@ -41,6 +41,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 				[AssistantResponseAttributes.IDENTITY]: JSON.stringify(identity),
 				[AssistantResponseAttributes.COUNTRY]: country,
 				[AssistantResponseAttributes.CREATED_AT]: Date.now().toString(),
+				[AssistantResponseAttributes.IS_PUBLIC]: false,
 			};
 
 			await dynamo
