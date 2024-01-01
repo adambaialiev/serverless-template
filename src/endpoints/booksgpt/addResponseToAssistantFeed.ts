@@ -21,8 +21,29 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			responses: { prompt: string; response: string; messageId?: string }[];
 		};
 
+		const feedOutput = await dynamo
+			.query({
+				TableName,
+				KeyConditionExpression: '#pk = :pk',
+				ExpressionAttributeNames: {
+					'#pk': TableKeys.PK,
+				},
+				ExpressionAttributeValues: {
+					':pk': buildAssistantKey(assistantId),
+				},
+				ScanIndexForward: false,
+			})
+			.promise();
+
 		for (const r of responses) {
 			const { prompt, response, messageId } = r;
+
+			if (
+				feedOutput.Items?.length &&
+				feedOutput.Items.find((item) => item.messageId === messageId)
+			) {
+				continue;
+			}
 			const id = KSUID.randomSync().string;
 
 			const countryCode = event.headers['CloudFront-Viewer-Country'];
