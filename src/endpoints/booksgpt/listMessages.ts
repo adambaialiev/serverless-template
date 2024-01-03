@@ -12,7 +12,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 	} catch (error: unknown) {
 		console.log(error);
 		if (error instanceof Error) {
-			return sendResponse(500, error.message);
+			return sendResponse(500, error);
 		}
 	}
 };
