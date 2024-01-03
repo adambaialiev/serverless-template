@@ -4,10 +4,10 @@ import { axiosInstance } from './axiosInstance';
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
-		const { assistantId, message } = JSON.parse(event.body);
+		const { assistant_id, message } = JSON.parse(event.body);
 
 		const response = await axiosInstance.post('/v1/threads/runs', {
-			assistant_id: assistantId,
+			assistant_id: assistant_id,
 			thread: { messages: [{ role: 'user', content: message }] },
 		});
 
