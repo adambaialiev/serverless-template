@@ -10,7 +10,8 @@
 		"start": "sls offline",
 		"deploy:prod": "yarn build && sls deploy --stage prod",
 		"deploy:staging": "yarn build && sls deploy --stage staging",
-		"deploy:adam": "yarn deploy:dev --stage wallet-adam-dev"
+		"deploy:adam": "yarn deploy:dev --stage wallet-adam-dev",
+		"deploy:argen": "yarn deploy:dev --stage argen-dev"
 	},
 	"keywords": [],
 	"author": "",
