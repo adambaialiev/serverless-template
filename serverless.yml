@@ -22,6 +22,8 @@ provider:
       Ref: BooksGPTTable
     learning_platform_bucket:
       Ref: LearningPlatformBucket
+    booksgpt_bucket:
+      Ref: BooksGPTBucket
     MAIN_QUEUE_URL:
       Ref: MainQueue
     ALCHEMY_API_KEY_MATIC: ${env:ALCHEMY_API_KEY_MATIC}
@@ -70,6 +72,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  booksgpt-get-upload-url:
+    handler: build/src/endpoints/booksgpt/getUploadUrl.main
+    events:
+      - http:
+          path: /v1/booksgpt/upload-url
+          method: POST
+          cors: true
   assistant-feed:
     handler: build/src/endpoints/booksgpt/assistantFeed.main
     events:
@@ -283,6 +292,28 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: learning-platform-bucket-${self:provider.profile}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+    BooksGPTBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: books-gpt-bucket-${self:provider.profile}
         PublicAccessBlockConfiguration:
           BlockPublicAcls: false
         OwnershipControls:
