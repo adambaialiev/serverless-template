@@ -52,6 +52,14 @@ export interface AssistantResponseItem {
 	[AssistantResponseAttributes.CREATED_AT]: DocumentClient.String;
 }
 
+export enum AssistantAttributes {
+	NAME = 'NAME',
+	AUTHOR = 'author',
+	MODEL = 'model',
+	INSTRUCTIONS = 'instructions',
+	CREATED_AT = 'createdAt',
+}
+
 export enum MasterWalletAttributes {
 	PUBLIC_ADDRESS = 'publicAddress',
 	PRIVATE_KEY = 'privateKey',

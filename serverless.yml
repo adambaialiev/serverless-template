@@ -149,6 +149,13 @@ functions:
             parameters:
               paths:
                 threadId: true
+  create-assistant:
+    handler: build/src/endpoints/booksgpt/createAssistant.main
+    events:
+      - http:
+          path: /v1/booksgpt/create-assistant
+          method: POST
+          cors: true
   update-lessons:
     handler: build/src/endpoints/learningPlatform/course/updateLessons.main
     events:
