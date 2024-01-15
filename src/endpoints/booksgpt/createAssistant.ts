@@ -13,21 +13,22 @@ const TableName = process.env.booksgpt_table as string;
 export const main: APIGatewayProxyHandler = async (event) => {
 	const { name, author, filePdf, uid } = JSON.parse(event.body);
 
-	const assistantCreationParams = {
-		assistantId: 'assistantId#1',
-		model: 'gpt-3.5-turbo-1106',
-		instructions: 'You are helpful assistant',
-		tools: 'retrieval',
-	};
-
 	try {
 		const uploadFileResponse = await axiosInstance.post(`/v1/files`, {
 			file: fs.createReadStream(filePdf),
 			purpose: 'assistants',
 		});
 
+		const assistantCreationParams = {
+			name: `${name} by ${author}`,
+			model: 'gpt-4-1106-preview',
+			instructions: `You are a friendly assistant that have read the book called ${name} by ${author}. You should be able to summurize the book, its chapters and respond to any other questions about the book.`,
+			tools: [{ type: 'retrieval' }],
+		};
+
 		const createAssistantResponse = await axiosInstance.post(`/v1/assistants`, {
-			...assistantCreationParams, fileIds: [uploadFileResponse.data.id],
+			...assistantCreationParams,
+			file_ids: [uploadFileResponse.data.id],
 		});
 
 		await dynamoDb
@@ -35,11 +36,12 @@ export const main: APIGatewayProxyHandler = async (event) => {
 				TableName,
 				Item: {
 					[TableKeys.PK]: buildUserKey(uid),
-					[TableKeys.SK]: buildAssistantKey(assistantCreationParams.assistantId),
+					[TableKeys.SK]: buildAssistantKey(createAssistantResponse.data.id),
 					[AssistantAttributes.NAME]: name,
 					[AssistantAttributes.AUTHOR]: author,
 					[AssistantAttributes.MODEL]: assistantCreationParams.model,
-					[AssistantAttributes.INSTRUCTIONS]: assistantCreationParams.instructions,
+					[AssistantAttributes.INSTRUCTIONS]:
+						assistantCreationParams.instructions,
 					[AssistantAttributes.CREATED_AT]: Date.now().toString(),
 				},
 			})

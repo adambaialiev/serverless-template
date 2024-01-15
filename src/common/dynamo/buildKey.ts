@@ -2,8 +2,7 @@ import { Entities } from '@/common/dynamo/schema';
 
 export const buildKey = (entity: Entities, id: string) => `${entity}${id}`;
 
-export const buildUserKey = (phoneNumber: string) =>
-	buildKey(Entities.USER, phoneNumber);
+export const buildUserKey = (id: string) => buildKey(Entities.USER, id);
 
 export const buildTelegramUserKey = (id: string) =>
 	buildKey(Entities.TELEGRAM_USER, id);
