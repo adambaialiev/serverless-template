@@ -1,14 +1,12 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { axiosInstance } from './axiosInstance';
+import retrieveRunAPI from './openaiAPI/retrieveRunAPI';
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
 		const { threadId, runId } = event.pathParameters;
 
-		const response = await axiosInstance.get(
-			`/v1/threads/${threadId}/runs/${runId}`
-		);
+		const response = await retrieveRunAPI(threadId, runId);
 
 		return sendResponse(200, response.data);
 	} catch (error: unknown) {

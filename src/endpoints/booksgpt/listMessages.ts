@@ -1,12 +1,12 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { axiosInstance } from './axiosInstance';
+import listMessagersAPI from './openaiAPI/listMessagesAPI';
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
 		const { threadId } = event.pathParameters;
 
-		const response = await axiosInstance.get(`v1/threads/${threadId}/messages`);
+		const response = await listMessagersAPI(threadId);
 
 		return sendResponse(200, response.data);
 	} catch (error: unknown) {

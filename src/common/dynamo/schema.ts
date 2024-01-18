@@ -31,6 +31,7 @@ export enum Entities {
 	COURSE = 'COURSE#',
 	ASSISTANT = 'ASSISTANT#',
 	ASSISTANT_RESPONSE = 'ASSISTANT_RESPONSE#',
+	PENDING_RUN = 'PENDING_RUN#',
 }
 
 export enum AssistantResponseAttributes {
@@ -53,11 +54,48 @@ export interface AssistantResponseItem {
 }
 
 export enum AssistantAttributes {
-	NAME = 'NAME',
+	NAME = 'name',
 	AUTHOR = 'author',
 	MODEL = 'model',
 	INSTRUCTIONS = 'instructions',
+	PDF_URL = 'pdfUrl',
+	COVER_IMAGE_URL = 'coverImageUrl',
+	CHAPTERS_LIST = 'chaptersList',
+	GENERAL_SUMMARY = 'generalSummary',
+	CHAPTERS_SUMMARY = 'chaptersSummary',
 	CREATED_AT = 'createdAt',
+	STATUS = 'status',
+}
+
+export enum PendingRunAttributes {
+	ID = 'id',
+	ASSISTANT_ID = 'assistantId',
+	THREAD_ID = 'threadId',
+	CREATED_AT = 'createdAt',
+	JOB_TYPE = 'jobType',
+}
+
+export type PendingRunItem = {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[PendingRunAttributes.ID]: DocumentClient.String;
+	[PendingRunAttributes.ASSISTANT_ID]: DocumentClient.String;
+	[PendingRunAttributes.THREAD_ID]: DocumentClient.String;
+	[PendingRunAttributes.CREATED_AT]: DocumentClient.String;
+	[PendingRunAttributes.JOB_TYPE]: DocumentClient.String;
+};
+
+export enum JobType {
+	CHAPTERS_LIST_EXTRACTION = 'chaptersListExtraction',
+	CHAPTER_SUMMARY_EXTRACTION = 'chaptersSummaryExtraction',
+	GENERAL_SUMMARY_EXTRACTION = 'generalSummaryExtraction',
+}
+
+export enum AssisttantStatus {
+	QueuedForProcessing = 'queuedForProcessing',
+	ExtractingChapters = 'extractingChapters',
+	ExtractingChaptersSummary = 'extractingChaptersSummary',
+	ExtractingGeneralSummary = 'extractingGeneralSummary',
 }
 
 export enum MasterWalletAttributes {

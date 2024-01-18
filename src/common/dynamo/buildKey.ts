@@ -51,3 +51,6 @@ export const buildAssistantResponseKey = (id: string) =>
 
 export const buildAssistantKey = (id: string) =>
 	buildKey(Entities.ASSISTANT, id);
+
+export const buildPendingRunKey = (id: string) =>
+	buildKey(Entities.PENDING_RUN, id);

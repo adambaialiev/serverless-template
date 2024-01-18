@@ -72,6 +72,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  processPendingRuns:
+    handler: build/src/endpoints/booksgpt/processPendingRuns.main
+    events:
+      - http:
+          path: /v1/booksgpt/process-pending-runs
+          method: POST
+          cors: true
   booksgpt-get-upload-url:
     handler: build/src/endpoints/booksgpt/getUploadUrl.main
     events:

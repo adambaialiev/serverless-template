@@ -2,7 +2,6 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import AWS from 'aws-sdk';
 import { Entities, TableKeys } from '@/common/dynamo/schema';
-import { BucketName } from '../utils';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -26,7 +25,7 @@ export const main: APIGatewayProxyHandler = async () => {
 
 		return sendResponse(201, {
 			courses: queryOutput.Items,
-			bucketName: BucketName,
+			bucketName: process.env.learning_platform_bucket,
 		});
 	} catch (error: unknown) {
 		console.log(error);

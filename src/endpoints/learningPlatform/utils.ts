@@ -1,6 +1,5 @@
-const BucketName = process.env.learning_platform_bucket as string;
+export const buildFileUrlForCourseProject = (key: string) =>
+	`https://${process.env.learning_platform_bucket}.s3.amazonaws.com/${key}`;
 
-export const buildFileUrl = (key: string) =>
-	`https://${BucketName}.s3.amazonaws.com/${key}`;
-
-export { BucketName };
+export const buildFileUrlForbooksGPTProject = (key: string) =>
+	`https://${process.env.booksgpt_bucket}.s3.amazonaws.com/${key}`;

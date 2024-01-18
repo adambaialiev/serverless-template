@@ -4,7 +4,7 @@ import AWS from 'aws-sdk';
 import { Entities, TableKeys, CourseAttributes } from '@/common/dynamo/schema';
 import { buildCourseKey } from '@/common/dynamo/buildKey';
 import KSUID from 'ksuid';
-import { buildFileUrl } from '../utils';
+import { buildFileUrlForCourseProject } from '../utils';
 import { Lessons } from '../types';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
@@ -15,7 +15,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 	try {
 		const { name, imageKey, authorId } = JSON.parse(event.body);
 
-		const imageUrl = buildFileUrl(imageKey);
+		const imageUrl = buildFileUrlForCourseProject(imageKey);
 
 		const id = KSUID.randomSync().string;
 		const emptyLessons: Lessons = { lessons: [] };
