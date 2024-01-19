@@ -18,6 +18,7 @@ import { axiosInstance } from '@/endpoints/booksgpt/axiosInstance';
 import * as fs from 'fs';
 import { buildFileUrlForbooksGPTProject } from '../learningPlatform/utils';
 import createThreadAndRunAPI from './openaiAPI/createThreadAndRunAPI';
+import OpenAI from 'openai';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -29,9 +30,11 @@ export const main: APIGatewayProxyHandler = async (event) => {
 	const coverImageUrl = buildFileUrlForbooksGPTProject(coverImageKey);
 	const pdfUrl = buildFileUrlForbooksGPTProject(pdfKey);
 
+	const openai = new OpenAI();
+
 	try {
-		const uploadFileResponse = await axiosInstance.post(`/v1/files`, {
-			file: fs.createReadStream(pdfUrl),
+		const file = await openai.files.create({
+			file: fs.createReadStream('pdfUrl'),
 			purpose: 'assistants',
 		});
 
@@ -44,7 +47,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
 		const createAssistantResponse = await axiosInstance.post(`/v1/assistants`, {
 			...assistantCreationParams,
-			file_ids: [uploadFileResponse.data.id],
+			file_ids: [file.id],
 		});
 
 		const assistantId = createAssistantResponse.data.id;
