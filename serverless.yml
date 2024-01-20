@@ -158,6 +158,7 @@ functions:
                 threadId: true
   create-assistant:
     handler: build/src/endpoints/booksgpt/createAssistant.main
+    timeout: 400
     events:
       - http:
           path: /v1/booksgpt/create-assistant

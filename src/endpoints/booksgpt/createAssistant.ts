@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import AWS, { S3 } from 'aws-sdk';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
 import {
@@ -14,11 +14,14 @@ import {
 	buildPendingRunKey,
 	buildUserKey,
 } from '@/common/dynamo/buildKey';
-import { axiosInstance } from '@/endpoints/booksgpt/axiosInstance';
-import * as fs from 'fs';
+import {
+	OPEN_AI_API_TOKEN,
+	axiosInstance,
+} from '@/endpoints/booksgpt/axiosInstance';
 import { buildFileUrlForbooksGPTProject } from '../learningPlatform/utils';
 import createThreadAndRunAPI from './openaiAPI/createThreadAndRunAPI';
 import OpenAI from 'openai';
+import { toFile } from 'openai/uploads';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -30,18 +33,37 @@ export const main: APIGatewayProxyHandler = async (event) => {
 	const coverImageUrl = buildFileUrlForbooksGPTProject(coverImageKey);
 	const pdfUrl = buildFileUrlForbooksGPTProject(pdfKey);
 
-	const openai = new OpenAI();
+	const openai = new OpenAI({ apiKey: OPEN_AI_API_TOKEN });
+
+	const s3 = new S3();
 
 	try {
+		const pdfFileBuffer: Buffer = await new Promise((resolve) => {
+			s3.getObject(
+				{
+					Bucket: process.env.booksgpt_bucket as string,
+					Key: pdfKey,
+				},
+				(err, data) => {
+					if (err) {
+						//
+					}
+					resolve(data.Body as Buffer);
+				}
+			);
+		});
+
+		const pdfFile = await toFile(pdfFileBuffer);
+
 		const file = await openai.files.create({
-			file: fs.createReadStream('pdfUrl'),
+			file: pdfFile,
 			purpose: 'assistants',
 		});
 
 		const assistantCreationParams = {
 			name: `${name} by ${author}`,
 			model: 'gpt-4-1106-preview',
-			instructions: `You are an assistant that have read the book called ${name} by ${author}. You should be able to summurize the book, its chapters and respond to any other questions about the book.`,
+			instructions: `You are an assistant that have read the book called ${name} by ${author}. You should be able to summarize the book, its chapters and respond to any other questions about the book.`,
 			tools: [{ type: 'retrieval' }],
 		};
 
@@ -84,22 +106,25 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			assistantId,
 			chaptersExtractionPrompt
 		);
+		console.log({ createThreadAndRunAPIResponse });
 		if (createThreadAndRunAPIResponse.data.status === 'queued') {
 			const runId = createThreadAndRunAPIResponse.data.id;
 			try {
-				await dynamoDb.put({
-					TableName,
-					Item: {
-						[TableKeys.PK]: Entities.PENDING_RUN,
-						[TableKeys.SK]: buildPendingRunKey(runId),
-						[PendingRunAttributes.ID]: runId,
-						[PendingRunAttributes.ASSISTANT_ID]: assistantId,
-						[PendingRunAttributes.CREATED_AT]: Date.now().toString(),
-						[PendingRunAttributes.THREAD_ID]:
-							createThreadAndRunAPIResponse.data.thread_id,
-						[PendingRunAttributes.JOB_TYPE]: JobType.CHAPTERS_LIST_EXTRACTION,
-					},
-				});
+				await dynamoDb
+					.put({
+						TableName,
+						Item: {
+							[TableKeys.PK]: Entities.PENDING_RUN,
+							[TableKeys.SK]: buildPendingRunKey(runId),
+							[PendingRunAttributes.ID]: runId,
+							[PendingRunAttributes.ASSISTANT_ID]: assistantId,
+							[PendingRunAttributes.CREATED_AT]: Date.now().toString(),
+							[PendingRunAttributes.THREAD_ID]:
+								createThreadAndRunAPIResponse.data.thread_id,
+							[PendingRunAttributes.JOB_TYPE]: JobType.CHAPTERS_LIST_EXTRACTION,
+						},
+					})
+					.promise();
 			} catch (error) {
 				console.log({ error });
 			}
