@@ -61,11 +61,27 @@ export enum AssistantAttributes {
 	PDF_URL = 'pdfUrl',
 	COVER_IMAGE_URL = 'coverImageUrl',
 	CHAPTERS_LIST = 'chaptersList',
+	CHAPTERS_SUMMARIES = 'chaptersSummaries',
 	GENERAL_SUMMARY = 'generalSummary',
-	CHAPTERS_SUMMARY = 'chaptersSummary',
 	CREATED_AT = 'createdAt',
 	STATUS = 'status',
 }
+
+export type AssistantItem = {
+	[TableKeys.PK]: DocumentClient.String;
+	[TableKeys.SK]: DocumentClient.String;
+	[AssistantAttributes.NAME]: DocumentClient.String;
+	[AssistantAttributes.AUTHOR]: DocumentClient.String;
+	[AssistantAttributes.MODEL]: DocumentClient.String;
+	[AssistantAttributes.INSTRUCTIONS]: DocumentClient.String;
+	[AssistantAttributes.PDF_URL]: DocumentClient.String;
+	[AssistantAttributes.COVER_IMAGE_URL]: DocumentClient.String;
+	[AssistantAttributes.CHAPTERS_LIST]: DocumentClient.String;
+	[AssistantAttributes.CHAPTERS_SUMMARIES]: DocumentClient.String;
+	[AssistantAttributes.GENERAL_SUMMARY]: DocumentClient.String;
+	[AssistantAttributes.CREATED_AT]: DocumentClient.String;
+	[AssistantAttributes.STATUS]: DocumentClient.String;
+};
 
 export enum PendingRunAttributes {
 	ID = 'id',
@@ -74,6 +90,7 @@ export enum PendingRunAttributes {
 	THREAD_ID = 'threadId',
 	CREATED_AT = 'createdAt',
 	JOB_TYPE = 'jobType',
+	CHAPTER_NAME = 'chapterName',
 }
 
 export type PendingRunItem = {
@@ -85,11 +102,12 @@ export type PendingRunItem = {
 	[PendingRunAttributes.THREAD_ID]: DocumentClient.String;
 	[PendingRunAttributes.CREATED_AT]: DocumentClient.String;
 	[PendingRunAttributes.JOB_TYPE]: DocumentClient.String;
+	[PendingRunAttributes.CHAPTER_NAME]: DocumentClient.String;
 };
 
 export enum JobType {
 	CHAPTERS_LIST_EXTRACTION = 'chaptersListExtraction',
-	CHAPTER_SUMMARY_EXTRACTION = 'chaptersSummaryExtraction',
+	CHAPTERS_SUMMARY_EXTRACTION = 'chaptersSummaryExtraction',
 	GENERAL_SUMMARY_EXTRACTION = 'generalSummaryExtraction',
 }
 

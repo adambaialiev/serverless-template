@@ -84,8 +84,8 @@ export const main: APIGatewayProxyHandler = async (event) => {
 				[AssistantAttributes.INSTRUCTIONS]:
 					assistantCreationParams.instructions,
 				[AssistantAttributes.CREATED_AT]: Date.now().toString(),
-				[AssistantAttributes.CHAPTERS_LIST]: [] as string[],
-				[AssistantAttributes.CHAPTERS_SUMMARY]: '',
+				[AssistantAttributes.CHAPTERS_LIST]: '',
+				[AssistantAttributes.CHAPTERS_SUMMARIES]: '',
 				[AssistantAttributes.COVER_IMAGE_URL]: coverImageUrl,
 				[AssistantAttributes.PDF_URL]: pdfUrl,
 				[AssistantAttributes.GENERAL_SUMMARY]: '',
