@@ -10,7 +10,7 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import AWS from 'aws-sdk';
 import retrieveRunAPI from './openaiAPI/retrieveRunAPI';
 import listMessagersAPI from './openaiAPI/listMessagesAPI';
-import { buildAssistantKey } from '@/common/dynamo/buildKey';
+import { buildAssistantKey, buildUserKey } from '@/common/dynamo/buildKey';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -32,30 +32,38 @@ export const main: APIGatewayProxyHandler = async () => {
 			})
 			.promise();
 
+		console.log({ items: pendingRunsOutput.Items });
+
 		if (pendingRunsOutput.Items?.length) {
 			for (const pendingRun of pendingRunsOutput.Items) {
-				const { jobType, threadId, id, assistantId } =
+				const { jobType, threadId, id, assistantId, userId } =
 					pendingRun as PendingRunItem;
 				if (jobType === JobType.CHAPTERS_LIST_EXTRACTION) {
 					const response = await retrieveRunAPI(threadId, id);
+					console.log({ response });
 					if (response.data.status === 'completed') {
 						const listMessagesResponse = await listMessagersAPI(threadId);
-						if (listMessagesResponse.data) {
-							const messages = listMessagesResponse.data;
+						console.log({
+							listMessagesResponseData: listMessagesResponse.data,
+						});
+						if (listMessagesResponse.data.data) {
+							const messages = listMessagesResponse.data.data;
+							console.log({ messages });
 							if (messages.length) {
-								const lastMessage = messages[messages.length - 1];
+								const lastMessage = messages[0];
+								console.log({ lastMessage });
 								const response = lastMessage.content[0].text.value;
-
+								console.log({ response });
 								await dynamo
 									.update({
 										TableName,
 										Key: {
-											[TableKeys.PK]: Entities.ASSISTANT,
+											[TableKeys.PK]: buildUserKey(userId),
 											[TableKeys.SK]: buildAssistantKey(assistantId),
 										},
 										UpdateExpression: `SET #chaptersList = :chaptersList`,
 										ExpressionAttributeNames: {
-											'#name': AssistantAttributes.CHAPTERS_LIST,
+											'#chaptersList': AssistantAttributes.CHAPTERS_LIST,
 										},
 										ExpressionAttributeValues: {
 											':chaptersList': response,
@@ -74,6 +82,7 @@ export const main: APIGatewayProxyHandler = async () => {
 				}
 			}
 		}
+		return sendResponse(201, true);
 	} catch (error: unknown) {
 		console.log(error);
 		if (error instanceof Error) {

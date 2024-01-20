@@ -100,7 +100,11 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			})
 			.promise();
 
-		const chaptersExtractionPrompt = `Give me a complete list of chapters as an array of strings. Don't add additional words or comments. Only an array of strings.`;
+		const chaptersExtractionPrompt = `Give me a complete list of chapters of this book in the following format: 
+		{
+			"chapters": {put array of strings here}
+		}
+		Don't add additional words or comments. No markup.`;
 
 		const createThreadAndRunAPIResponse = await createThreadAndRunAPI(
 			assistantId,
@@ -118,6 +122,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 							[TableKeys.SK]: buildPendingRunKey(runId),
 							[PendingRunAttributes.ID]: runId,
 							[PendingRunAttributes.ASSISTANT_ID]: assistantId,
+							[PendingRunAttributes.USER_ID]: uid,
 							[PendingRunAttributes.CREATED_AT]: Date.now().toString(),
 							[PendingRunAttributes.THREAD_ID]:
 								createThreadAndRunAPIResponse.data.thread_id,

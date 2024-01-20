@@ -70,6 +70,7 @@ export enum AssistantAttributes {
 export enum PendingRunAttributes {
 	ID = 'id',
 	ASSISTANT_ID = 'assistantId',
+	USER_ID = 'userId',
 	THREAD_ID = 'threadId',
 	CREATED_AT = 'createdAt',
 	JOB_TYPE = 'jobType',
@@ -80,6 +81,7 @@ export type PendingRunItem = {
 	[TableKeys.SK]: DocumentClient.String;
 	[PendingRunAttributes.ID]: DocumentClient.String;
 	[PendingRunAttributes.ASSISTANT_ID]: DocumentClient.String;
+	[PendingRunAttributes.USER_ID]: DocumentClient.String;
 	[PendingRunAttributes.THREAD_ID]: DocumentClient.String;
 	[PendingRunAttributes.CREATED_AT]: DocumentClient.String;
 	[PendingRunAttributes.JOB_TYPE]: DocumentClient.String;
