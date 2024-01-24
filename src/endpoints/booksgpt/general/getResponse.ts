@@ -8,9 +8,10 @@ export default async function getResponse(threadId: string) {
 		if (messages.length) {
 			const lastMessage = messages[0];
 			console.log({ lastMessage });
-			const response = lastMessage.content[0].text.value;
+			const response = lastMessage.content[0].text.value as string;
 			console.log({ response });
 			return response;
 		}
 	}
+	return undefined;
 }

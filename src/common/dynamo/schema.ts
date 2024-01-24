@@ -60,7 +60,7 @@ export enum AssistantAttributes {
 	AUTHOR = 'author',
 	MODEL = 'model',
 	INSTRUCTIONS = 'instructions',
-	PDF_KEY = 'pdffKey',
+	PDF_KEY = 'pdfKey',
 	COVER_IMAGE_URL = 'coverImageUrl',
 	CHAPTERS_LIST = 'chaptersList',
 	CHAPTERS_SUMMARIES = 'chaptersSummaries',

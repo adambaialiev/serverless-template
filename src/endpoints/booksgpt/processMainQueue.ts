@@ -25,10 +25,11 @@ const TableName = process.env.booksgpt_table as string;
 
 export const main: SQSHandler = async (event) => {
 	const sqs = new SQS();
+	console.log({ Records: JSON.stringify(event.Records, null, 2) });
 	try {
 		for (const record of event.Records) {
 			const messageAttributes: SQSMessageAttributes = record.messageAttributes;
-
+			console.log({ record });
 			console.log('Message Attributtes -->  ', messageAttributes);
 			console.log('Message Body -->  ', record.body);
 			const messageBody = record.body as EProcessingMessageTypes;
@@ -57,7 +58,7 @@ export const main: SQSHandler = async (event) => {
 					assistantId,
 					'SET #status = :status',
 					{ '#status': AssistantAttributes.STATUS },
-					{ ':status': { S: 'Started processing' } }
+					{ ':status': 'Started processing' }
 				);
 
 				let pdfFileBuffer: Buffer;
@@ -84,7 +85,7 @@ export const main: SQSHandler = async (event) => {
 						assistantId,
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
-						{ ':status': { S: 'Failed to read pdf' } }
+						{ ':status': 'Failed to read pdf' }
 					);
 					throw new Error('Failed to read file from s3');
 				}
@@ -100,7 +101,7 @@ export const main: SQSHandler = async (event) => {
 						assistantId,
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
-						{ ':status': { S: 'Failed to create OpenAI file' } }
+						{ ':status': 'Failed to create OpenAI file' }
 					);
 					throw new Error('Failed to create open ai file');
 				}
@@ -126,7 +127,7 @@ export const main: SQSHandler = async (event) => {
 						{
 							'#status': AssistantAttributes.STATUS,
 						},
-						{ ':status': { S: 'Failed to create OpenAI assistant' } }
+						{ ':status': 'Failed to create OpenAI assistant' }
 					);
 					throw new Error('Failed to create open ai assistant');
 				}
@@ -142,12 +143,11 @@ export const main: SQSHandler = async (event) => {
 						'#openAiAssistantId': AssistantAttributes.OPEN_AI_ASSISTANT_ID,
 					},
 					{
-						':status': {
-							S: 'Assistant is created. Going to start extracting the list of chapters',
-						},
-						':model': { S: model },
-						':instructions': { S: instructions },
-						':openAiAssistantId': { S: openAiAssistantId },
+						':status':
+							'Assistant is created. Going to start extracting the list of chapters',
+						':model': model,
+						':instructions': instructions,
+						':openAiAssistantId': openAiAssistantId,
 					}
 				);
 
@@ -161,9 +161,7 @@ export const main: SQSHandler = async (event) => {
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
 						{
-							':status': {
-								S: 'Failed to start extracting chapter list',
-							},
+							':status': 'Failed to start extracting chapter list',
 						}
 					);
 					throw new Error('Failed to start extracting chapter list');
@@ -174,9 +172,7 @@ export const main: SQSHandler = async (event) => {
 					'SET #status = :status',
 					{ '#status': AssistantAttributes.STATUS },
 					{
-						':status': {
-							S: 'The process of chapters list extraction has started',
-						},
+						':status': 'The process of chapters list extraction has started',
 					}
 				);
 			}
@@ -208,23 +204,18 @@ export const main: SQSHandler = async (event) => {
 								'#status': AssistantAttributes.STATUS,
 							},
 							{
-								':status': {
-									S: 'Chapters list is extracted. The process to extract each chapter summary has started',
-								},
+								':status':
+									'Chapters list is extracted. The process to extract each chapter summary has started',
 								':chaptersList': {
-									L: chaptersListObject.chapters.map((chapter) => ({
-										S: chapter,
-									})),
+									L: chaptersListObject.chapters,
 								},
 								':chaptersSummaries': {
-									L: chaptersListObject.chapters.map(() => ({
-										S: '',
-									})),
+									L: chaptersListObject.chapters.map(() => ''),
 								},
 							}
 						);
 						for (let i = 0; i < chaptersListObject.chapters.length; i++) {
-							await sqs
+							sqs
 								.sendMessage(
 									extractChapterSummaryMessage({
 										openAiAssistantId,
@@ -236,7 +227,7 @@ export const main: SQSHandler = async (event) => {
 								)
 								.promise();
 						}
-						await sqs
+						sqs
 							.sendMessage(
 								extractGeneralSummaryMessage({
 									openAiAssistantId,
@@ -254,9 +245,7 @@ export const main: SQSHandler = async (event) => {
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
 						{
-							':status': {
-								S: 'Failed to extract chapters list',
-							},
+							':status': 'Failed to extract chapters list',
 						}
 					);
 				}
@@ -371,9 +360,7 @@ export const main: SQSHandler = async (event) => {
 									'SET #status = :status',
 									{ '#status': AssistantAttributes.STATUS },
 									{
-										':status': {
-											S: 'All chapters summaries are extracted',
-										},
+										':status': 'All chapters summaries are extracted',
 									}
 								);
 							}
@@ -387,13 +374,17 @@ export const main: SQSHandler = async (event) => {
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
 						{
-							':status': {
-								S: `Failed to extract chapter summary for chapter with index ${index}`,
-							},
+							':status': `Failed to extract chapter summary for chapter with index ${index}`,
 						}
 					);
 				}
 			}
+			await sqs
+				.deleteMessage({
+					QueueUrl: process.env.MAIN_QUEUE_URL,
+					ReceiptHandle: record.receiptHandle,
+				})
+				.promise();
 		}
 	} catch (error) {
 		console.log(error);

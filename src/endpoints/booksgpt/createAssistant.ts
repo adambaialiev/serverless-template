@@ -26,7 +26,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 				[AssistantAttributes.COVER_IMAGE_URL]:
 					buildFileUrlForbooksGPTProject(coverImageKey),
 				[AssistantAttributes.PDF_KEY]: pdfKey,
-				[AssistantAttributes.STATUS]: 'queued',
+				[AssistantAttributes.STATUS]: 'Queued',
 			};
 		};
 

@@ -1,10 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { buildAssistantKey, buildUserKey } from '@/common/dynamo/buildKey';
 import { TableKeys } from '@/common/dynamo/schema';
 import AWS from 'aws-sdk';
-import {
-	ExpressionAttributeNameMap,
-	ExpressionAttributeValueMap,
-} from 'aws-sdk/clients/dynamodb';
+import { ExpressionAttributeNameMap } from 'aws-sdk/clients/dynamodb';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -15,7 +13,7 @@ export default async function updateAssistant(
 	assistantId: string,
 	UpdateExpression: string,
 	ExpressionAttributeNames: ExpressionAttributeNameMap,
-	ExpressionAttributeValues: ExpressionAttributeValueMap
+	ExpressionAttributeValues: { [key: string]: any }
 ) {
 	await dynamo
 		.update({
