@@ -1,6 +1,4 @@
-import { SQS } from 'aws-sdk';
 import createThreadAndRunAPI from '../openaiAPI/createThreadAndRunAPI';
-import { checkExtractChaptersListRunMessage } from '../processingMessages/checkExtractChaptersListRunMessage';
 
 type TExtractChapterListParams = {
 	openAiAssistantId: string;
@@ -10,10 +8,7 @@ type TExtractChapterListParams = {
 
 export default async function extractChapterList({
 	openAiAssistantId,
-	assistantId,
-	uid,
 }: TExtractChapterListParams) {
-	const sqs = new SQS();
 	const chaptersExtractionPrompt = `Give me a complete list of chapters of this book in the following format: 
   {
     "chapters": {put array of strings here}
@@ -29,16 +24,7 @@ export default async function extractChapterList({
 	if (createThreadAndRunAPIResponse.data.status === 'queued') {
 		const runId = createThreadAndRunAPIResponse.data.id;
 		const threadId = createThreadAndRunAPIResponse.data.thread_id;
-		await sqs
-			.sendMessage(
-				checkExtractChaptersListRunMessage({
-					runId,
-					assistantId,
-					threadId,
-					uid,
-					openAiAssistantId,
-				})
-			)
-			.promise();
+		return { runId, threadId };
 	}
+	throw new Error('Not queued');
 }

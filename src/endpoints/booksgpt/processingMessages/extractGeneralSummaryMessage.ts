@@ -15,8 +15,6 @@ export const extractGeneralSummaryMessage = ({
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
 		MessageBody: EProcessingMessageTypes.extractGeneralSummary,
-		MessageGroupId: 'extractGeneralSummary',
-		MessageDeduplicationId: assistantId,
 		MessageAttributes: {
 			openAiAssistantId: {
 				DataType: 'String',

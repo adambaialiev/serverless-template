@@ -19,8 +19,6 @@ export const createAssistantMessage = ({
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
 		MessageBody: EProcessingMessageTypes.createAssistant,
-		MessageGroupId: 'createAssistant',
-		MessageDeduplicationId: assistantId,
 		MessageAttributes: {
 			name: {
 				DataType: 'String',

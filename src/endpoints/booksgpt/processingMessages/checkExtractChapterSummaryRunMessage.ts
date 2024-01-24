@@ -19,9 +19,7 @@ export const checkExtractChapterSummaryRunMessage = ({
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
 		MessageBody: EProcessingMessageTypes.checkExtractChapterSummaryRun,
-		MessageGroupId: 'checkExtractChapterSummaryRun',
-		MessageDeduplicationId: runId,
-		DelaySeconds: 40,
+		DelaySeconds: 60,
 		MessageAttributes: {
 			runId: {
 				DataType: 'String',

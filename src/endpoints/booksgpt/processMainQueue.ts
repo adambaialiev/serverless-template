@@ -19,6 +19,10 @@ import { buildAssistantKey, buildUserKey } from '@/common/dynamo/buildKey';
 import { extractGeneralSummaryMessage } from './processingMessages/extractGeneralSummaryMessage';
 import extractGeneralSummary from './general/extractGeneralSummary';
 import { createAssistantMessage } from './processingMessages/createAssistantMessage';
+import { extractChapterListMessage } from './processingMessages/extractChapterListMessage';
+import { checkExtractChaptersListRunMessage } from './processingMessages/checkExtractChaptersListRunMessage';
+import { checkExtractGeneralSummaryRunMessage } from './processingMessages/checkExtractGeneralSummaryRunMessage';
+import { checkExtractChapterSummaryRunMessage } from './processingMessages/checkExtractChapterSummaryRunMessage';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -167,9 +171,28 @@ export const main: SQSHandler = async (event) => {
 						':openAiAssistantId': openAiAssistantId,
 					}
 				);
+				await sqs
+					.sendMessage(
+						extractChapterListMessage({ openAiAssistantId, assistantId, uid })
+					)
+					.promise();
+			}
+			if (messageBody === EProcessingMessageTypes.extractChaptersList) {
+				const openAiAssistantId =
+					messageAttributes.openAiAssistantId.stringValue;
+				const assistantId = messageAttributes.assistantId.stringValue;
+				const uid = messageAttributes.uid.stringValue;
 
+				let runId: string;
+				let threadId: string;
 				try {
-					await extractChapterList({ openAiAssistantId, assistantId, uid });
+					const r = await extractChapterList({
+						openAiAssistantId,
+						assistantId,
+						uid,
+					});
+					runId = r.runId;
+					threadId = r.threadId;
 				} catch (error) {
 					console.log({ error });
 					await updateAssistant(
@@ -192,6 +215,17 @@ export const main: SQSHandler = async (event) => {
 						':status': 'The process of chapters list extraction has started',
 					}
 				);
+				await sqs
+					.sendMessage(
+						checkExtractChaptersListRunMessage({
+							runId,
+							assistantId,
+							threadId,
+							uid,
+							openAiAssistantId,
+						})
+					)
+					.promise();
 			}
 			if (messageBody === EProcessingMessageTypes.checkExtractChaptersListRun) {
 				const runId = messageAttributes.runId.stringValue;
@@ -200,6 +234,7 @@ export const main: SQSHandler = async (event) => {
 				const uid = messageAttributes.uid.stringValue;
 				const openAiAssistantId =
 					messageAttributes.openAiAssistantId.stringValue;
+
 				if (!runId || !assistantId || !threadId || !uid || !openAiAssistantId) {
 					throw new Error('Missing message attributes');
 				}
@@ -266,6 +301,19 @@ export const main: SQSHandler = async (event) => {
 						}
 					);
 				}
+				if (response.data.status === 'in_progress') {
+					await sqs
+						.sendMessage(
+							checkExtractChaptersListRunMessage({
+								runId,
+								assistantId,
+								threadId,
+								uid,
+								openAiAssistantId,
+							})
+						)
+						.promise();
+				}
 			}
 
 			if (messageBody === EProcessingMessageTypes.extractChapterSummary) {
@@ -328,6 +376,29 @@ export const main: SQSHandler = async (event) => {
 						);
 					}
 				}
+				if (response.data.status === 'failed') {
+					await updateAssistant(
+						uid,
+						assistantId,
+						'SET #status = :status',
+						{ '#status': AssistantAttributes.STATUS },
+						{
+							':status': 'Failed to extract general summary',
+						}
+					);
+				}
+				if (response.data.status === 'in_progress') {
+					await sqs
+						.sendMessage(
+							checkExtractGeneralSummaryRunMessage({
+								runId,
+								assistantId,
+								threadId,
+								uid,
+							})
+						)
+						.promise();
+				}
 			}
 
 			if (
@@ -383,6 +454,19 @@ export const main: SQSHandler = async (event) => {
 							}
 						}
 					}
+				}
+				if (response.data.status === 'in_progress') {
+					await sqs
+						.sendMessage(
+							checkExtractChapterSummaryRunMessage({
+								runId,
+								assistantId,
+								threadId,
+								uid,
+								index,
+							})
+						)
+						.promise();
 				}
 				if (response.data.status === 'failed') {
 					await updateAssistant(

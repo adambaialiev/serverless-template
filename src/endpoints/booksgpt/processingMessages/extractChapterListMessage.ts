@@ -2,44 +2,32 @@ import { SQS } from 'aws-sdk';
 import { EProcessingMessageTypes } from './types';
 
 type TParams = {
-	runId: string;
-	assistantId: string;
-	threadId: string;
-	uid: string;
 	openAiAssistantId: string;
+	assistantId: string;
+	uid: string;
 };
 
-export const checkExtractChaptersListRunMessage = ({
-	runId,
-	assistantId,
-	threadId,
-	uid,
+export const extractChapterListMessage = ({
 	openAiAssistantId,
+	assistantId,
+	uid,
 }: TParams): SQS.Types.SendMessageRequest => {
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
-		MessageBody: EProcessingMessageTypes.checkExtractChaptersListRun,
+		MessageBody: EProcessingMessageTypes.extractChaptersList,
 		DelaySeconds: 60,
 		MessageAttributes: {
-			runId: {
+			openAiAssistantId: {
 				DataType: 'String',
-				StringValue: runId,
+				StringValue: openAiAssistantId,
 			},
 			assistantId: {
 				DataType: 'String',
 				StringValue: assistantId,
 			},
-			threadId: {
-				DataType: 'String',
-				StringValue: threadId,
-			},
 			uid: {
 				DataType: 'String',
 				StringValue: uid,
-			},
-			openAiAssistantId: {
-				DataType: 'String',
-				StringValue: openAiAssistantId,
 			},
 		},
 	};

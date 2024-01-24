@@ -19,8 +19,6 @@ export const uploadPdfMessage = ({
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
 		MessageBody: EProcessingMessageTypes.uploadPdf,
-		MessageGroupId: 'uploadPdf',
-		MessageDeduplicationId: pdfKey,
 		MessageAttributes: {
 			name: {
 				DataType: 'String',
