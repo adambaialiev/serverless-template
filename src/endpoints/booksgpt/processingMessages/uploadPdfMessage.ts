@@ -1,26 +1,26 @@
 import { SQS } from 'aws-sdk';
 import { EProcessingMessageTypes } from './types';
 
-type CreateAssistantMessageParams = {
+type TParams = {
 	name: string;
 	author: string;
 	uid: string;
 	assistantId: string;
-	fileId: string;
+	pdfKey: string;
 };
 
-export const createAssistantMessage = ({
+export const uploadPdfMessage = ({
 	name,
 	author,
 	uid,
 	assistantId,
-	fileId,
-}: CreateAssistantMessageParams): SQS.Types.SendMessageRequest => {
+	pdfKey,
+}: TParams): SQS.Types.SendMessageRequest => {
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
-		MessageBody: EProcessingMessageTypes.createAssistant,
-		MessageGroupId: 'createAssistant',
-		MessageDeduplicationId: assistantId,
+		MessageBody: EProcessingMessageTypes.uploadPdf,
+		MessageGroupId: 'uploadPdf',
+		MessageDeduplicationId: pdfKey,
 		MessageAttributes: {
 			name: {
 				DataType: 'String',
@@ -38,9 +38,9 @@ export const createAssistantMessage = ({
 				DataType: 'String',
 				StringValue: assistantId,
 			},
-			fileId: {
+			pdfKey: {
 				DataType: 'String',
-				StringValue: fileId,
+				StringValue: pdfKey,
 			},
 		},
 	};

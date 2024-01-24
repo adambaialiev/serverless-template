@@ -18,6 +18,7 @@ import getResponse from './general/getResponse';
 import { buildAssistantKey, buildUserKey } from '@/common/dynamo/buildKey';
 import { extractGeneralSummaryMessage } from './processingMessages/extractGeneralSummaryMessage';
 import extractGeneralSummary from './general/extractGeneralSummary';
+import { createAssistantMessage } from './processingMessages/createAssistantMessage';
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
@@ -26,8 +27,8 @@ const TableName = process.env.booksgpt_table as string;
 export const main: SQSHandler = async (event) => {
 	const sqs = new SQS();
 	console.log({ Records: JSON.stringify(event.Records, null, 2) });
-	try {
-		for (const record of event.Records) {
+	for (const record of event.Records) {
+		try {
 			const messageAttributes: SQSMessageAttributes = record.messageAttributes;
 			console.log({ record });
 			console.log('Message Attributtes -->  ', messageAttributes);
@@ -35,32 +36,19 @@ export const main: SQSHandler = async (event) => {
 			const messageBody = record.body as EProcessingMessageTypes;
 
 			const s3 = new S3();
-			if (messageBody === EProcessingMessageTypes.createAssistant) {
-				const name = messageAttributes.name.stringValue;
-				const author = messageAttributes.author.stringValue;
-				const pdfKey = messageAttributes.pdfKey.stringValue;
-				const coverImageKey = messageAttributes.coverImageKey.stringValue;
+			if (messageBody === EProcessingMessageTypes.uploadPdf) {
 				const uid = messageAttributes.uid.stringValue;
 				const assistantId = messageAttributes.assistantId.stringValue;
-				if (
-					!name ||
-					!author ||
-					!pdfKey ||
-					!coverImageKey ||
-					!uid ||
-					!assistantId
-				) {
-					throw new Error('Missing message attributes');
-				}
-
+				const name = messageAttributes.name.stringValue;
+				const pdfKey = messageAttributes.pdfKey.stringValue;
+				const author = messageAttributes.author.stringValue;
 				await updateAssistant(
 					uid,
 					assistantId,
 					'SET #status = :status',
 					{ '#status': AssistantAttributes.STATUS },
-					{ ':status': 'Started processing' }
+					{ ':status': 'Started uploading pdf for the model' }
 				);
-
 				let pdfFileBuffer: Buffer;
 
 				try {
@@ -105,6 +93,35 @@ export const main: SQSHandler = async (event) => {
 					);
 					throw new Error('Failed to create open ai file');
 				}
+				await sqs
+					.sendMessage(
+						createAssistantMessage({
+							name,
+							author,
+							assistantId,
+							uid,
+							fileId: file.id,
+						})
+					)
+					.promise();
+			}
+			if (messageBody === EProcessingMessageTypes.createAssistant) {
+				const name = messageAttributes.name.stringValue;
+				const author = messageAttributes.author.stringValue;
+				const uid = messageAttributes.uid.stringValue;
+				const assistantId = messageAttributes.assistantId.stringValue;
+				const fileId = messageAttributes.fileId.stringValue;
+				if (!name || !author || !uid || !assistantId || !fileId) {
+					throw new Error('Missing message attributes');
+				}
+
+				await updateAssistant(
+					uid,
+					assistantId,
+					'SET #status = :status',
+					{ '#status': AssistantAttributes.STATUS },
+					{ ':status': 'Started creating assistant' }
+				);
 
 				let openAiAssistantId: string;
 				let model: string;
@@ -113,7 +130,7 @@ export const main: SQSHandler = async (event) => {
 					const result = await createOpenAiAssistant({
 						name,
 						author,
-						fileId: file.id,
+						fileId: fileId,
 					});
 					openAiAssistantId = result.openAiAssistantId;
 					model = result.model;
@@ -379,14 +396,14 @@ export const main: SQSHandler = async (event) => {
 					);
 				}
 			}
-			await sqs
-				.deleteMessage({
-					QueueUrl: process.env.MAIN_QUEUE_URL,
-					ReceiptHandle: record.receiptHandle,
-				})
-				.promise();
+		} catch (error) {
+			console.log({ error });
 		}
-	} catch (error) {
-		console.log(error);
+		await sqs
+			.deleteMessage({
+				QueueUrl: process.env.MAIN_QUEUE_URL,
+				ReceiptHandle: record.receiptHandle,
+			})
+			.promise();
 	}
 };

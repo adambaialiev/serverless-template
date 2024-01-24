@@ -1,11 +1,11 @@
 import AWS, { SQS } from 'aws-sdk';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { createAssistantMessage } from './processingMessages/createAssistantMessage';
 import { AssistantAttributes, TableKeys } from '@/common/dynamo/schema';
 import { buildAssistantKey, buildUserKey } from '@/common/dynamo/buildKey';
 import KSUID from 'ksuid';
 import { buildFileUrlForbooksGPTProject } from '../learningPlatform/utils';
+import { uploadPdfMessage } from './processingMessages/uploadPdfMessage';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.booksgpt_table as string;
@@ -38,11 +38,10 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			.promise();
 		await sqs
 			.sendMessage(
-				createAssistantMessage({
+				uploadPdfMessage({
 					name,
 					author,
 					pdfKey,
-					coverImageKey,
 					uid,
 					assistantId,
 				})

@@ -20,7 +20,7 @@ export const checkExtractChaptersListRunMessage = ({
 		QueueUrl: process.env.MAIN_QUEUE_URL,
 		MessageBody: EProcessingMessageTypes.checkExtractChaptersListRun,
 		MessageGroupId: 'checkExtractChaptersListRun',
-		MessageDeduplicationId: assistantId,
+		MessageDeduplicationId: runId,
 		DelaySeconds: 40,
 		MessageAttributes: {
 			runId: {
