@@ -22,6 +22,10 @@ export default async function createOpenAiAssistant({
 		file_ids: [fileId],
 	});
 
-	const assistantId = createAssistantResponse.data.id;
-	return assistantId;
+	const openAiAssistantId = createAssistantResponse.data.id;
+	return {
+		openAiAssistantId,
+		instructions: assistantCreationParams.instructions,
+		model: assistantCreationParams.model,
+	};
 }

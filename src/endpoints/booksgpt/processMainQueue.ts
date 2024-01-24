@@ -1,8 +1,12 @@
 import { SQSHandler, SQSMessageAttributes } from 'aws-lambda';
 import { EProcessingMessageTypes } from './processingMessages/types';
-import { AssistantAttributes } from '@/common/dynamo/schema';
+import {
+	AssistantAttributes,
+	AssistantItem,
+	TableKeys,
+} from '@/common/dynamo/schema';
 import OpenAI from 'openai';
-import { S3, SQS } from 'aws-sdk';
+import AWS, { S3, SQS } from 'aws-sdk';
 import retrieveRunAPI from './openaiAPI/retrieveRunAPI';
 import createOpenAiAssistant from './general/сreateOpenAIAssistant';
 import createOpenAIFile from './general/createOpenAIFile';
@@ -11,6 +15,13 @@ import extractChapterList from './general/extractChapterList';
 import { extractChapterSummaryMessage } from './processingMessages/extractChapterSummaryMessage';
 import extractChapterSummary from './general/extractChapterSummary';
 import getResponse from './general/getResponse';
+import { buildAssistantKey, buildUserKey } from '@/common/dynamo/buildKey';
+import { extractGeneralSummaryMessage } from './processingMessages/extractGeneralSummaryMessage';
+import extractGeneralSummary from './general/extractGeneralSummary';
+
+const dynamo = new AWS.DynamoDB.DocumentClient();
+
+const TableName = process.env.booksgpt_table as string;
 
 export const main: SQSHandler = async (event) => {
 	const sqs = new SQS();
@@ -81,7 +92,7 @@ export const main: SQSHandler = async (event) => {
 				let file: OpenAI.Files.FileObject;
 
 				try {
-					file = await createOpenAIFile(pdfFileBuffer, author);
+					file = await createOpenAIFile({ pdfFileBuffer, author, name });
 				} catch (error) {
 					console.log({ error });
 					await updateAssistant(
@@ -95,20 +106,26 @@ export const main: SQSHandler = async (event) => {
 				}
 
 				let openAiAssistantId: string;
-
+				let model: string;
+				let instructions: string;
 				try {
-					openAiAssistantId = await createOpenAiAssistant({
+					const result = await createOpenAiAssistant({
 						name,
 						author,
 						fileId: file.id,
 					});
+					openAiAssistantId = result.openAiAssistantId;
+					model = result.model;
+					instructions = result.instructions;
 				} catch (error) {
 					console.log({ error });
 					await updateAssistant(
 						uid,
 						assistantId,
-						'SET #status = :status',
-						{ '#status': AssistantAttributes.STATUS },
+						'SET #status = :status, #model = :model, #instructions = :instructions',
+						{
+							'#status': AssistantAttributes.STATUS,
+						},
 						{ ':status': { S: 'Failed to create OpenAI assistant' } }
 					);
 					throw new Error('Failed to create open ai assistant');
@@ -117,12 +134,20 @@ export const main: SQSHandler = async (event) => {
 				await updateAssistant(
 					uid,
 					assistantId,
-					'SET #status = :status',
-					{ '#status': AssistantAttributes.STATUS },
+					'SET #status = :status, #model = :model, #instructions = :instructions, #openAiAssistantId = :openAiAssistantId',
+					{
+						'#status': AssistantAttributes.STATUS,
+						'#model': AssistantAttributes.MODEL,
+						'#instructions': AssistantAttributes.INSTRUCTIONS,
+						'#openAiAssistantId': AssistantAttributes.OPEN_AI_ASSISTANT_ID,
+					},
 					{
 						':status': {
-							S: 'Assistant is created. Extracting the list of chapters',
+							S: 'Assistant is created. Going to start extracting the list of chapters',
 						},
+						':model': { S: model },
+						':instructions': { S: instructions },
+						':openAiAssistantId': { S: openAiAssistantId },
 					}
 				);
 
@@ -130,7 +155,6 @@ export const main: SQSHandler = async (event) => {
 					await extractChapterList({ openAiAssistantId, assistantId, uid });
 				} catch (error) {
 					console.log({ error });
-
 					await updateAssistant(
 						uid,
 						assistantId,
@@ -144,6 +168,17 @@ export const main: SQSHandler = async (event) => {
 					);
 					throw new Error('Failed to start extracting chapter list');
 				}
+				await updateAssistant(
+					uid,
+					assistantId,
+					'SET #status = :status',
+					{ '#status': AssistantAttributes.STATUS },
+					{
+						':status': {
+							S: 'The process of chapters list extraction has started',
+						},
+					}
+				);
 			}
 			if (messageBody === EProcessingMessageTypes.checkExtractChaptersListRun) {
 				const runId = messageAttributes.runId.stringValue;
@@ -166,12 +201,16 @@ export const main: SQSHandler = async (event) => {
 						await updateAssistant(
 							uid,
 							assistantId,
-							'SET #chaptersList = :chaptersList, #chaptersSummaries = :chaptersSummaries',
+							'SET #status = :status, #chaptersList = :chaptersList, #chaptersSummaries = :chaptersSummaries',
 							{
 								'#chaptersList': AssistantAttributes.CHAPTERS_LIST,
 								'#chaptersSummaries': AssistantAttributes.CHAPTERS_SUMMARIES,
+								'#status': AssistantAttributes.STATUS,
 							},
 							{
+								':status': {
+									S: 'Chapters list is extracted. The process to extract each chapter summary has started',
+								},
 								':chaptersList': {
 									L: chaptersListObject.chapters.map((chapter) => ({
 										S: chapter,
@@ -197,18 +236,16 @@ export const main: SQSHandler = async (event) => {
 								)
 								.promise();
 						}
+						await sqs
+							.sendMessage(
+								extractGeneralSummaryMessage({
+									openAiAssistantId,
+									assistantId,
+									uid,
+								})
+							)
+							.promise();
 					}
-					await updateAssistant(
-						uid,
-						assistantId,
-						'SET #status = :status',
-						{ '#status': AssistantAttributes.STATUS },
-						{
-							':status': {
-								S: 'Chapters are extracted. The process to summarize each chapter has started',
-							},
-						}
-					);
 				}
 				if (response.data.status === 'failed') {
 					await updateAssistant(
@@ -244,6 +281,49 @@ export const main: SQSHandler = async (event) => {
 					console.log({ error });
 				}
 			}
+			if (messageBody === EProcessingMessageTypes.extractGeneralSummary) {
+				const openAiAssistantId =
+					messageAttributes.openAiAssistantId.stringValue;
+				const assistantId = messageAttributes.assistantId.stringValue;
+				const uid = messageAttributes.uid.stringValue;
+				try {
+					await extractGeneralSummary({
+						openAiAssistantId,
+						assistantId,
+						uid,
+					});
+				} catch (error) {
+					console.log({ error });
+				}
+			}
+
+			if (
+				messageBody === EProcessingMessageTypes.checkExtractGeneralSummaryRun
+			) {
+				const runId = messageAttributes.runId.stringValue;
+				const assistantId = messageAttributes.assistantId.stringValue;
+				const threadId = messageAttributes.threadId.stringValue;
+				const uid = messageAttributes.uid.stringValue;
+				const response = await retrieveRunAPI(threadId, runId);
+				console.log({ retrieveRunResponse: response });
+				if (response.data.status === 'completed') {
+					const response = await getResponse(threadId);
+					if (response) {
+						await updateAssistant(
+							uid,
+							assistantId,
+							`SET #generalSummary = :generalSummary`,
+							{
+								'#generalSummary': AssistantAttributes.GENERAL_SUMMARY,
+							},
+							{
+								':generalSummary': response,
+							}
+						);
+					}
+				}
+			}
+
 			if (
 				messageBody === EProcessingMessageTypes.checkExtractChapterSummaryRun
 			) {
@@ -271,7 +351,47 @@ export const main: SQSHandler = async (event) => {
 								':chaptersSummaries': response,
 							}
 						);
+						const assistantItem = await dynamo
+							.get({
+								TableName,
+								Key: {
+									[TableKeys.PK]: buildUserKey(uid),
+									[TableKeys.SK]: buildAssistantKey(assistantId),
+								},
+							})
+							.promise();
+
+						if (assistantItem.Item) {
+							const item = assistantItem.Item as AssistantItem;
+							const chaptersSummaries = item.chaptersSummaries;
+							if (chaptersSummaries.every((chapter) => chapter.S !== '')) {
+								await updateAssistant(
+									uid,
+									assistantId,
+									'SET #status = :status',
+									{ '#status': AssistantAttributes.STATUS },
+									{
+										':status': {
+											S: 'All chapters summaries are extracted',
+										},
+									}
+								);
+							}
+						}
 					}
+				}
+				if (response.data.status === 'failed') {
+					await updateAssistant(
+						uid,
+						assistantId,
+						'SET #status = :status',
+						{ '#status': AssistantAttributes.STATUS },
+						{
+							':status': {
+								S: `Failed to extract chapter summary for chapter with index ${index}`,
+							},
+						}
+					);
 				}
 			}
 		}

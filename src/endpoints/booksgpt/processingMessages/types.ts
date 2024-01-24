@@ -3,4 +3,6 @@ export enum EProcessingMessageTypes {
 	checkExtractChaptersListRun = 'checkExtractChaptersListRun',
 	extractChapterSummary = 'extractChapterSummary',
 	checkExtractChapterSummaryRun = 'checkExtractChapterSummaryRun',
+	extractGeneralSummary = 'extractGeneralSummary',
+	checkExtractGeneralSummaryRun = 'checkExtractGeneralSummaryRun',
 }
