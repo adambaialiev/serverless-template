@@ -54,30 +54,35 @@ export interface AssistantResponseItem {
 }
 
 export enum AssistantAttributes {
+	ID = 'id',
+	OPEN_AI_ASSISTANT_ID = 'openAiAssistantId',
 	NAME = 'name',
 	AUTHOR = 'author',
 	MODEL = 'model',
 	INSTRUCTIONS = 'instructions',
-	PDF_URL = 'pdfUrl',
+	PDF_KEY = 'pdffKey',
 	COVER_IMAGE_URL = 'coverImageUrl',
 	CHAPTERS_LIST = 'chaptersList',
 	CHAPTERS_SUMMARIES = 'chaptersSummaries',
 	GENERAL_SUMMARY = 'generalSummary',
 	CREATED_AT = 'createdAt',
 	STATUS = 'status',
+	FILE_ID = 'fileId',
 }
 
 export type AssistantItem = {
 	[TableKeys.PK]: DocumentClient.String;
 	[TableKeys.SK]: DocumentClient.String;
+	[AssistantAttributes.ID]: DocumentClient.String;
+	[AssistantAttributes.OPEN_AI_ASSISTANT_ID]: DocumentClient.String;
 	[AssistantAttributes.NAME]: DocumentClient.String;
 	[AssistantAttributes.AUTHOR]: DocumentClient.String;
 	[AssistantAttributes.MODEL]: DocumentClient.String;
 	[AssistantAttributes.INSTRUCTIONS]: DocumentClient.String;
-	[AssistantAttributes.PDF_URL]: DocumentClient.String;
+	[AssistantAttributes.PDF_KEY]: DocumentClient.String;
 	[AssistantAttributes.COVER_IMAGE_URL]: DocumentClient.String;
-	[AssistantAttributes.CHAPTERS_LIST]: DocumentClient.String;
-	[AssistantAttributes.CHAPTERS_SUMMARIES]: DocumentClient.String;
+	[AssistantAttributes.CHAPTERS_LIST]: DocumentClient.ListAttributeValue;
+	[AssistantAttributes.CHAPTERS_SUMMARIES]: DocumentClient.ListAttributeValue;
 	[AssistantAttributes.GENERAL_SUMMARY]: DocumentClient.String;
 	[AssistantAttributes.CREATED_AT]: DocumentClient.String;
 	[AssistantAttributes.STATUS]: DocumentClient.String;
@@ -109,13 +114,6 @@ export enum JobType {
 	CHAPTERS_LIST_EXTRACTION = 'chaptersListExtraction',
 	CHAPTERS_SUMMARY_EXTRACTION = 'chaptersSummaryExtraction',
 	GENERAL_SUMMARY_EXTRACTION = 'generalSummaryExtraction',
-}
-
-export enum AssisttantStatus {
-	QueuedForProcessing = 'queuedForProcessing',
-	ExtractingChapters = 'extractingChapters',
-	ExtractingChaptersSummary = 'extractingChaptersSummary',
-	ExtractingGeneralSummary = 'extractingGeneralSummary',
 }
 
 export enum MasterWalletAttributes {

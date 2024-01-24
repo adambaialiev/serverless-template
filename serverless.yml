@@ -72,11 +72,29 @@ custom:
     createRoute53Record: true
 
 functions:
+  processMainQueue:
+    handler: build/src/endpoints/booksgpt/processMainQueue.main
+    timeout: 400
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - MainQueue
+              - Arn
   processPendingRuns:
     handler: build/src/endpoints/booksgpt/processPendingRuns.main
+    timeout: 400
     events:
       - http:
           path: /v1/booksgpt/process-pending-runs
+          method: POST
+          cors: true
+  create-assistant:
+    handler: build/src/endpoints/booksgpt/createAssistant.main
+    timeout: 400
+    events:
+      - http:
+          path: /v1/booksgpt/create-assistant
           method: POST
           cors: true
   booksgpt-get-upload-url:
@@ -156,14 +174,6 @@ functions:
             parameters:
               paths:
                 threadId: true
-  create-assistant:
-    handler: build/src/endpoints/booksgpt/createAssistant.main
-    timeout: 400
-    events:
-      - http:
-          path: /v1/booksgpt/create-assistant
-          method: POST
-          cors: true
   update-lessons:
     handler: build/src/endpoints/learningPlatform/course/updateLessons.main
     events:

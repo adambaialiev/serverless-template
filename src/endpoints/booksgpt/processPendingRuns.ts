@@ -52,6 +52,7 @@ export const main: APIGatewayProxyHandler = async () => {
 					pendingRun as PendingRunItem;
 				if (jobType === JobType.CHAPTERS_LIST_EXTRACTION) {
 					const response = await retrieveRunAPI(threadId, id);
+					console.log({ retrieveRunResponse: response });
 					if (response.data.status === 'completed') {
 						const listMessagesResponse = await listMessagersAPI(threadId);
 						if (listMessagesResponse.data.data) {
@@ -87,13 +88,15 @@ export const main: APIGatewayProxyHandler = async () => {
 										},
 									})
 									.promise();
-								await dynamo.delete({
-									TableName,
-									Key: {
-										[TableKeys.PK]: Entities.PENDING_RUN,
-										[TableKeys.SK]: buildPendingRunKey(id),
-									},
-								});
+								await dynamo
+									.delete({
+										TableName,
+										Key: {
+											[TableKeys.PK]: Entities.PENDING_RUN,
+											[TableKeys.SK]: buildPendingRunKey(id),
+										},
+									})
+									.promise();
 
 								const chaptersList = chaptersListObject.chapters;
 								for (const chapter of chaptersList) {
@@ -167,6 +170,7 @@ export const main: APIGatewayProxyHandler = async () => {
 				}
 				if (jobType === JobType.GENERAL_SUMMARY_EXTRACTION) {
 					const response = await retrieveRunAPI(threadId, id);
+					console.log({ retrieveRunResponse: response });
 					if (response.data.status === 'completed') {
 						const listMessagesResponse = await listMessagersAPI(threadId);
 						if (listMessagesResponse.data.data) {
@@ -192,19 +196,22 @@ export const main: APIGatewayProxyHandler = async () => {
 										},
 									})
 									.promise();
-								await dynamo.delete({
-									TableName,
-									Key: {
-										[TableKeys.PK]: Entities.PENDING_RUN,
-										[TableKeys.SK]: buildPendingRunKey(id),
-									},
-								});
+								await dynamo
+									.delete({
+										TableName,
+										Key: {
+											[TableKeys.PK]: Entities.PENDING_RUN,
+											[TableKeys.SK]: buildPendingRunKey(id),
+										},
+									})
+									.promise();
 							}
 						}
 					}
 				}
 				if (jobType === JobType.CHAPTERS_SUMMARY_EXTRACTION) {
 					const response = await retrieveRunAPI(threadId, id);
+					console.log({ retrieveRunResponse: response });
 					if (response.data.status === 'completed') {
 						const listMessagesResponse = await listMessagersAPI(threadId);
 						if (listMessagesResponse.data.data) {
@@ -260,13 +267,15 @@ export const main: APIGatewayProxyHandler = async () => {
 											},
 										})
 										.promise();
-									await dynamo.delete({
-										TableName,
-										Key: {
-											[TableKeys.PK]: Entities.PENDING_RUN,
-											[TableKeys.SK]: buildPendingRunKey(id),
-										},
-									});
+									await dynamo
+										.delete({
+											TableName,
+											Key: {
+												[TableKeys.PK]: Entities.PENDING_RUN,
+												[TableKeys.SK]: buildPendingRunKey(id),
+											},
+										})
+										.promise();
 								}
 							}
 						}
