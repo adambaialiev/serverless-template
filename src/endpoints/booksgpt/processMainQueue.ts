@@ -144,7 +144,7 @@ export const main: SQSHandler = async (event) => {
 					await updateAssistant(
 						uid,
 						assistantId,
-						'SET #status = :status, #model = :model, #instructions = :instructions',
+						'SET #status = :status',
 						{
 							'#status': AssistantAttributes.STATUS,
 						},
@@ -243,9 +243,33 @@ export const main: SQSHandler = async (event) => {
 				if (response.data.status === 'completed') {
 					const response = await getResponse(threadId);
 					if (response) {
-						const chaptersListObject = JSON.parse(response) as {
-							chapters: string[];
-						};
+						const cleanResponse = response
+							.replace(/```json/gi, '')
+							.replace(/```/gi, '')
+							.replace(/\n/gi, '');
+
+						console.log({ cleanResponse });
+
+						let chaptersListObject: { chapters: string[] };
+
+						try {
+							chaptersListObject = JSON.parse(cleanResponse) as {
+								chapters: string[];
+							};
+						} catch (error) {
+							console.log({ error });
+							await updateAssistant(
+								uid,
+								assistantId,
+								'SET #status = :status',
+								{ '#status': AssistantAttributes.STATUS },
+								{
+									':status': 'Failed to parse chapters list response',
+								}
+							);
+							throw new Error('Failed to parse chapters list response');
+						}
+
 						await updateAssistant(
 							uid,
 							assistantId,
@@ -258,12 +282,8 @@ export const main: SQSHandler = async (event) => {
 							{
 								':status':
 									'Chapters list is extracted. The process to extract each chapter summary has started',
-								':chaptersList': {
-									L: chaptersListObject.chapters,
-								},
-								':chaptersSummaries': {
-									L: chaptersListObject.chapters.map(() => ''),
-								},
+								':chaptersList': chaptersListObject.chapters,
+								':chaptersSummaries': chaptersListObject.chapters.map(() => ''),
 							}
 						);
 						for (let i = 0; i < chaptersListObject.chapters.length; i++) {

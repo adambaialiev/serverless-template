@@ -13,7 +13,7 @@ export default async function extractChapterList({
   {
     "chapters": {put array of strings here}
   }
-  Don't add additional words or comments. No markup.`;
+  Do not add additional words or comments. Do not use markdown syntax.`;
 
 	const createThreadAndRunAPIResponse = await createThreadAndRunAPI(
 		openAiAssistantId,

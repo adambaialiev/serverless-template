@@ -74,6 +74,7 @@ custom:
 functions:
   processMainQueue:
     handler: build/src/endpoints/booksgpt/processMainQueue.main
+    timeout: 60
     events:
       - sqs:
           arn:
