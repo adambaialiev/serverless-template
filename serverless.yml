@@ -72,6 +72,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  get-assistants:
+    handler: build/src/endpoints/booksgpt/getAssistants.main
+    events:
+      - http:
+          path: /v1/booksgpt/assistants
+          method: POST
+          cors: true
   processMainQueue:
     handler: build/src/endpoints/booksgpt/processMainQueue.main
     timeout: 60
