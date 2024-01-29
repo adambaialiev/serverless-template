@@ -3,22 +3,16 @@ import createThreadAndRunAPI from '../openaiAPI/createThreadAndRunAPI';
 import { checkExtractGeneralSummaryRunMessage } from '../processingMessages/checkExtractGeneralSummaryRunMessage';
 
 type TParams = {
-	openAiAssistantId: string;
 	assistantId: string;
-	uid: string;
 };
 
-export default async function extractGeneralSummary({
-	openAiAssistantId,
-	assistantId,
-	uid,
-}: TParams) {
+export default async function extractGeneralSummary({ assistantId }: TParams) {
 	const sqs = new SQS();
 
 	const prompt = `Please give me general summary of the book`;
 
 	const createThreadAndRunAPIResponse = await createThreadAndRunAPI(
-		openAiAssistantId,
+		assistantId,
 		prompt
 	);
 	console.log({ createThreadAndRunAPIResponse });
@@ -32,7 +26,6 @@ export default async function extractGeneralSummary({
 					runId,
 					assistantId,
 					threadId,
-					uid,
 				})
 			)
 			.promise();

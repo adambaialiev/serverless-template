@@ -14,7 +14,7 @@ export default async function createOpenAiAssistant({
 	const instructions = `You are an assistant that have read the book called ${name} by ${author}. You should be able to summarize the book, its chapters and respond to any other questions about the book. Respond to questions in language that the book was written.`;
 	const assistantCreationParams = {
 		name: `${name} by ${author}`,
-		model: 'gpt-4-1106-preview',
+		model: 'gpt-4-turbo-preview',
 		instructions,
 		tools: [{ type: 'retrieval' }],
 	};

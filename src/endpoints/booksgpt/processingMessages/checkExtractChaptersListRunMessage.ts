@@ -5,16 +5,12 @@ type TParams = {
 	runId: string;
 	assistantId: string;
 	threadId: string;
-	uid: string;
-	openAiAssistantId: string;
 };
 
 export const checkExtractChaptersListRunMessage = ({
 	runId,
 	assistantId,
 	threadId,
-	uid,
-	openAiAssistantId,
 }: TParams): SQS.Types.SendMessageRequest => {
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
@@ -32,14 +28,6 @@ export const checkExtractChaptersListRunMessage = ({
 			threadId: {
 				DataType: 'String',
 				StringValue: threadId,
-			},
-			uid: {
-				DataType: 'String',
-				StringValue: uid,
-			},
-			openAiAssistantId: {
-				DataType: 'String',
-				StringValue: openAiAssistantId,
 			},
 		},
 	};

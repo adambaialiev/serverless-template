@@ -68,6 +68,7 @@ export enum AssistantAttributes {
 	CREATED_AT = 'createdAt',
 	STATUS = 'status',
 	FILE_ID = 'fileId',
+	OPEN_AI_KEY = 'openAiKey',
 }
 
 export type AssistantItem = {

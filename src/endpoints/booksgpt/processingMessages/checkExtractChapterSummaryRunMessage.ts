@@ -6,14 +6,12 @@ type CreateAssistantMessageParams = {
 	assistantId: string;
 	threadId: string;
 	index: string;
-	uid: string;
 };
 
 export const checkExtractChapterSummaryRunMessage = ({
 	runId,
 	assistantId,
 	threadId,
-	uid,
 	index,
 }: CreateAssistantMessageParams): SQS.Types.SendMessageRequest => {
 	return {
@@ -32,10 +30,6 @@ export const checkExtractChapterSummaryRunMessage = ({
 			threadId: {
 				DataType: 'String',
 				StringValue: threadId,
-			},
-			uid: {
-				DataType: 'String',
-				StringValue: uid,
 			},
 			index: {
 				DataType: 'String',

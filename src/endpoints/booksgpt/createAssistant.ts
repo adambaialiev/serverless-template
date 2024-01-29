@@ -1,32 +1,46 @@
 import AWS, { SQS } from 'aws-sdk';
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { sendResponse } from '@/utils/makeResponse';
-import { AssistantAttributes, TableKeys } from '@/common/dynamo/schema';
-import { buildAssistantKey, buildUserKey } from '@/common/dynamo/buildKey';
-import KSUID from 'ksuid';
+import {
+	AssistantAttributes,
+	Entities,
+	TableKeys,
+} from '@/common/dynamo/schema';
+import { buildAssistantKey } from '@/common/dynamo/buildKey';
 import { buildFileUrlForbooksGPTProject } from '../learningPlatform/utils';
-import { uploadPdfMessage } from './processingMessages/uploadPdfMessage';
+import { extractChapterListMessage } from './processingMessages/extractChapterListMessage';
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const TableName = process.env.booksgpt_table as string;
 const sqs = new SQS();
 
 export const main: APIGatewayProxyHandler = async (event) => {
-	const { name, author, pdfKey, coverImageKey, uid } = JSON.parse(event.body);
+	const {
+		name,
+		author,
+		coverImageKey,
+		assistantId,
+		fileId,
+		openAiKey,
+		model,
+		instructions,
+	} = JSON.parse(event.body);
 
 	try {
-		const assistantId = KSUID.randomSync().string;
 		const createAssistantObject = () => {
 			return {
-				[TableKeys.PK]: buildUserKey(uid),
+				[TableKeys.PK]: Entities.ASSISTANT,
 				[TableKeys.SK]: buildAssistantKey(assistantId),
 				[AssistantAttributes.NAME]: name,
 				[AssistantAttributes.AUTHOR]: author,
 				[AssistantAttributes.CREATED_AT]: Date.now().toString(),
 				[AssistantAttributes.COVER_IMAGE_URL]:
 					buildFileUrlForbooksGPTProject(coverImageKey),
-				[AssistantAttributes.PDF_KEY]: pdfKey,
+				[AssistantAttributes.FILE_ID]: fileId,
 				[AssistantAttributes.STATUS]: 'Queued',
+				[AssistantAttributes.OPEN_AI_KEY]: openAiKey,
+				[AssistantAttributes.MODEL]: model,
+				[AssistantAttributes.INSTRUCTIONS]: instructions,
 			};
 		};
 
@@ -38,11 +52,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			.promise();
 		await sqs
 			.sendMessage(
-				uploadPdfMessage({
-					name,
-					author,
-					pdfKey,
-					uid,
+				extractChapterListMessage({
 					assistantId,
 				})
 			)

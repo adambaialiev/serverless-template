@@ -1,13 +1,11 @@
 import createThreadAndRunAPI from '../openaiAPI/createThreadAndRunAPI';
 
 type TExtractChapterListParams = {
-	openAiAssistantId: string;
 	assistantId: string;
-	uid: string;
 };
 
 export default async function extractChapterList({
-	openAiAssistantId,
+	assistantId,
 }: TExtractChapterListParams) {
 	const chaptersExtractionPrompt = `Give me a complete list of chapters of this book in the following format: 
   {
@@ -16,7 +14,7 @@ export default async function extractChapterList({
   Do not add additional words or comments. Do not use markdown syntax.`;
 
 	const createThreadAndRunAPIResponse = await createThreadAndRunAPI(
-		openAiAssistantId,
+		assistantId,
 		chaptersExtractionPrompt
 	);
 	console.log({ createThreadAndRunAPIResponse });

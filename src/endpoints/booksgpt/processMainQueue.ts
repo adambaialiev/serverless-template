@@ -3,23 +3,19 @@ import { EProcessingMessageTypes } from './processingMessages/types';
 import {
 	AssistantAttributes,
 	AssistantItem,
+	Entities,
 	TableKeys,
 } from '@/common/dynamo/schema';
-import OpenAI from 'openai';
-import AWS, { S3, SQS } from 'aws-sdk';
+import AWS, { SQS } from 'aws-sdk';
 import retrieveRunAPI from './openaiAPI/retrieveRunAPI';
-import createOpenAiAssistant from './general/createOpenAIAssistant';
-import createOpenAIFile from './general/createOpenAIFile';
 import updateAssistant from './general/updateAssistant';
 import extractChapterList from './general/extractChapterList';
 import { extractChapterSummaryMessage } from './processingMessages/extractChapterSummaryMessage';
 import extractChapterSummary from './general/extractChapterSummary';
 import getResponse from './general/getResponse';
-import { buildAssistantKey, buildUserKey } from '@/common/dynamo/buildKey';
+import { buildAssistantKey } from '@/common/dynamo/buildKey';
 import { extractGeneralSummaryMessage } from './processingMessages/extractGeneralSummaryMessage';
 import extractGeneralSummary from './general/extractGeneralSummary';
-import { createAssistantMessage } from './processingMessages/createAssistantMessage';
-import { extractChapterListMessage } from './processingMessages/extractChapterListMessage';
 import { checkExtractChaptersListRunMessage } from './processingMessages/checkExtractChaptersListRunMessage';
 import { checkExtractGeneralSummaryRunMessage } from './processingMessages/checkExtractGeneralSummaryRunMessage';
 import { checkExtractChapterSummaryRunMessage } from './processingMessages/checkExtractChapterSummaryRunMessage';
@@ -39,164 +35,20 @@ export const main: SQSHandler = async (event) => {
 			console.log('Message Body -->  ', record.body);
 			const messageBody = record.body as EProcessingMessageTypes;
 
-			const s3 = new S3();
-			if (messageBody === EProcessingMessageTypes.uploadPdf) {
-				const uid = messageAttributes.uid.stringValue;
-				const assistantId = messageAttributes.assistantId.stringValue;
-				const name = messageAttributes.name.stringValue;
-				const pdfKey = messageAttributes.pdfKey.stringValue;
-				const author = messageAttributes.author.stringValue;
-				await updateAssistant(
-					uid,
-					assistantId,
-					'SET #status = :status',
-					{ '#status': AssistantAttributes.STATUS },
-					{ ':status': 'Started uploading pdf for the model' }
-				);
-				let pdfFileBuffer: Buffer;
-
-				try {
-					pdfFileBuffer = await new Promise((resolve) => {
-						s3.getObject(
-							{
-								Bucket: process.env.booksgpt_bucket as string,
-								Key: pdfKey,
-							},
-							(err, data) => {
-								if (err) {
-									//
-								}
-								resolve(data.Body as Buffer);
-							}
-						);
-					});
-				} catch (error) {
-					console.log({ error });
-					await updateAssistant(
-						uid,
-						assistantId,
-						'SET #status = :status',
-						{ '#status': AssistantAttributes.STATUS },
-						{ ':status': 'Failed to read pdf' }
-					);
-					throw new Error('Failed to read file from s3');
-				}
-
-				let file: OpenAI.Files.FileObject;
-
-				try {
-					file = await createOpenAIFile({ pdfFileBuffer, author, name });
-				} catch (error) {
-					console.log({ error });
-					await updateAssistant(
-						uid,
-						assistantId,
-						'SET #status = :status',
-						{ '#status': AssistantAttributes.STATUS },
-						{ ':status': 'Failed to create OpenAI file' }
-					);
-					throw new Error('Failed to create open ai file');
-				}
-				await sqs
-					.sendMessage(
-						createAssistantMessage({
-							name,
-							author,
-							assistantId,
-							uid,
-							fileId: file.id,
-						})
-					)
-					.promise();
-			}
-			if (messageBody === EProcessingMessageTypes.createAssistant) {
-				const name = messageAttributes.name.stringValue;
-				const author = messageAttributes.author.stringValue;
-				const uid = messageAttributes.uid.stringValue;
-				const assistantId = messageAttributes.assistantId.stringValue;
-				const fileId = messageAttributes.fileId.stringValue;
-				if (!name || !author || !uid || !assistantId || !fileId) {
-					throw new Error('Missing message attributes');
-				}
-
-				await updateAssistant(
-					uid,
-					assistantId,
-					'SET #status = :status',
-					{ '#status': AssistantAttributes.STATUS },
-					{ ':status': 'Started creating assistant' }
-				);
-
-				let openAiAssistantId: string;
-				let model: string;
-				let instructions: string;
-				try {
-					const result = await createOpenAiAssistant({
-						name,
-						author,
-						fileId: fileId,
-					});
-					openAiAssistantId = result.openAiAssistantId;
-					model = result.model;
-					instructions = result.instructions;
-				} catch (error) {
-					console.log({ error });
-					await updateAssistant(
-						uid,
-						assistantId,
-						'SET #status = :status',
-						{
-							'#status': AssistantAttributes.STATUS,
-						},
-						{ ':status': 'Failed to create OpenAI assistant' }
-					);
-					throw new Error('Failed to create open ai assistant');
-				}
-
-				await updateAssistant(
-					uid,
-					assistantId,
-					'SET #status = :status, #model = :model, #instructions = :instructions, #openAiAssistantId = :openAiAssistantId',
-					{
-						'#status': AssistantAttributes.STATUS,
-						'#model': AssistantAttributes.MODEL,
-						'#instructions': AssistantAttributes.INSTRUCTIONS,
-						'#openAiAssistantId': AssistantAttributes.OPEN_AI_ASSISTANT_ID,
-					},
-					{
-						':status':
-							'Assistant is created. Going to start extracting the list of chapters',
-						':model': model,
-						':instructions': instructions,
-						':openAiAssistantId': openAiAssistantId,
-					}
-				);
-				await sqs
-					.sendMessage(
-						extractChapterListMessage({ openAiAssistantId, assistantId, uid })
-					)
-					.promise();
-			}
 			if (messageBody === EProcessingMessageTypes.extractChaptersList) {
-				const openAiAssistantId =
-					messageAttributes.openAiAssistantId.stringValue;
 				const assistantId = messageAttributes.assistantId.stringValue;
-				const uid = messageAttributes.uid.stringValue;
 
 				let runId: string;
 				let threadId: string;
 				try {
 					const r = await extractChapterList({
-						openAiAssistantId,
 						assistantId,
-						uid,
 					});
 					runId = r.runId;
 					threadId = r.threadId;
 				} catch (error) {
 					console.log({ error });
 					await updateAssistant(
-						uid,
 						assistantId,
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
@@ -207,7 +59,6 @@ export const main: SQSHandler = async (event) => {
 					throw new Error('Failed to start extracting chapter list');
 				}
 				await updateAssistant(
-					uid,
 					assistantId,
 					'SET #status = :status',
 					{ '#status': AssistantAttributes.STATUS },
@@ -221,8 +72,6 @@ export const main: SQSHandler = async (event) => {
 							runId,
 							assistantId,
 							threadId,
-							uid,
-							openAiAssistantId,
 						})
 					)
 					.promise();
@@ -231,11 +80,8 @@ export const main: SQSHandler = async (event) => {
 				const runId = messageAttributes.runId.stringValue;
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const threadId = messageAttributes.threadId.stringValue;
-				const uid = messageAttributes.uid.stringValue;
-				const openAiAssistantId =
-					messageAttributes.openAiAssistantId.stringValue;
 
-				if (!runId || !assistantId || !threadId || !uid || !openAiAssistantId) {
+				if (!runId || !assistantId || !threadId) {
 					throw new Error('Missing message attributes');
 				}
 				const response = await retrieveRunAPI(threadId, runId);
@@ -259,7 +105,6 @@ export const main: SQSHandler = async (event) => {
 						} catch (error) {
 							console.log({ error });
 							await updateAssistant(
-								uid,
 								assistantId,
 								'SET #status = :status',
 								{ '#status': AssistantAttributes.STATUS },
@@ -271,7 +116,6 @@ export const main: SQSHandler = async (event) => {
 						}
 
 						await updateAssistant(
-							uid,
 							assistantId,
 							'SET #status = :status, #chaptersList = :chaptersList, #chaptersSummaries = :chaptersSummaries',
 							{
@@ -290,11 +134,9 @@ export const main: SQSHandler = async (event) => {
 							sqs
 								.sendMessage(
 									extractChapterSummaryMessage({
-										openAiAssistantId,
 										assistantId,
 										chapter: chaptersListObject.chapters[i],
 										index: i.toString(),
-										uid,
 									})
 								)
 								.promise();
@@ -302,9 +144,7 @@ export const main: SQSHandler = async (event) => {
 						sqs
 							.sendMessage(
 								extractGeneralSummaryMessage({
-									openAiAssistantId,
 									assistantId,
-									uid,
 								})
 							)
 							.promise();
@@ -312,7 +152,6 @@ export const main: SQSHandler = async (event) => {
 				}
 				if (response.data.status === 'failed') {
 					await updateAssistant(
-						uid,
 						assistantId,
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
@@ -328,8 +167,6 @@ export const main: SQSHandler = async (event) => {
 								runId,
 								assistantId,
 								threadId,
-								uid,
-								openAiAssistantId,
 							})
 						)
 						.promise();
@@ -337,34 +174,24 @@ export const main: SQSHandler = async (event) => {
 			}
 
 			if (messageBody === EProcessingMessageTypes.extractChapterSummary) {
-				const openAiAssistantId =
-					messageAttributes.openAiAssistantId.stringValue;
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const chapter = messageAttributes.chapter.stringValue;
 				const index = messageAttributes.index.stringValue;
-				const uid = messageAttributes.uid.stringValue;
 				try {
 					await extractChapterSummary({
-						openAiAssistantId,
 						assistantId,
 						chapter,
 						index,
-						uid,
 					});
 				} catch (error) {
 					console.log({ error });
 				}
 			}
 			if (messageBody === EProcessingMessageTypes.extractGeneralSummary) {
-				const openAiAssistantId =
-					messageAttributes.openAiAssistantId.stringValue;
 				const assistantId = messageAttributes.assistantId.stringValue;
-				const uid = messageAttributes.uid.stringValue;
 				try {
 					await extractGeneralSummary({
-						openAiAssistantId,
 						assistantId,
-						uid,
 					});
 				} catch (error) {
 					console.log({ error });
@@ -377,14 +204,12 @@ export const main: SQSHandler = async (event) => {
 				const runId = messageAttributes.runId.stringValue;
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const threadId = messageAttributes.threadId.stringValue;
-				const uid = messageAttributes.uid.stringValue;
 				const response = await retrieveRunAPI(threadId, runId);
 				console.log({ retrieveRunResponse: response });
 				if (response.data.status === 'completed') {
 					const response = await getResponse(threadId);
 					if (response) {
 						await updateAssistant(
-							uid,
 							assistantId,
 							`SET #generalSummary = :generalSummary`,
 							{
@@ -398,7 +223,6 @@ export const main: SQSHandler = async (event) => {
 				}
 				if (response.data.status === 'failed') {
 					await updateAssistant(
-						uid,
 						assistantId,
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
@@ -414,7 +238,6 @@ export const main: SQSHandler = async (event) => {
 								runId,
 								assistantId,
 								threadId,
-								uid,
 							})
 						)
 						.promise();
@@ -428,7 +251,6 @@ export const main: SQSHandler = async (event) => {
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const threadId = messageAttributes.threadId.stringValue;
 				const index = messageAttributes.index.stringValue;
-				const uid = messageAttributes.uid.stringValue;
 				if (!runId || !assistantId || !threadId) {
 					throw new Error('Missing message attributes');
 				}
@@ -438,7 +260,6 @@ export const main: SQSHandler = async (event) => {
 					const response = await getResponse(threadId);
 					if (response) {
 						await updateAssistant(
-							uid,
 							assistantId,
 							`SET #chaptersSummaries[${index}] = :chaptersSummaries`,
 							{
@@ -452,7 +273,7 @@ export const main: SQSHandler = async (event) => {
 							.get({
 								TableName,
 								Key: {
-									[TableKeys.PK]: buildUserKey(uid),
+									[TableKeys.PK]: Entities.ASSISTANT,
 									[TableKeys.SK]: buildAssistantKey(assistantId),
 								},
 							})
@@ -463,7 +284,6 @@ export const main: SQSHandler = async (event) => {
 							const chaptersSummaries = item.chaptersSummaries;
 							if (chaptersSummaries.every((chapter) => chapter.S !== '')) {
 								await updateAssistant(
-									uid,
 									assistantId,
 									'SET #status = :status',
 									{ '#status': AssistantAttributes.STATUS },
@@ -482,7 +302,6 @@ export const main: SQSHandler = async (event) => {
 								runId,
 								assistantId,
 								threadId,
-								uid,
 								index,
 							})
 						)
@@ -490,7 +309,6 @@ export const main: SQSHandler = async (event) => {
 				}
 				if (response.data.status === 'failed') {
 					await updateAssistant(
-						uid,
 						assistantId,
 						'SET #status = :status',
 						{ '#status': AssistantAttributes.STATUS },
