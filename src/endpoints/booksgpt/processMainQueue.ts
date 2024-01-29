@@ -8,7 +8,7 @@ import {
 import OpenAI from 'openai';
 import AWS, { S3, SQS } from 'aws-sdk';
 import retrieveRunAPI from './openaiAPI/retrieveRunAPI';
-import createOpenAiAssistant from './general/сreateOpenAIAssistant';
+import createOpenAiAssistant from './general/createOpenAIAssistant';
 import createOpenAIFile from './general/createOpenAIFile';
 import updateAssistant from './general/updateAssistant';
 import extractChapterList from './general/extractChapterList';
