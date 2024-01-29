@@ -18,10 +18,13 @@ export default async function createOpenAiAssistant({
 		instructions,
 		tools: [{ type: 'retrieval' }],
 	};
-	const createAssistantResponse = await axiosInstance.post(`/v1/assistants`, {
-		...assistantCreationParams,
-		file_ids: [fileId],
-	});
+	const createAssistantResponse = await axiosInstance('').post(
+		`/v1/assistants`,
+		{
+			...assistantCreationParams,
+			file_ids: [fileId],
+		}
+	);
 
 	const openAiAssistantId = createAssistantResponse.data.id;
 	return {

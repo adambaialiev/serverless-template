@@ -5,12 +5,14 @@ type TParams = {
 	assistantId: string;
 	chapter: string;
 	index: string;
+	apiKey: string;
 };
 
 export const extractChapterSummaryMessage = ({
 	assistantId,
 	chapter,
 	index,
+	apiKey,
 }: TParams): SQS.Types.SendMessageRequest => {
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
@@ -27,6 +29,10 @@ export const extractChapterSummaryMessage = ({
 			index: {
 				DataType: 'String',
 				StringValue: index,
+			},
+			apiKey: {
+				DataType: 'String',
+				StringValue: apiKey,
 			},
 		},
 	};

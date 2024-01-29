@@ -1,7 +1,7 @@
 import listMessagersAPI from '../openaiAPI/listMessagesAPI';
 
-export default async function getResponse(threadId: string) {
-	const listMessagesResponse = await listMessagersAPI(threadId);
+export default async function getResponse(threadId: string, apiKey: string) {
+	const listMessagesResponse = await listMessagersAPI(threadId, apiKey);
 	if (listMessagesResponse.data.data) {
 		const messages = listMessagesResponse.data.data;
 		console.log({ messages });

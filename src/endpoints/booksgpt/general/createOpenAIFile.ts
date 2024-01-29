@@ -1,5 +1,4 @@
 import OpenAI, { toFile } from 'openai';
-import { OPEN_AI_API_TOKEN } from '../axiosInstance';
 
 type TParams = {
 	pdfFileBuffer: Buffer;
@@ -12,7 +11,7 @@ export default async function createOpenAIFile({
 	author,
 	name,
 }: TParams) {
-	const openai = new OpenAI({ apiKey: OPEN_AI_API_TOKEN });
+	const openai = new OpenAI({ apiKey: '' });
 	const pdfFile = await toFile(pdfFileBuffer, `${name} by ${author}.pdf`);
 
 	const file = await openai.files.create({

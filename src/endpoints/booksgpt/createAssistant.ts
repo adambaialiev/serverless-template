@@ -54,6 +54,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			.sendMessage(
 				extractChapterListMessage({
 					assistantId,
+					apiKey: openAiKey,
 				})
 			)
 			.promise();

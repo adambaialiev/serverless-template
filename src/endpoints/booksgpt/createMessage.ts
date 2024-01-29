@@ -7,7 +7,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 		const { threadId } = event.pathParameters;
 		const { message } = JSON.parse(event.body);
 
-		const response = await axiosInstance.post(
+		const response = await axiosInstance('').post(
 			`/v1/threads/${threadId}/messages`,
 			{
 				role: 'user',

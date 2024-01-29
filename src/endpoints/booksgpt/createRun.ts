@@ -7,9 +7,12 @@ export const main: APIGatewayProxyHandler = async (event) => {
 		const { threadId } = event.pathParameters;
 		const { assistant_id } = JSON.parse(event.body);
 
-		const response = await axiosInstance.post(`/v1/threads/${threadId}/runs`, {
-			assistant_id,
-		});
+		const response = await axiosInstance('').post(
+			`/v1/threads/${threadId}/runs`,
+			{
+				assistant_id,
+			}
+		);
 
 		return sendResponse(201, response.data);
 	} catch (error: unknown) {

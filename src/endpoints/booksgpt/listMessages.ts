@@ -4,9 +4,9 @@ import listMessagersAPI from './openaiAPI/listMessagesAPI';
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
-		const { threadId } = event.pathParameters;
+		const { threadId, apiKey } = event.pathParameters;
 
-		const response = await listMessagersAPI(threadId);
+		const response = await listMessagersAPI(threadId, apiKey);
 
 		return sendResponse(200, response.data);
 	} catch (error: unknown) {

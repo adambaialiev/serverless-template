@@ -3,10 +3,12 @@ import { EProcessingMessageTypes } from './types';
 
 type TParams = {
 	assistantId: string;
+	apiKey: string;
 };
 
 export const extractChapterListMessage = ({
 	assistantId,
+	apiKey,
 }: TParams): SQS.Types.SendMessageRequest => {
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
@@ -16,6 +18,10 @@ export const extractChapterListMessage = ({
 			assistantId: {
 				DataType: 'String',
 				StringValue: assistantId,
+			},
+			apiKey: {
+				DataType: 'String',
+				StringValue: apiKey,
 			},
 		},
 	};

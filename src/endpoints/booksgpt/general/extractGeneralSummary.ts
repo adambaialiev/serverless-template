@@ -4,16 +4,21 @@ import { checkExtractGeneralSummaryRunMessage } from '../processingMessages/chec
 
 type TParams = {
 	assistantId: string;
+	apiKey: string;
 };
 
-export default async function extractGeneralSummary({ assistantId }: TParams) {
+export default async function extractGeneralSummary({
+	assistantId,
+	apiKey,
+}: TParams) {
 	const sqs = new SQS();
 
 	const prompt = `Please give me general summary of the book`;
 
 	const createThreadAndRunAPIResponse = await createThreadAndRunAPI(
 		assistantId,
-		prompt
+		prompt,
+		apiKey
 	);
 	console.log({ createThreadAndRunAPIResponse });
 
@@ -26,6 +31,7 @@ export default async function extractGeneralSummary({ assistantId }: TParams) {
 					runId,
 					assistantId,
 					threadId,
+					apiKey,
 				})
 			)
 			.promise();

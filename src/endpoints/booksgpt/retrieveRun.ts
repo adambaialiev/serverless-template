@@ -4,9 +4,9 @@ import retrieveRunAPI from './openaiAPI/retrieveRunAPI';
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
-		const { threadId, runId } = event.pathParameters;
+		const { threadId, runId, apiKey } = event.pathParameters;
 
-		const response = await retrieveRunAPI(threadId, runId);
+		const response = await retrieveRunAPI(threadId, runId, apiKey);
 
 		return sendResponse(200, response.data);
 	} catch (error: unknown) {

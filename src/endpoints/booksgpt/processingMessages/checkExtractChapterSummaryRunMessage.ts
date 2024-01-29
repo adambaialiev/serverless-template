@@ -6,6 +6,7 @@ type CreateAssistantMessageParams = {
 	assistantId: string;
 	threadId: string;
 	index: string;
+	apiKey: string;
 };
 
 export const checkExtractChapterSummaryRunMessage = ({
@@ -13,6 +14,7 @@ export const checkExtractChapterSummaryRunMessage = ({
 	assistantId,
 	threadId,
 	index,
+	apiKey,
 }: CreateAssistantMessageParams): SQS.Types.SendMessageRequest => {
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
@@ -34,6 +36,10 @@ export const checkExtractChapterSummaryRunMessage = ({
 			index: {
 				DataType: 'String',
 				StringValue: index,
+			},
+			apiKey: {
+				DataType: 'String',
+				StringValue: apiKey,
 			},
 		},
 	};

@@ -37,12 +37,14 @@ export const main: SQSHandler = async (event) => {
 
 			if (messageBody === EProcessingMessageTypes.extractChaptersList) {
 				const assistantId = messageAttributes.assistantId.stringValue;
+				const apiKey = messageAttributes.apiKey.stringValue;
 
 				let runId: string;
 				let threadId: string;
 				try {
 					const r = await extractChapterList({
 						assistantId,
+						apiKey,
 					});
 					runId = r.runId;
 					threadId = r.threadId;
@@ -72,6 +74,7 @@ export const main: SQSHandler = async (event) => {
 							runId,
 							assistantId,
 							threadId,
+							apiKey,
 						})
 					)
 					.promise();
@@ -80,14 +83,15 @@ export const main: SQSHandler = async (event) => {
 				const runId = messageAttributes.runId.stringValue;
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const threadId = messageAttributes.threadId.stringValue;
+				const apiKey = messageAttributes.apiKey.stringValue;
 
-				if (!runId || !assistantId || !threadId) {
+				if (!runId || !assistantId || !threadId || !apiKey) {
 					throw new Error('Missing message attributes');
 				}
-				const response = await retrieveRunAPI(threadId, runId);
+				const response = await retrieveRunAPI(threadId, runId, apiKey);
 				console.log({ retrieveRunResponse: response });
 				if (response.data.status === 'completed') {
-					const response = await getResponse(threadId);
+					const response = await getResponse(threadId, apiKey);
 					if (response) {
 						const cleanResponse = response
 							.replace(/```json/gi, '')
@@ -137,6 +141,7 @@ export const main: SQSHandler = async (event) => {
 										assistantId,
 										chapter: chaptersListObject.chapters[i],
 										index: i.toString(),
+										apiKey,
 									})
 								)
 								.promise();
@@ -145,6 +150,7 @@ export const main: SQSHandler = async (event) => {
 							.sendMessage(
 								extractGeneralSummaryMessage({
 									assistantId,
+									apiKey,
 								})
 							)
 							.promise();
@@ -167,6 +173,7 @@ export const main: SQSHandler = async (event) => {
 								runId,
 								assistantId,
 								threadId,
+								apiKey,
 							})
 						)
 						.promise();
@@ -177,11 +184,13 @@ export const main: SQSHandler = async (event) => {
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const chapter = messageAttributes.chapter.stringValue;
 				const index = messageAttributes.index.stringValue;
+				const apiKey = messageAttributes.apiKey.stringValue;
 				try {
 					await extractChapterSummary({
 						assistantId,
 						chapter,
 						index,
+						apiKey,
 					});
 				} catch (error) {
 					console.log({ error });
@@ -189,9 +198,11 @@ export const main: SQSHandler = async (event) => {
 			}
 			if (messageBody === EProcessingMessageTypes.extractGeneralSummary) {
 				const assistantId = messageAttributes.assistantId.stringValue;
+				const apiKey = messageAttributes.apiKey.stringValue;
 				try {
 					await extractGeneralSummary({
 						assistantId,
+						apiKey,
 					});
 				} catch (error) {
 					console.log({ error });
@@ -204,10 +215,11 @@ export const main: SQSHandler = async (event) => {
 				const runId = messageAttributes.runId.stringValue;
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const threadId = messageAttributes.threadId.stringValue;
-				const response = await retrieveRunAPI(threadId, runId);
+				const apiKey = messageAttributes.apiKey.stringValue;
+				const response = await retrieveRunAPI(threadId, runId, apiKey);
 				console.log({ retrieveRunResponse: response });
 				if (response.data.status === 'completed') {
-					const response = await getResponse(threadId);
+					const response = await getResponse(threadId, apiKey);
 					if (response) {
 						await updateAssistant(
 							assistantId,
@@ -238,6 +250,7 @@ export const main: SQSHandler = async (event) => {
 								runId,
 								assistantId,
 								threadId,
+								apiKey,
 							})
 						)
 						.promise();
@@ -251,13 +264,14 @@ export const main: SQSHandler = async (event) => {
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const threadId = messageAttributes.threadId.stringValue;
 				const index = messageAttributes.index.stringValue;
-				if (!runId || !assistantId || !threadId) {
+				const apiKey = messageAttributes.apiKey.stringValue;
+				if (!runId || !assistantId || !threadId || !apiKey) {
 					throw new Error('Missing message attributes');
 				}
-				const response = await retrieveRunAPI(threadId, runId);
+				const response = await retrieveRunAPI(threadId, runId, apiKey);
 				console.log({ retrieveRunResponse: response });
 				if (response.data.status === 'completed') {
-					const response = await getResponse(threadId);
+					const response = await getResponse(threadId, apiKey);
 					if (response) {
 						await updateAssistant(
 							assistantId,
@@ -303,6 +317,7 @@ export const main: SQSHandler = async (event) => {
 								assistantId,
 								threadId,
 								index,
+								apiKey,
 							})
 						)
 						.promise();

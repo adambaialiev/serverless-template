@@ -5,12 +5,14 @@ type TParams = {
 	runId: string;
 	assistantId: string;
 	threadId: string;
+	apiKey: string;
 };
 
 export const checkExtractChaptersListRunMessage = ({
 	runId,
 	assistantId,
 	threadId,
+	apiKey,
 }: TParams): SQS.Types.SendMessageRequest => {
 	return {
 		QueueUrl: process.env.MAIN_QUEUE_URL,
@@ -28,6 +30,10 @@ export const checkExtractChaptersListRunMessage = ({
 			threadId: {
 				DataType: 'String',
 				StringValue: threadId,
+			},
+			apiKey: {
+				DataType: 'String',
+				StringValue: apiKey,
 			},
 		},
 	};

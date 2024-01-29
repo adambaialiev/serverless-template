@@ -6,12 +6,14 @@ type TParams = {
 	assistantId: string;
 	chapter: string;
 	index: string;
+	apiKey: string;
 };
 
 export default async function extractChapterSummary({
 	assistantId,
 	chapter,
 	index,
+	apiKey,
 }: TParams) {
 	const sqs = new SQS();
 
@@ -19,7 +21,8 @@ export default async function extractChapterSummary({
 
 	const createThreadAndRunAPIResponse = await createThreadAndRunAPI(
 		assistantId,
-		prompt
+		prompt,
+		apiKey
 	);
 	console.log({ createThreadAndRunAPIResponse });
 
@@ -33,6 +36,7 @@ export default async function extractChapterSummary({
 					assistantId,
 					threadId,
 					index,
+					apiKey,
 				})
 			)
 			.promise();
