@@ -88,12 +88,16 @@ export const main: SQSHandler = async (event) => {
 				if (!runId || !assistantId || !threadId || !apiKey) {
 					throw new Error('Missing message attributes');
 				}
-				const response = await retrieveRunAPI(threadId, runId, apiKey);
-				console.log({ retrieveRunResponse: response });
-				if (response.data.status === 'completed') {
-					const response = await getResponse(threadId, apiKey);
-					if (response) {
-						const cleanResponse = response
+				const retrieveRunResponse = await retrieveRunAPI(
+					threadId,
+					runId,
+					apiKey
+				);
+				console.log({ retrieveRunResponse });
+				if (retrieveRunResponse.data.status === 'completed') {
+					const aiResponse = await getResponse(threadId, apiKey);
+					if (aiResponse) {
+						const cleanResponse = aiResponse
 							.replace(/```json/gi, '')
 							.replace(/```/gi, '')
 							.replace(/\n/gi, '');
@@ -128,8 +132,9 @@ export const main: SQSHandler = async (event) => {
 								'#status': AssistantAttributes.STATUS,
 							},
 							{
-								':status':
-									'Chapters list is extracted. The process to extract each chapter summary has started',
+								':status': !chaptersListObject.chapters.length
+									? 'Chapter list is empty. Please make sure that the book is not cut.'
+									: 'Chapters list is extracted. The process to extract each chapter summary has started',
 								':chaptersList': chaptersListObject.chapters,
 								':chaptersSummaries': chaptersListObject.chapters.map(() => ''),
 							}
@@ -156,7 +161,7 @@ export const main: SQSHandler = async (event) => {
 							.promise();
 					}
 				}
-				if (response.data.status === 'failed') {
+				if (retrieveRunResponse.data.status === 'failed') {
 					await updateAssistant(
 						assistantId,
 						'SET #status = :status',
@@ -166,7 +171,7 @@ export const main: SQSHandler = async (event) => {
 						}
 					);
 				}
-				if (response.data.status === 'in_progress') {
+				if (retrieveRunResponse.data.status === 'in_progress') {
 					await sqs
 						.sendMessage(
 							checkExtractChaptersListRunMessage({
@@ -216,11 +221,15 @@ export const main: SQSHandler = async (event) => {
 				const assistantId = messageAttributes.assistantId.stringValue;
 				const threadId = messageAttributes.threadId.stringValue;
 				const apiKey = messageAttributes.apiKey.stringValue;
-				const response = await retrieveRunAPI(threadId, runId, apiKey);
-				console.log({ retrieveRunResponse: response });
-				if (response.data.status === 'completed') {
-					const response = await getResponse(threadId, apiKey);
-					if (response) {
+				const retrieveRunResponse = await retrieveRunAPI(
+					threadId,
+					runId,
+					apiKey
+				);
+				console.log({ retrieveRunResponse });
+				if (retrieveRunResponse.data.status === 'completed') {
+					const aiResponse = await getResponse(threadId, apiKey);
+					if (aiResponse) {
 						await updateAssistant(
 							assistantId,
 							`SET #generalSummary = :generalSummary`,
@@ -228,12 +237,12 @@ export const main: SQSHandler = async (event) => {
 								'#generalSummary': AssistantAttributes.GENERAL_SUMMARY,
 							},
 							{
-								':generalSummary': response,
+								':generalSummary': aiResponse,
 							}
 						);
 					}
 				}
-				if (response.data.status === 'failed') {
+				if (retrieveRunResponse.data.status === 'failed') {
 					await updateAssistant(
 						assistantId,
 						'SET #status = :status',
@@ -243,7 +252,7 @@ export const main: SQSHandler = async (event) => {
 						}
 					);
 				}
-				if (response.data.status === 'in_progress') {
+				if (retrieveRunResponse.data.status === 'in_progress') {
 					await sqs
 						.sendMessage(
 							checkExtractGeneralSummaryRunMessage({
@@ -268,11 +277,15 @@ export const main: SQSHandler = async (event) => {
 				if (!runId || !assistantId || !threadId || !apiKey) {
 					throw new Error('Missing message attributes');
 				}
-				const response = await retrieveRunAPI(threadId, runId, apiKey);
-				console.log({ retrieveRunResponse: response });
-				if (response.data.status === 'completed') {
-					const response = await getResponse(threadId, apiKey);
-					if (response) {
+				const retrieveRunResponse = await retrieveRunAPI(
+					threadId,
+					runId,
+					apiKey
+				);
+				console.log({ retrieveRunResponse });
+				if (retrieveRunResponse.data.status === 'completed') {
+					const aiResponse = await getResponse(threadId, apiKey);
+					if (aiResponse) {
 						await updateAssistant(
 							assistantId,
 							`SET #chaptersSummaries[${index}] = :chaptersSummaries`,
@@ -280,7 +293,7 @@ export const main: SQSHandler = async (event) => {
 								'#chaptersSummaries': AssistantAttributes.CHAPTERS_SUMMARIES,
 							},
 							{
-								':chaptersSummaries': response,
+								':chaptersSummaries': aiResponse,
 							}
 						);
 						const assistantItem = await dynamo
@@ -296,7 +309,8 @@ export const main: SQSHandler = async (event) => {
 						if (assistantItem.Item) {
 							const item = assistantItem.Item as AssistantItem;
 							const chaptersSummaries = item.chaptersSummaries;
-							if (chaptersSummaries.every((chapter) => chapter.S !== '')) {
+							console.log({ chaptersSummaries });
+							if (chaptersSummaries.every((chapter) => chapter !== '')) {
 								await updateAssistant(
 									assistantId,
 									'SET #status = :status',
@@ -309,7 +323,7 @@ export const main: SQSHandler = async (event) => {
 						}
 					}
 				}
-				if (response.data.status === 'in_progress') {
+				if (retrieveRunResponse.data.status === 'in_progress') {
 					await sqs
 						.sendMessage(
 							checkExtractChapterSummaryRunMessage({
@@ -322,7 +336,7 @@ export const main: SQSHandler = async (event) => {
 						)
 						.promise();
 				}
-				if (response.data.status === 'failed') {
+				if (retrieveRunResponse.data.status === 'failed') {
 					await updateAssistant(
 						assistantId,
 						'SET #status = :status',
