@@ -1,0 +1,15 @@
+openapi: 3.0.0
+components:
+  schemas: {}
+  securitySchemes: {}
+info:
+  title: My API
+  description: This is my API
+  version: '1'
+paths:
+  //v1/functionsgpt/hello:
+    post:
+      operationId: hello
+      summary: Say hello
+      description: Say hello to the world
+      responses: {}

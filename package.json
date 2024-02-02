@@ -17,6 +17,7 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@octokit/rest": "^20.0.2",
 		"@types/bcrypt": "^5.0.0",
 		"alchemy-sdk": "^2.4.3",
 		"aws-lambda": "^1.0.7",
@@ -38,6 +39,7 @@
 		"graphql-request": "^6.1.0",
 		"jsonwebtoken": "^9.0.0",
 		"ksuid": "^3.0.0",
+		"octokit": "^3.1.2",
 		"openai": "^4.24.7",
 		"pusher": "^5.1.2",
 		"serverless-middleware": "^3.1.0",
@@ -60,6 +62,7 @@
 		"eslint-plugin-prettier": "^4.2.1",
 		"prettier": "^2.8.8",
 		"serverless-domain-manager": "^6.2.1",
+		"serverless-openapi-documentation": "^0.4.0",
 		"serverless-prune-plugin": "^2.0.1",
 		"tsc-alias": "^1.8.2",
 		"typescript": "*"
