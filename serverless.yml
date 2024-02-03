@@ -73,6 +73,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  createOrUpdateFile:
+    handler: build/src/endpoints/functionsgpt/createOrUpdateFile.main
+    events:
+      - http:
+          path: /v1/functionsgpt/create-or-update-file
+          method: POST
+          cors: true
   createGitRepository:
     handler: build/src/endpoints/functionsgpt/createGitRepository.main
     events:
