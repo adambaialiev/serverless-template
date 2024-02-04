@@ -8,7 +8,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			repositoryName,
 			owner,
 			authToken,
-			fileName,
+			path,
 			content,
 			commitMessage,
 			sha,
@@ -21,7 +21,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 		const response = await octokit.repos.createOrUpdateFileContents({
 			owner: owner,
 			repo: repositoryName,
-			path: fileName,
+			path,
 			message: commitMessage,
 			content: Buffer.from(content).toString('base64'),
 			sha,

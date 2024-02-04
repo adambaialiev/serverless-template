@@ -21,7 +21,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			const content = Buffer.from(response.data.content, 'base64').toString(
 				'utf8'
 			);
-			return sendResponse(200, { content });
+			return sendResponse(200, { content, sha: response.data.sha });
 		}
 		throw new Error('File content not found.');
 	} catch (error) {
