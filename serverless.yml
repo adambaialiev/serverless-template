@@ -73,6 +73,13 @@ custom:
     createRoute53Record: true
 
 functions:
+  readFile:
+    handler: build/src/endpoints/functionsgpt/readFile.main
+    events:
+      - http:
+          path: /v1/functionsgpt/read-file
+          method: POST
+          cors: true
   createOrUpdateFile:
     handler: build/src/endpoints/functionsgpt/createOrUpdateFile.main
     events:
