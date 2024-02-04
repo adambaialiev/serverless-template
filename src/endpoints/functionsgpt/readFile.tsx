@@ -4,9 +4,7 @@ import { sendResponse } from '@/utils/makeResponse';
 
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
-		const { repositoryName, owner, authToken, fileName } = JSON.parse(
-			event.body
-		);
+		const { repositoryName, owner, authToken, path } = JSON.parse(event.body);
 
 		const octokit = new Octokit({
 			auth: authToken as string,
@@ -15,7 +13,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 		const response = await octokit.repos.getContent({
 			owner,
 			repo: repositoryName,
-			path: fileName,
+			path,
 		});
 		console.log({ response: JSON.stringify(response.data, null, 2) });
 
