@@ -73,32 +73,18 @@ custom:
     createRoute53Record: true
 
 functions:
-  readFile:
-    handler: build/src/endpoints/functionsgpt/readFile.main
+  readFiles:
+    handler: build/src/endpoints/functionsgpt/readFiles.main
     events:
       - http:
-          path: /v1/functionsgpt/read-file
+          path: /v1/functionsgpt/read-files
           method: POST
           cors: true
-  createOrUpdateFile:
-    handler: build/src/endpoints/functionsgpt/createOrUpdateFile.main
+  createOrUpdateFiles:
+    handler: build/src/endpoints/functionsgpt/createOrUpdateFiles.main
     events:
       - http:
-          path: /v1/functionsgpt/create-or-update-file
-          method: POST
-          cors: true
-  createGitRepository:
-    handler: build/src/endpoints/functionsgpt/createGitRepository.main
-    events:
-      - http:
-          path: /v1/functionsgpt/create-git-repository
-          method: POST
-          cors: true
-  hello:
-    handler: build/src/endpoints/functionsgpt/hello.main
-    events:
-      - http:
-          path: /v1/functionsgpt/hello
+          path: /v1/functionsgpt/create-or-update-files
           method: POST
           cors: true
   get-assistants:
