@@ -12,6 +12,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			content,
 			commitMessage,
 			sha,
+			branch,
 		} = JSON.parse(event.body);
 
 		const octokit = new Octokit({
@@ -25,6 +26,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			message: commitMessage,
 			content: Buffer.from(content).toString('base64'),
 			sha,
+			branch,
 		});
 
 		return sendResponse(200, { message: JSON.stringify(response.data) });
