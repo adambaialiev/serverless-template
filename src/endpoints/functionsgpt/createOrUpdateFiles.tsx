@@ -12,7 +12,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			paths,
 			contents,
 			commitMessage,
-			sha,
+			shas,
 			branch,
 		} = JSON.parse(event.body);
 
@@ -22,8 +22,10 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
 		const responses: any[] = [];
 
-		for (const [index, path] of paths.entries()) {
-			const content = contents[index];
+		for (let i = 0; i < paths.length; i++) {
+			const path = paths[i];
+			const content = contents[i];
+			const sha = shas[i];
 			const response = await octokit.repos.createOrUpdateFileContents({
 				owner: owner,
 				repo: repositoryName,
@@ -33,6 +35,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 				sha,
 				branch,
 			});
+			console.log({ response: JSON.stringify(response, null, 2) });
 			responses.push(response.data);
 		}
 

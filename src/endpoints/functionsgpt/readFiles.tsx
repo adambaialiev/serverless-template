@@ -14,7 +14,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
 		const responses: { [key: string]: { content: string; sha: string } } = {};
 
-		for (const path of paths.entries()) {
+		for (const path of paths) {
 			const response = await octokit.repos.getContent({
 				owner,
 				repo: repositoryName,
