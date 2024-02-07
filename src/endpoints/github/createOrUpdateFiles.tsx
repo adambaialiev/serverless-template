@@ -25,7 +25,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 		for (let i = 0; i < paths.length; i++) {
 			const path = paths[i];
 			const content = contents[i];
-			const sha = shas[i];
+			const sha = shas ? shas[i] : undefined;
 			const response = await octokit.repos.createOrUpdateFileContents({
 				owner: owner,
 				repo: repositoryName,

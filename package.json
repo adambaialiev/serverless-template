@@ -11,7 +11,8 @@
 		"deploy:prod": "yarn build && sls deploy --stage prod",
 		"deploy:staging": "yarn build && sls deploy --stage staging",
 		"deploy:adam": "yarn deploy:dev --stage wallet-adam-dev",
-		"deploy:argen": "yarn deploy:dev --stage argen-dev"
+		"deploy:argen": "yarn deploy:dev --stage argen-dev",
+		"deploy:api": "yarn deploy:dev --stage api"
 	},
 	"keywords": [],
 	"author": "",
@@ -61,6 +62,7 @@
 		"eslint-plugin-import": "^2.25.2",
 		"eslint-plugin-prettier": "^4.2.1",
 		"prettier": "^2.8.8",
+		"serverless-certificate-creator": "^1.6.0",
 		"serverless-domain-manager": "^6.2.1",
 		"serverless-openapi-documentation": "^0.4.0",
 		"serverless-prune-plugin": "^2.0.1",

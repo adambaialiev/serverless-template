@@ -58,33 +58,38 @@ provider:
 
 plugins:
   - serverless-offline
+  - serverless-certificate-creator
   - serverless-domain-manager
   - serverless-prune-plugin
-  - serverless-openapi-documentation
 
 custom:
   prune:
     automatic: true
     number: 5
   customDomain:
-    domainName: ${opt:stage}-api.shopwalletapp.com
+    domainName: ${opt:stage}.functionsgpt.net
+    certificateName: ${opt:stage}.functionsgpt.net
     basePath: 'api'
-    stage: ${opt:stage}
     createRoute53Record: true
+    autoDomain: true
+  customCertificate:
+    certificateName: ${opt:stage}.functionsgpt.net
+    hostedZoneNames: 'functionsgpt.net.'
+    region: ${self:provider.region}
 
 functions:
   readFiles:
-    handler: build/src/endpoints/functionsgpt/readFiles.main
+    handler: build/src/endpoints/github/readFiles.main
     events:
       - http:
-          path: /v1/functionsgpt/read-files
+          path: /v1/github/read-files
           method: POST
           cors: true
   createOrUpdateFiles:
-    handler: build/src/endpoints/functionsgpt/createOrUpdateFiles.main
+    handler: build/src/endpoints/github/createOrUpdateFiles.main
     events:
       - http:
-          path: /v1/functionsgpt/create-or-update-files
+          path: /v1/github/create-or-update-files
           method: POST
           cors: true
   get-assistants:
