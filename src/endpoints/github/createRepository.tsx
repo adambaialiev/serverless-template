@@ -14,7 +14,9 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			name: repositoryName as string,
 		});
 
-		return sendResponse(200, { message: JSON.stringify(response.data) });
+		return sendResponse(200, {
+			response: JSON.stringify(response.data, null, 2),
+		});
 	} catch (error) {
 		if (error instanceof Error) {
 			return sendResponse(500, error);

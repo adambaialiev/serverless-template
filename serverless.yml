@@ -78,6 +78,13 @@ custom:
     region: ${self:provider.region}
 
 functions:
+  createRepository:
+    handler: build/src/endpoints/github/createRepository.main
+    events:
+      - http:
+          path: /v1/github/create-repository
+          method: POST
+          cors: true
   readFiles:
     handler: build/src/endpoints/github/readFiles.main
     events:
