@@ -3,6 +3,13 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { Octokit } from '@octokit/rest';
 import { sendResponse } from '@/utils/makeResponse';
 
+// eslint-disable-next-line func-style
+function isBase64(content: string) {
+	const base64RegExp =
+		/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/;
+	return base64RegExp.test(content);
+}
+
 export const main: APIGatewayProxyHandler = async (event) => {
 	try {
 		const {
@@ -26,12 +33,17 @@ export const main: APIGatewayProxyHandler = async (event) => {
 			const path = paths[i];
 			const content = contents[i];
 			const sha = shas ? shas[i] : undefined;
+
+			const finalContent = isBase64(content as string)
+				? content
+				: Buffer.from(content as string).toString('base64');
+
 			const response = await octokit.repos.createOrUpdateFileContents({
 				owner: owner,
 				repo: repositoryName,
 				path,
 				message: commitMessage,
-				content: Buffer.from(content).toString('base64'),
+				content: finalContent,
 				sha,
 				branch,
 			});
