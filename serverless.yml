@@ -78,6 +78,13 @@ custom:
     region: ${self:provider.region}
 
 functions:
+  createRepositoryFromTemplate:
+    handler: build/src/endpoints/github/createRepositoryFromTemplate.main
+    events:
+      - http:
+          path: /v1/github/create-repository-from-template
+          method: POST
+          cors: true
   createRepository:
     handler: build/src/endpoints/github/createRepository.main
     events:
