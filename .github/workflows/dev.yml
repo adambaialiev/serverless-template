@@ -1,14 +1,14 @@
 name: CI-CD
 on:
   push:
-    branches: [staging]
+    branches: [dev]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_STAGING_DEV }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_STAGING_DEV }}
     steps:
       - uses: actions/setup-node@v3
         with:
@@ -24,4 +24,4 @@ jobs:
       - uses: actions/checkout@v3
       - run: |
           yarn
-          yarn deploy:staging
+          yarn deploy:dev

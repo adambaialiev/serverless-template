@@ -14,30 +14,11 @@ provider:
   versionFunctions: false
   environment:
     stage: ${opt:stage}
-    dynamo_table:
+    MAIN_TABLE:
       Ref: MainTable
-    learning_platform_table:
-      Ref: LearningPlatformTable
-    booksgpt_table:
-      Ref: BooksGPTTable
-    learning_platform_bucket:
-      Ref: LearningPlatformBucket
-    booksgpt_bucket:
-      Ref: BooksGPTBucket
     MAIN_QUEUE_URL:
       Ref: MainQueue
-    ALCHEMY_API_KEY_MATIC: ${env:ALCHEMY_API_KEY_MATIC}
-    ALCHEMY_API_KEY_ETH: ${env:ALCHEMY_API_KEY_ETH}
-    CHAINSTACK_NODE: ${env:CHAINSTACK_NODE}
-    TATUM_WEBHOOK_URL: ${env:TATUM_WEBHOOK_URL}
-    TATUM_API_KEY: ${env:TATUM_API_KEY}
-    ETHERSCAN_API_KEY: ${env:ETHERSCAN_API_KEY}
-    POLYGONSCAN_API_KEY: ${env:POLYGONSCAN_API_KEY}
-    COIN_MARKET_CAP_API_KEY: ${env:COIN_MARKET_CAP_API_KEY}
-    COIN_MARKET_CAP_API_URL: ${env:COIN_MARKET_CAP_API_URL}
-    TELEGRAM_BOT_TOKEN: ${env:TELEGRAM_BOT_TOKEN}
-    SLACK_WALLET_WATCHER_URL: ${env:SLACK_WALLET_WATCHER_URL}
-    SLACK_BOT_CHANNEL_URL: ${env:SLACK_BOT_CHANNEL_URL}
+    EXAMPLE: ${env:EXAMPLE}
 
   iamRoleStatements:
     - Effect: Allow
@@ -66,194 +47,14 @@ custom:
   prune:
     automatic: true
     number: 5
-  customDomain:
-    domainName: ${opt:stage}.functionsgpt.net
-    certificateName: ${opt:stage}.functionsgpt.net
-    basePath: 'api'
-    createRoute53Record: true
-    autoDomain: true
-  customCertificate:
-    certificateName: ${opt:stage}.functionsgpt.net
-    hostedZoneNames: 'functionsgpt.net.'
-    region: ${self:provider.region}
 
 functions:
-  createRepositoryFromTemplate:
+  ping:
     handler: build/src/endpoints/github/createRepositoryFromTemplate.main
     events:
       - http:
-          path: /v1/github/create-repository-from-template
-          method: POST
-          cors: true
-  createRepository:
-    handler: build/src/endpoints/github/createRepository.main
-    events:
-      - http:
-          path: /v1/github/create-repository
-          method: POST
-          cors: true
-  readFiles:
-    handler: build/src/endpoints/github/readFiles.main
-    events:
-      - http:
-          path: /v1/github/read-files
-          method: POST
-          cors: true
-  createOrUpdateFiles:
-    handler: build/src/endpoints/github/createOrUpdateFiles.main
-    events:
-      - http:
-          path: /v1/github/create-or-update-files
-          method: POST
-          cors: true
-  get-assistants:
-    handler: build/src/endpoints/booksgpt/getAssistants.main
-    events:
-      - http:
-          path: /v1/booksgpt/assistants
-          method: POST
-          cors: true
-  processMainQueue:
-    handler: build/src/endpoints/booksgpt/processMainQueue.main
-    timeout: 60
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - MainQueue
-              - Arn
-  create-assistant:
-    handler: build/src/endpoints/booksgpt/createAssistant.main
-    events:
-      - http:
-          path: /v1/booksgpt/create-assistant
-          method: POST
-          cors: true
-  booksgpt-get-upload-url:
-    handler: build/src/endpoints/booksgpt/getUploadUrl.main
-    events:
-      - http:
-          path: /v1/booksgpt/upload-url
-          method: POST
-          cors: true
-  assistant-feed:
-    handler: build/src/endpoints/booksgpt/assistantFeed.main
-    events:
-      - http:
-          path: /v1/booksgpt/assistant/{assistantId}/feed
+          path: /v1/ping
           method: GET
-          cors: true
-          request:
-            parameters:
-              paths:
-                assistantId: true
-  add-response-to-feed:
-    handler: build/src/endpoints/booksgpt/addResponseToAssistantFeed.main
-    events:
-      - http:
-          path: /v1/booksgpt/assistant/{assistantId}/feed
-          method: POST
-          cors: true
-  retrieve-run:
-    handler: build/src/endpoints/booksgpt/retrieveRun.main
-    events:
-      - http:
-          path: /v1/booksgpt/threads/{threadId}/runs/{runId}
-          method: GET
-          cors: true
-          request:
-            parameters:
-              paths:
-                threadId: true
-                runId: true
-  list-messages:
-    handler: build/src/endpoints/booksgpt/listMessages.main
-    events:
-      - http:
-          path: /v1/booksgpt/threads/{threadId}/messages
-          method: GET
-          cors: true
-          request:
-            parameters:
-              paths:
-                threadId: true
-  create-thread-and-run:
-    handler: build/src/endpoints/booksgpt/createThreadAndRun.main
-    events:
-      - http:
-          path: /v1/booksgpt/threads/runs
-          method: POST
-          cors: true
-  create-run:
-    handler: build/src/endpoints/booksgpt/createRun.main
-    events:
-      - http:
-          path: /v1/booksgpt/threads/{threadId}/runs
-          method: POST
-          cors: true
-          request:
-            parameters:
-              paths:
-                threadId: true
-  create-message:
-    handler: build/src/endpoints/booksgpt/createMessage.main
-    events:
-      - http:
-          path: /v1/booksgpt/threads/{threadId}/messages
-          method: POST
-          cors: true
-          request:
-            parameters:
-              paths:
-                threadId: true
-  update-lessons:
-    handler: build/src/endpoints/learningPlatform/course/updateLessons.main
-    events:
-      - http:
-          path: /course/lessons
-          method: POST
-          cors: true
-  create-course:
-    handler: build/src/endpoints/learningPlatform/course/createCourse.main
-    events:
-      - http:
-          path: /course
-          method: POST
-          cors: true
-  update-course:
-    handler: build/src/endpoints/learningPlatform/course/updateCourse.main
-    events:
-      - http:
-          path: /course
-          method: PUT
-          cors: true
-  get-courses:
-    handler: build/src/endpoints/learningPlatform/course/getCourses.main
-    events:
-      - http:
-          path: /course
-          method: GET
-          cors: true
-  create-creator:
-    handler: build/src/endpoints/learningPlatform/creator/createCreator.main
-    events:
-      - http:
-          path: /creator
-          method: POST
-          cors: true
-  get-creators:
-    handler: build/src/endpoints/learningPlatform/creator/getCreators.main
-    events:
-      - http:
-          path: /creator
-          method: GET
-          cors: true
-  get-upload-url:
-    handler: build/src/endpoints/learningPlatform/creator/getUploadUrl.main
-    events:
-      - http:
-          path: /upload-url
-          method: POST
           cors: true
 resources:
   Resources:
@@ -290,88 +91,10 @@ resources:
             Projection:
               ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
-    BooksGPTTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: BooksGPTTable-${self:provider.profile}
-        AttributeDefinitions:
-          - AttributeName: PK
-            AttributeType: S
-          - AttributeName: SK
-            AttributeType: S
-          - AttributeName: GSI1PK
-            AttributeType: S
-          - AttributeName: GSI1SK
-            AttributeType: S
-        KeySchema:
-          - AttributeName: PK
-            KeyType: HASH
-          - AttributeName: SK
-            KeyType: RANGE
-        GlobalSecondaryIndexes:
-          - IndexName: GSI1
-            KeySchema:
-              - AttributeName: GSI1PK
-                KeyType: HASH
-              - AttributeName: GSI1SK
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-        BillingMode: PAY_PER_REQUEST
-    LearningPlatformTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: LearningPlatformTable-${self:provider.profile}
-        AttributeDefinitions:
-          - AttributeName: PK
-            AttributeType: S
-          - AttributeName: SK
-            AttributeType: S
-          - AttributeName: GSI1PK
-            AttributeType: S
-          - AttributeName: GSI1SK
-            AttributeType: S
-        KeySchema:
-          - AttributeName: PK
-            KeyType: HASH
-          - AttributeName: SK
-            KeyType: RANGE
-        GlobalSecondaryIndexes:
-          - IndexName: GSI1
-            KeySchema:
-              - AttributeName: GSI1PK
-                KeyType: HASH
-              - AttributeName: GSI1SK
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-        BillingMode: PAY_PER_REQUEST
-    LearningPlatformBucket:
+    MainBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: learning-platform-bucket-${self:provider.profile}
-        PublicAccessBlockConfiguration:
-          BlockPublicAcls: false
-        OwnershipControls:
-          Rules:
-            - ObjectOwnership: ObjectWriter
-        CorsConfiguration:
-          CorsRules:
-            - AllowedOrigins:
-                - '*'
-              AllowedHeaders:
-                - '*'
-              AllowedMethods:
-                - GET
-                - PUT
-                - POST
-                - DELETE
-                - HEAD
-              MaxAge: 3000
-    BooksGPTBucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: books-gpt-bucket-${self:provider.profile}
+        BucketName: main-bucket-${self:provider.profile}
         PublicAccessBlockConfiguration:
           BlockPublicAcls: false
         OwnershipControls:
